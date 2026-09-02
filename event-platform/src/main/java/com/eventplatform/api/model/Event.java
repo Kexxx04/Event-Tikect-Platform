@@ -1,5 +1,6 @@
 package com.eventplatform.api.model;
 
+import com.eventplatform.api.model.enums.EventStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -38,7 +39,7 @@ public class Event {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private EventStatus status;
+    private EventStatus status = EventStatus.SCHEDULED;
 
     public Event() {
     }

@@ -1,11 +1,14 @@
 package com.eventplatform.api.model;
 
+import com.eventplatform.api.model.enums.UserStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 
 
@@ -26,18 +29,18 @@ public class User {
     @Column(nullable = false, unique =true)
     private String document;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private boolean active;
-
+    private UserStatus status = UserStatus.ACTIVE;
     public User() {
 
     }
 
-    public User(String name, String email, String document, boolean active) {
+    public User(String name, String email, String document) {
         this.name = name;
         this.email = email;
         this.document = document;
-        this.active = active;
+        this.status = UserStatus.ACTIVE;
     }
 
     public Long getId() { return id; }
@@ -48,8 +51,8 @@ public class User {
     public void setEmail(String email) { this.email = email; }
     public String getDocument() { return document; }
     public void setDocument(String document) { this.document = document; }
-    public Boolean getActive() { return active; }
-    public void setActive(Boolean id) { this.active = active; }
+    public UserStatus getStatus() {return status;}
+    public void setStatus(UserStatus status) {this.status = status;}
 
 }
 
