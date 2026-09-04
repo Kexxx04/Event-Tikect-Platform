@@ -64,6 +64,23 @@ public class Event {
         this.registeredCount = 0;
         this.status = status != null ? status : EventStatus.SCHEDULED;
     }
+    public Event(
+            String name,
+            String description,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Integer capacity,
+            EventStatus status
+    ) {
+        this.name = name;
+        this.description = description;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.capacity = capacity;
+        this.registeredCount = 0;
+        this.status = status != null ? status : EventStatus.SCHEDULED;
+    }
+
 
     public Long getId() {
         return id;
