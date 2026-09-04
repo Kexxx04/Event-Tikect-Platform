@@ -1,4 +1,5 @@
-package com.eventplatform.api.model;
+```java
+        package com.eventplatform.api.model;
 
 import com.eventplatform.api.model.enums.EventStatus;
 import jakarta.persistence.Column;
@@ -9,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -41,17 +43,26 @@ public class Event {
     @Column(nullable = false)
     private EventStatus status = EventStatus.SCHEDULED;
 
+    // Constructor vacío requerido por JPA
     public Event() {
     }
 
-    public Event(String name, String description, LocalDateTime startDate, LocalDateTime endDate, Integer capacity, EventStatus status) {
+    // Constructor para crear eventos
+    public Event(
+            String name,
+            String description,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Integer capacity,
+            EventStatus status
+    ) {
         this.name = name;
         this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
         this.capacity = capacity;
-        this.status = status;
         this.registeredCount = 0;
+        this.status = status != null ? status : EventStatus.SCHEDULED;
     }
 
     public Long getId() {
@@ -118,3 +129,4 @@ public class Event {
         this.status = status;
     }
 }
+```
