@@ -210,6 +210,45 @@ Las pruebas actuales verifican:
 - Rechazo de un correo duplicado.
 - Creación y consulta de usuarios mediante los endpoints.
 
+## Análisis de calidad con SonarQube
+
+El proyecto está configurado para analizarse con una instancia local de SonarQube (`http://localhost:9000`, `sonar.projectKey = Event-Ticket-Platform`). El token **no** se guarda en el repositorio: se lee desde la variable de entorno `SONAR_TOKEN`.
+
+Requisitos:
+
+- Una instancia de SonarQube corriendo localmente en `http://localhost:9000`.
+- Un token generado en **My Account → Security → Generate Tokens**. Debe ser de tipo **User Token** o **Global Analysis Token**; un **Project Analysis Token** solo funciona si el proyecto ya existe en Sonar.
+
+Exportar el token antes de analizar (bash/zsh):
+
+```bash
+export SONAR_TOKEN="tu_token_aqui"
+```
+
+PowerShell:
+
+```powershell
+$env:SONAR_TOKEN = "tu_token_aqui"
+```
+
+Ejecutar pruebas, generar cobertura con JaCoCo y enviar el análisis:
+
+```bash
+./gradlew test sonar
+```
+
+```powershell
+.\gradlew.bat test sonar
+```
+
+El reporte de cobertura de JaCoCo se genera en:
+
+```text
+build/reports/jacoco/test/html/index.html
+```
+
+Los resultados del análisis quedan disponibles en `http://localhost:9000/dashboard?id=Event-Ticket-Platform`.
+
 ## Construir el proyecto
 
 ```powershell
