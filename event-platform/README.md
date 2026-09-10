@@ -210,6 +210,28 @@ Las pruebas actuales verifican:
 - Rechazo de un correo duplicado.
 - Creación y consulta de usuarios mediante los endpoints.
 
+## Pruebas de aceptación con Gherkin
+
+Los dos escenarios en inglés de `src/test/resources/features/user_registration.feature`
+comprueban el registro exitoso de un usuario (`201`, estado `ACTIVE`) y el rechazo
+de un correo duplicado (`409`, sin crear otro usuario ni modificar el existente).
+
+`src/test/java/steps/RegistrationUser.java` implementa los pasos y
+`src/test/java/runners/RunCucumberTest.java` ejecuta los escenarios con Cucumber.
+Se carga la aplicación con MockMvc y el perfil `acceptance`, que usa H2 en memoria.
+Cada escenario revierte su transacción al terminar. No requiere iniciar PostgreSQL
+ni la API por separado. Estas pruebas no validan las migraciones de PostgreSQL.
+
+Desde la carpeta `event-platform`:
+
+```powershell
+.\gradlew.bat acceptanceTest
+```
+
+El reporte de Cucumber queda en `build/reports/cucumber/user-registration.html`.
+Las pruebas de integración existentes siguen requiriendo PostgreSQL cuando se
+ejecuta toda la suite con `.\gradlew.bat test`.
+
 ## Construir el proyecto
 
 ```powershell

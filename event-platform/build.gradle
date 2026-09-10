@@ -32,10 +32,18 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	// PIT Mutation Testing
 	pitest 'org.pitest:pitest-junit5-plugin:1.2.1'
+	//Cucumber
+	testImplementation("io.cucumber:cucumber-java:7.34.3")
+	testImplementation("io.cucumber:cucumber-junit-platform-engine:7.34.3")
+	testImplementation("io.cucumber:cucumber-spring:7.34.3")
+	testImplementation 'org.junit.platform:junit-platform-suite'
+	testRuntimeOnly 'com.h2database:h2'
 }
 
 test {
-	useJUnitPlatform()
+	useJUnitPlatform {
+		includeEngines 'junit-jupiter', 'junit-platform-suite'
+	}
 }
 
 sonar {
@@ -49,7 +57,22 @@ sonar {
 	}
 }
 
+tasks.register('acceptanceTest', Test) {
+	description = "Runs Cucumber acceptance tests."
+	group = "verification"
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+	useJUnitPlatform {
+		includeEngines 'junit-platform-suite'
+	}
+	filter {
+		includeTestsMatching 'runners.RunCucumberTest'
+	}
+}
+
 pitest {
+	// Use Spring Boot's managed launcher instead of PIT's inferred version.
+	addJUnitPlatformLauncher = false
 	pitestVersion = '1.19.0'
 	junit5PluginVersion = '1.2.1'
 
@@ -59,8 +82,4 @@ pitest {
 	threads = 4
 	outputFormats = ['HTML']
 	timestampedReports = false
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
 }
