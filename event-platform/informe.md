@@ -1,9 +1,22 @@
 # Informe de calidad de código — Event-Ticket-Platform
 
-**Fecha:** 08 de septiembre de 2026, 17:19 (America/Bogota)
+**Fecha:** 08 de septiembre de 2026, 17:19
 **Módulo analizado:** `event-platform`
 **Rama:** `feature/testSonar` · commit `405c461`
 **Proyecto en SonarQube:** `Event-Ticket-Platform` (http://localhost:9000/dashboard?id=Event-Ticket-Platform)
+
+---
+
+## 0. Datos generales del proyecto
+
+| Campo | Valor |
+| --- | --- |
+| Nombre del proyecto | Event-Ticket-Platform |
+| Tecnología utilizada | Spring Boot 4.1.1 (Spring Data JPA, Spring Web MVC, Spring Validation, Flyway), PostgreSQL, Gradle, JUnit 5, JaCoCo, Pitest, SonarQube |
+| Lenguaje | Java 21 |
+| Número aproximado de clases/componentes | 19 clases Java (`event-platform/src/main/java`) |
+| Integrantes | Diego Romero, Keith Smith Balaguera Rodriguez, Jaider Rios Franco, Lina Paola Suarez Diaz |
+| Fecha del análisis | 11 de septiembre de 2026 |
 
 ---
 
