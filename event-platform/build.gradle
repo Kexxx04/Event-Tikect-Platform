@@ -1,5 +1,6 @@
 plugins {
 	id 'java'
+	id 'jacoco'
 	id 'org.springframework.boot' version '4.1.1'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id "org.sonarqube" version "7.3.1.8318"
@@ -40,7 +41,20 @@ dependencies {
 	testRuntimeOnly 'com.h2database:h2'
 }
 
+jacoco {
+	toolVersion = '0.8.14'
+}
+
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.required = true
+		html.required = true
+	}
+}
+
 test {
+	finalizedBy jacocoTestReport
 	useJUnitPlatform {
 		includeEngines 'junit-jupiter', 'junit-platform-suite'
 	}
@@ -52,8 +66,7 @@ sonar {
 		property 'sonar.projectName', 'event-ticket-platform'
 		property 'sonar.host.url', 'http://localhost:9000'
 
-		// Mejor usar variable de entorno y no guardar el token aquí
-		property 'sonar.token', 'sqp_d1e360a0c26f8d828f1de4d52a7bf47db5212480'
+		property 'sonar.token', providers.environmentVariable('SONAR_TOKEN').getOrElse('')
 	}
 }
 

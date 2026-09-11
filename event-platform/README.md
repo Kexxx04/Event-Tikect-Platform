@@ -40,10 +40,24 @@ La aplicación usa estos valores predeterminados:
 | Propiedad | Valor predeterminado |
 | --- | --- |
 | Base de datos | `event_platform` |
-| Usuario | `event_platform` |
-| Contraseña | `event_platform` |
+| Usuario | Obligatorio: variable `DB_USERNAME` |
+| Contraseña | Obligatoria: variable `DB_PASSWORD` |
 | Puerto | `5432` |
 | URL JDBC | `jdbc:postgresql://localhost:5432/event_platform` |
+
+Antes de iniciar la aplicación, define las credenciales en la misma sesión de PowerShell:
+
+```powershell
+$env:DB_USERNAME = Read-Host 'Usuario de PostgreSQL'
+$dbSecret = Read-Host 'Contraseña de PostgreSQL' -AsSecureString
+$env:DB_PASSWORD = [System.Net.NetworkCredential]::new('', $dbSecret).Password
+$env:POSTGRES_USER = $env:DB_USERNAME
+$env:POSTGRES_PASSWORD = $env:DB_PASSWORD
+```
+
+Para un volumen existente, usa sus credenciales actuales: cambiar las variables no cambia la contraseña almacenada en PostgreSQL.
+
+`.env.example` enumera las variables sin secretos reales. Si lo copias a `.env`, Git ignorará ese archivo. Docker Compose lo carga automáticamente; Spring y Gradle requieren las variables en su entorno (por ejemplo, con los comandos anteriores o la configuración del IDE).
 
 Para iniciar PostgreSQL desde la raíz del proyecto:
 
@@ -68,6 +82,18 @@ También se pueden sobrescribir estas variables:
 - Aplicación: `DB_URL`, `DB_USERNAME` y `DB_PASSWORD`.
 
 Los valores de ambos grupos deben coincidir.
+
+## Credenciales de SonarQube
+
+El token se obtiene de `SONAR_TOKEN`; no se guarda en `build.gradle`. Configúralo en la sesión antes de ejecutar el análisis:
+
+```powershell
+$sonarSecret = Read-Host 'Token de SonarQube' -AsSecureString
+$env:SONAR_TOKEN = [System.Net.NetworkCredential]::new('', $sonarSecret).Password
+.\gradlew.bat sonar
+```
+
+En CI, configura `SONAR_TOKEN` como secreto y pásalo como variable de entorno a la tarea. Revoca el token que estuvo escrito en el código y genera uno nuevo; quitarlo del archivo no lo elimina del historial de Git.
 
 ## Ejecutar la API
 
@@ -184,10 +210,11 @@ Ejemplo de error de validación:
 
 ## Ejecutar las pruebas automatizadas
 
-La prueba unitaria del servicio usa Mockito. Las pruebas de integración cargan el contexto completo y requieren PostgreSQL activo con la configuración indicada anteriormente.
+Las pruebas unitarias del servicio usan Mockito para simular el repositorio con datos ficticios, sin conectarse a una base de datos. Las pruebas de integración y de arranque usan el perfil `test`, con una base H2 en memoria. Cucumber usa su propia base H2 con el perfil `acceptance`. No es necesario iniciar PostgreSQL para ejecutar las pruebas.
+
+Los usuarios de prueba se crean con datos ficticios. Las pruebas del controlador y los escenarios de Cucumber revierten sus transacciones al terminar. Las bases H2 existen únicamente dentro del proceso de pruebas. Flyway está desactivado en estos perfiles y Hibernate crea el esquema, por lo que estas pruebas no validan las migraciones ni las particularidades de PostgreSQL.
 
 ```powershell
-docker compose up -d
 .\gradlew.bat test
 ```
 
@@ -231,6 +258,21 @@ Desde la carpeta `event-platform`:
 El reporte de Cucumber queda en `build/reports/cucumber/user-registration.html`.
 Las pruebas de integración existentes siguen requiriendo PostgreSQL cuando se
 ejecuta toda la suite con `.\gradlew.bat test`.
+
+## Cobertura con JaCoCo
+
+Para ejecutar las pruebas y generar cobertura de líneas y ramas:
+
+```powershell
+.\gradlew.bat test jacocoTestReport
+```
+
+La tarea `test` ejecuta las pruebas JUnit Jupiter y los escenarios Cucumber mediante JUnit Platform. El reporte incluye la cobertura combinada de ambas y todas las clases del código principal, sin exclusiones. También se genera automáticamente al ejecutar `test`.
+
+- Reporte HTML: `build/reports/jacoco/test/html/index.html`.
+- Reporte XML: `build/reports/jacoco/test/jacocoTestReport.xml`.
+
+Las pruebas usan Mockito o H2 en memoria; no requieren PostgreSQL. La tarea independiente `acceptanceTest` no agrega cobertura a este reporte.
 
 ## Construir el proyecto
 

@@ -1,0 +1,67 @@
+trigger:
+  - develop
+  - main
+
+pool:
+  name: LocalPool
+
+variables:
+  projectDir: 'untitled1'
+  system.debug: 'true'
+
+steps:
+  - checkout: self
+
+  - script: |
+      echo "=== Diagnóstico inicial del agente local ==="
+      echo "Directorio actual:"
+      cd
+      echo "Contenido del workspace:"
+      dir
+      echo "Contenido del proyecto:"
+      dir $(projectDir)
+      echo "Versión de Java:"
+      java -version
+    displayName: "Diagnóstico inicial del agente"
+
+  - script: |
+      echo "=== Verificando Gradle Wrapper ==="
+      dir $(projectDir)
+      dir $(projectDir)\gradlew*
+    displayName: "Verificar archivos Gradle"
+
+  - task: Gradle@2
+    displayName: "Build y pruebas unitarias"
+    inputs:
+      workingDirectory: '$(projectDir)'
+      gradleWrapperFile: '$(projectDir)/gradlew'
+      gradleOptions: '-Dfile.encoding=UTF-8 -Xmx3072m'
+      publishJUnitResults: true
+      testResultsFiles: '**/build/test-results/test/TEST-*.xml'
+      tasks: 'clean build test --info --stacktrace'
+
+  - task: Gradle@2
+    displayName: "Pruebas de aceptación Cucumber"
+    inputs:
+      workingDirectory: '$(projectDir)'
+      gradleWrapperFile: '$(projectDir)/gradlew'
+      gradleOptions: '-Dfile.encoding=UTF-8'
+      tasks: 'acceptanceTest --info --stacktrace'
+      testResultsFiles: '**/build/test-results/acceptanceTest/TEST-*.xml'
+      publishJUnitResults: true
+
+  - task: Gradle@2
+    displayName: "Pruebas de mutación PIT"
+    inputs:
+      workingDirectory: '$(projectDir)'
+      gradleWrapperFile: '$(projectDir)/gradlew'
+      gradleOptions: '-Dfile.encoding=UTF-8'
+      tasks: 'pitest --info --stacktrace'
+
+  # - task: Gradle@2
+  #   displayName: "Análisis SonarQube"
+  #   inputs:
+  #     workingDirectory: '$(projectDir)'
+  #     gradleWrapperFile: '$(projectDir)/gradlew'
+  #     gradleOptions: '-Dfile.encoding=UTF-8'
+  #     tasks: 'sonarqube --info --stacktrace'
