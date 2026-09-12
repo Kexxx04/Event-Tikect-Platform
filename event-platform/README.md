@@ -274,7 +274,15 @@ La tarea `test` ejecuta las pruebas JUnit Jupiter y los escenarios Cucumber medi
 
 Las pruebas usan Mockito o H2 en memoria; no requieren PostgreSQL. La tarea independiente `acceptanceTest` no agrega cobertura a este reporte.
 
-## Construir el proyecto
+## Pipeline de Azure DevOps
+
+Selecciona `event-platform/azure-pipelines.yml` al crear el pipeline. Se ejecuta con cambios en `develop`, `main`, `feature/testSonar` y `feature/testAprobation`, usando un agente Windows del pool `Nuevos agentes`. El agente debe tener JDK 21, `JAVA_HOME` configurado y acceso a las descargas de Gradle, Maven y .NET. Autoriza el pipeline para usar ese pool. Si cambias la estructura del repositorio, ajusta `projectDir`.
+
+El pipeline construye el proyecto, ejecuta pruebas, publica cobertura JaCoCo y ejecuta PIT. Los reportes se descargan del artefacto `quality-reports`. `test` también ejecuta Cucumber; la tarea `acceptanceTest` lo ejecuta otra vez como comprobación independiente. La cobertura publicada corresponde a `test`. No se necesita PostgreSQL.
+
+SonarQube es opcional: crea `SONAR_TOKEN` como variable secreta y `SONAR_HOST_URL` como variable con la dirección del servidor. Marca `runSonar` al ejecutar manualmente el pipeline. `localhost` apunta al equipo del agente, no necesariamente al equipo desde el que abres Azure DevOps. El token se pasa mediante el entorno y no se imprime. El análisis usa la tarea `sonar` y el reporte XML de JaCoCo en su ubicación estándar.
+
+## Construir la aplicación
 
 ```powershell
 .\gradlew.bat clean build
