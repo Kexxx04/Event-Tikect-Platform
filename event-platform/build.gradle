@@ -1,8 +1,10 @@
 plugins {
 	id 'java'
+	id 'jacoco'
 	id 'org.springframework.boot' version '4.1.1'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id "org.sonarqube" version "7.3.1.8318"
+	id 'info.solidsoft.pitest' version '1.19.0'
 }
 
 group = 'com.eventplatform'
@@ -29,8 +31,68 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	// PIT Mutation Testing
+	pitest 'org.pitest:pitest-junit5-plugin:1.2.1'
+	//Cucumber
+	testImplementation("io.cucumber:cucumber-java:7.34.3")
+	testImplementation("io.cucumber:cucumber-junit-platform-engine:7.34.3")
+	testImplementation("io.cucumber:cucumber-spring:7.34.3")
+	testImplementation 'org.junit.platform:junit-platform-suite'
+	testRuntimeOnly 'com.h2database:h2'
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
+jacoco {
+	toolVersion = '0.8.14'
+}
+
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.required = true
+		html.required = true
+	}
+}
+
+test {
+	finalizedBy jacocoTestReport
+	useJUnitPlatform {
+		includeEngines 'junit-jupiter', 'junit-platform-suite'
+	}
+}
+
+sonar {
+	properties {
+		property 'sonar.projectKey', 'event-ticket-platform'
+		property 'sonar.projectName', 'event-ticket-platform'
+		property 'sonar.host.url', 'http://localhost:9000'
+
+		property 'sonar.token', providers.environmentVariable('SONAR_TOKEN').getOrElse('')
+	}
+}
+
+tasks.register('acceptanceTest', Test) {
+	description = "Runs Cucumber acceptance tests."
+	group = "verification"
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+	useJUnitPlatform {
+		includeEngines 'junit-platform-suite'
+	}
+	filter {
+		includeTestsMatching 'runners.RunCucumberTest'
+	}
+}
+
+pitest {
+	// Use Spring Boot's managed launcher instead of PIT's inferred version.
+	addJUnitPlatformLauncher = false
+	pitestVersion = '1.19.0'
+	junit5PluginVersion = '1.2.1'
+
+	targetClasses = ['com.eventplatform.api.*']
+	targetTests = ['com.eventplatform.api.*']
+
+	threads = 4
+	outputFormats = ['HTML']
+	timestampedReports = false
 }

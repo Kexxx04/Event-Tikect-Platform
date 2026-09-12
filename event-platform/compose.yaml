@@ -4,8 +4,8 @@ services:
     container_name: event-platform-postgres
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-event_platform}
-      POSTGRES_USER: ${POSTGRES_USER:-event_platform}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-event_platform}
+      POSTGRES_USER: ${POSTGRES_USER:?Define POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
