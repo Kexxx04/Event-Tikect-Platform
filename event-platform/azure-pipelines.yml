@@ -1,67 +1,97 @@
 trigger:
   - develop
   - main
+  - feature/testSonar
+  - feature/testAprobation
+
+parameters:
+  - name: runSonar
+    displayName: Ejecutar SonarQube
+    type: boolean
+    default: false
 
 pool:
-  name: LocalPool
+  name: 'Nuevos agentes'
+  demands:
+    - Agent.OS -equals Windows_NT
 
 variables:
-  projectDir: 'untitled1'
-  system.debug: 'true'
+  projectDir: 'event-platform'
+  system.debug: 'false'
+  GRADLE_OPTS: '-Dfile.encoding=UTF-8 -Xmx3072m'
 
 steps:
   - checkout: self
+    fetchDepth: 0
 
-  - script: |
-      echo "=== Diagnóstico inicial del agente local ==="
-      echo "Directorio actual:"
-      cd
-      echo "Contenido del workspace:"
-      dir
-      echo "Contenido del proyecto:"
-      dir $(projectDir)
-      echo "Versión de Java:"
-      java -version
-    displayName: "Diagnóstico inicial del agente"
+  - powershell: |
+      if (-not $env:JAVA_HOME) { throw 'Configura JAVA_HOME con JDK 21 en el agente.' }
+      & .\gradlew.bat --version
+      exit $LASTEXITCODE
+    workingDirectory: '$(Build.SourcesDirectory)/$(projectDir)'
+    displayName: Verificar Java y Gradle
 
-  - script: |
-      echo "=== Verificando Gradle Wrapper ==="
-      dir $(projectDir)
-      dir $(projectDir)\gradlew*
-    displayName: "Verificar archivos Gradle"
+  - powershell: |
+      & .\gradlew.bat clean build jacocoTestReport --no-daemon --stacktrace
+      exit $LASTEXITCODE
+    workingDirectory: '$(Build.SourcesDirectory)/$(projectDir)'
+    displayName: Build, pruebas y cobertura JaCoCo
 
-  - task: Gradle@2
-    displayName: "Build y pruebas unitarias"
+  - powershell: |
+      & .\gradlew.bat acceptanceTest --no-daemon --stacktrace
+      exit $LASTEXITCODE
+    workingDirectory: '$(Build.SourcesDirectory)/$(projectDir)'
+    displayName: Pruebas de aceptacion Cucumber
+
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
     inputs:
-      workingDirectory: '$(projectDir)'
-      gradleWrapperFile: '$(projectDir)/gradlew'
-      gradleOptions: '-Dfile.encoding=UTF-8 -Xmx3072m'
-      publishJUnitResults: true
-      testResultsFiles: '**/build/test-results/test/TEST-*.xml'
-      tasks: 'clean build test --info --stacktrace'
+      testResultsFormat: JUnit
+      searchFolder: '$(Build.SourcesDirectory)/$(projectDir)/build/test-results'
+      testResultsFiles: '**/TEST-*.xml'
+      failTaskOnFailedTests: true
+      failTaskOnMissingResultsFile: true
+      testRunTitle: JUnit y Cucumber
 
-  - task: Gradle@2
-    displayName: "Pruebas de aceptación Cucumber"
+  - task: UseDotNet@2
+    displayName: Preparar publicacion de cobertura
     inputs:
-      workingDirectory: '$(projectDir)'
-      gradleWrapperFile: '$(projectDir)/gradlew'
-      gradleOptions: '-Dfile.encoding=UTF-8'
-      tasks: 'acceptanceTest --info --stacktrace'
-      testResultsFiles: '**/build/test-results/acceptanceTest/TEST-*.xml'
-      publishJUnitResults: true
+      packageType: sdk
+      version: '8.x'
 
-  - task: Gradle@2
-    displayName: "Pruebas de mutación PIT"
+  - task: PublishCodeCoverageResults@2
+    displayName: Publicar cobertura de lineas y ramas
     inputs:
-      workingDirectory: '$(projectDir)'
-      gradleWrapperFile: '$(projectDir)/gradlew'
-      gradleOptions: '-Dfile.encoding=UTF-8'
-      tasks: 'pitest --info --stacktrace'
+      summaryFileLocation: '$(Build.SourcesDirectory)/$(projectDir)/build/reports/jacoco/test/jacocoTestReport.xml'
+      pathToSources: '$(Build.SourcesDirectory)/$(projectDir)/src/main/java'
+      failIfCoverageEmpty: true
 
-  # - task: Gradle@2
-  #   displayName: "Análisis SonarQube"
-  #   inputs:
-  #     workingDirectory: '$(projectDir)'
-  #     gradleWrapperFile: '$(projectDir)/gradlew'
-  #     gradleOptions: '-Dfile.encoding=UTF-8'
-  #     tasks: 'sonarqube --info --stacktrace'
+  - powershell: |
+      & .\gradlew.bat pitest --no-daemon --stacktrace
+      exit $LASTEXITCODE
+    workingDirectory: '$(Build.SourcesDirectory)/$(projectDir)'
+    displayName: Pruebas de mutacion PIT
+
+  - ${{ if eq(parameters.runSonar, true) }}:
+    - powershell: |
+        if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN) -or $env:SONAR_TOKEN.StartsWith('$(')) {
+          throw 'Configura SONAR_TOKEN como variable secreta del pipeline.'
+        }
+        if ([string]::IsNullOrWhiteSpace($env:SONAR_HOST_URL) -or $env:SONAR_HOST_URL.StartsWith('$(')) {
+          throw 'Configura SONAR_HOST_URL con una URL accesible desde el agente.'
+        }
+        & .\gradlew.bat sonar --no-daemon --stacktrace
+        exit $LASTEXITCODE
+      workingDirectory: '$(Build.SourcesDirectory)/$(projectDir)'
+      displayName: Analisis SonarQube
+      env:
+        SONAR_TOKEN: $(SONAR_TOKEN)
+        SONAR_HOST_URL: $(SONAR_HOST_URL)
+
+  - task: PublishBuildArtifacts@1
+    condition: succeededOrFailed()
+    displayName: Guardar reportes HTML y XML
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)/$(projectDir)/build/reports'
+      ArtifactName: quality-reports
+      publishLocation: Container

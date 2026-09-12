@@ -64,7 +64,7 @@ sonar {
 	properties {
 		property 'sonar.projectKey', 'event-ticket-platform'
 		property 'sonar.projectName', 'event-ticket-platform'
-		property 'sonar.host.url', 'http://localhost:9000'
+		property 'sonar.host.url', providers.environmentVariable('SONAR_HOST_URL').getOrElse('http://localhost:9000')
 
 		property 'sonar.token', providers.environmentVariable('SONAR_TOKEN').getOrElse('')
 	}
