@@ -166,8 +166,8 @@ public class Event {
             System.out.println("The end date is missing");
             valid = false;
         } else {
-            if (startDate != null && endDate.isBefore(startDate)) {
-                System.out.println("The end date is before the start date");
+            if (startDate != null && !endDate.isAfter(startDate)) {
+                System.out.println("The end date must be after the start date");
                 valid = false;
             }
         }
@@ -182,7 +182,10 @@ public class Event {
             }
         }
 
-        if (registeredCount != null) {
+        if (registeredCount == null || registeredCount < 0) {
+            System.out.println("The registered count must be non-negative");
+            valid = false;
+        } else {
             if (capacity != null && registeredCount > capacity) {
                 System.out.println("The registered count exceeds capacity");
                 valid = false;
