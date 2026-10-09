@@ -60,9 +60,10 @@ class UserServiceTests {
     @Test
     void rejectsMissingUsersForReadUpdateAndStatus() {
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
+        UpdateUserRequest request = new UpdateUserRequest("Ada", null, null);
+
         assertThrows(UserNotFoundException.class, () -> userService.findById(99L));
-        assertThrows(UserNotFoundException.class,
-                () -> userService.update(99L, new UpdateUserRequest("Ada", null, null)));
+        assertThrows(UserNotFoundException.class, () -> userService.update(99L, request));
         assertThrows(UserNotFoundException.class, () -> userService.updateStatus(99L, UserStatus.INACTIVE));
     }
 
@@ -90,8 +91,9 @@ class UserServiceTests {
         User user = existingUser();
         UserResponse before = UserResponse.from(user);
         when(userRepository.existsByEmailIgnoreCaseAndIdNot("other@example.com", 1L)).thenReturn(true);
-        assertThrows(DuplicateUserException.class,
-                () -> userService.update(1L, new UpdateUserRequest("Other", "other@example.com", null)));
+        UpdateUserRequest request = new UpdateUserRequest("Other", "other@example.com", null);
+        // Request creado fuera de la lambda: assertThrows solo debe evaluar la llamada a create (regla Sonar S5778)
+        assertThrows(DuplicateUserException.class, () -> userService.update(1L, request));
         assertEquals(before, UserResponse.from(user));
     }
 
@@ -100,8 +102,9 @@ class UserServiceTests {
         User user = existingUser();
         UserResponse before = UserResponse.from(user);
         when(userRepository.existsByDocumentAndIdNot("67890", 1L)).thenReturn(true);
-        assertThrows(DuplicateUserException.class,
-                () -> userService.update(1L, new UpdateUserRequest("Other", null, "67890")));
+        UpdateUserRequest request = new UpdateUserRequest("Other", null, "67890");
+        // Request creado fuera de la lambda: assertThrows solo debe evaluar la llamada a create (regla Sonar S5778)
+        assertThrows(DuplicateUserException.class, () -> userService.update(1L, request));
         assertEquals(before, UserResponse.from(user));
     }
 
@@ -119,20 +122,24 @@ class UserServiceTests {
     @NullAndEmptySource
     @ValueSource(strings = {"   "})
     void rejectsMissingRequiredFields(String invalid) {
-        assertThrows(InvalidUserDataException.class,
-                () -> userService.create(new CreateUserRequest(invalid, "ada@example.com", "12345")));
-        assertThrows(InvalidUserDataException.class,
-                () -> userService.create(new CreateUserRequest("Ada", invalid, "12345")));
-        assertThrows(InvalidUserDataException.class,
-                () -> userService.create(new CreateUserRequest("Ada", "ada@example.com", invalid)));
+        // Requests creados fuera de las lambdas: assertThrows solo debe evaluar la llamada a create (regla Sonar S5778)
+        CreateUserRequest missingName = new CreateUserRequest(invalid, "ada@example.com", "12345");
+        CreateUserRequest missingEmail = new CreateUserRequest("Ada", invalid, "12345");
+        CreateUserRequest missingDocument = new CreateUserRequest("Ada", "ada@example.com", invalid);
+
+        assertThrows(InvalidUserDataException.class, () -> userService.create(missingName));
+        assertThrows(InvalidUserDataException.class, () -> userService.create(missingEmail));
+        assertThrows(InvalidUserDataException.class, () -> userService.create(missingDocument));
         verify(userRepository, never()).save(org.mockito.ArgumentMatchers.any(User.class));
     }
 
     @Test
     void rejectsDuplicateDocumentOnCreate() {
         when(userRepository.existsByDocument("12345")).thenReturn(true);
-        assertThrows(DuplicateUserException.class,
-                () -> userService.create(new CreateUserRequest("Ada", "ada@example.com", "12345")));
+        // Request creado fuera de la lambda: assertThrows solo debe evaluar la llamada a create (regla Sonar S5778)
+        CreateUserRequest request = new CreateUserRequest("Ada", "ada@example.com", "12345");
+
+        assertThrows(DuplicateUserException.class, () -> userService.create(request));
         verify(userRepository, never()).save(org.mockito.ArgumentMatchers.any(User.class));
     }
 

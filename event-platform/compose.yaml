@@ -4,6 +4,7 @@ name: event-platform-team
 
 services:
   api:
+    build: .
     image: event-platform:1.0.0
     ports:
       - "127.0.0.1:${API_PORT:-8080}:8080"
