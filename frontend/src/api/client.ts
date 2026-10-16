@@ -1,4 +1,6 @@
-const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:8080').replace(/\/+$/, '')
+import { clearSession, loadSession } from '../auth/session'
+
+const API_URL =(import.meta.env.VITE_API_URL ?? 'http://localhost:8080').replace(/\/+$/, '')
 
 /** Body returned by the backend GlobalExceptionHandler. */
 interface ApiErrorBody {
@@ -24,6 +26,21 @@ export class ApiError extends Error {
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
+let unauthorizedHandler: (() => void) | null = null
+
+/** Called when an authenticated request gets 401 (token expired or revoked). */
+export function setUnauthorizedHandler(handler: (() => void) | null): void {
+  unauthorizedHandler = handler
+}
+
+function buildHeaders(body: unknown): Record<string, string> {
+  const headers: Record<string, string> = {}
+  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  const session = loadSession()
+  if (session) headers.Authorization = `Bearer ${session.token}`
+  return headers
+}
+
 async function parseErrorBody(response: Response): Promise<ApiErrorBody> {
   try {
     return (await response.json()) as ApiErrorBody
@@ -33,11 +50,12 @@ async function parseErrorBody(response: Response): Promise<ApiErrorBody> {
 }
 
 export async function request<T>(method: HttpMethod, path: string, body?: unknown): Promise<T> {
+  const headers = buildHeaders(body)
   let response: Response
   try {
     response = await fetch(`${API_URL}${path}`, {
       method,
-      headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
+      headers,
       body: body === undefined ? undefined : JSON.stringify(body),
     })
   } catch {
@@ -46,6 +64,10 @@ export async function request<T>(method: HttpMethod, path: string, body?: unknow
 
   if (!response.ok) {
     const errorBody = await parseErrorBody(response)
+    if (response.status === 401 && headers.Authorization) {
+      clearSession()
+      unauthorizedHandler?.()
+    }
     throw new ApiError(
       response.status,
       errorBody.message ?? `Request failed with status ${response.status}`,

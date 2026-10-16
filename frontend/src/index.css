@@ -104,6 +104,62 @@ a {
   background: rgba(255, 255, 255, 0.18);
 }
 
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.navbar-username {
+  color: #d5d9e0;
+  font-size: 0.9rem;
+}
+
+.button-ghost {
+  padding: 0.3rem 0.8rem;
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+  font-weight: 500;
+}
+
+.button-ghost:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Login */
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1.5rem 1rem;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem 1.75rem;
+}
+
+.login-card h1 {
+  text-align: center;
+  margin-bottom: 0.25rem;
+}
+
+.login-subtitle {
+  margin: 0 0 1.5rem;
+  text-align: center;
+  color: var(--color-muted);
+}
+
+.button-block {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
 /* Page structure */
 .page {
   padding-block: 1.5rem 3rem;
