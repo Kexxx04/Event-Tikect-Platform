@@ -36,11 +36,11 @@ data in the images is fake: render API data only.
 | `docs/design/02-register.png` | `/register` | Not built: see "Not supported by the API" |
 | `docs/design/03-not-found.png` | `*` | `src/pages/NotFoundPage.tsx` |
 | `docs/design/04-events-list.png` | `/events` | `src/pages/events/EventsPage.tsx` |
-| `docs/design/05-event-detail.png` | `/events/:id` | `EventDetailPage.tsx`, `AvailabilityCard.tsx`, `RegistrationsCard.tsx` |
+| `docs/design/05-event-detail.png` | `/events/:id` | `EventDetailPage.tsx`, `AvailabilityTiles.tsx`, `RegistrationsCard.tsx` |
 | `docs/design/06-event-form.png` | `/events/new`, `/events/:id/edit` | `EventFormPage.tsx` |
 | `docs/design/07-users-list.png` | `/users` | `src/pages/users/UsersPage.tsx` |
 | `docs/design/08-user-form.png` | `/users/new`, `/users/:id/edit` | `UserFormPage.tsx` |
-| `docs/design/09-user-detail.png` | `/users/:id` | New `UserDetailPage.tsx` + `UserEventsCard.tsx` |
+| `docs/design/09-user-detail.png` | `/users/:id` | `UserDetailPage.tsx`, `UserEventsCard.tsx` |
 
 The PNGs are git-ignored and exist only locally. If they are missing, the originals are in
 `../frontend/docs/design/event-platform (1).zip`. If neither exists, follow this spec.
@@ -172,22 +172,22 @@ Never hardcode hex values in components. Import `tokens.css` first in `src/main.
 }
 ```
 
-### Migrating from the current `src/index.css`
+### Tokens added while building the screens
 
-| Old token | New token |
+`src/styles/tokens.css` is the source of truth. Besides the block above, it defines:
+
+| Token | Use |
 | --- | --- |
-| `--color-primary` | `--color-accent` |
-| `--color-primary-hover` | `--color-accent-text` (hover background) |
-| `--color-muted` | `--color-text-muted` |
-| `--color-success*` | `--status-active-*` |
-| `--color-warning*` | `--status-waitlist-*` |
-| `--color-danger-bg` | `--status-cancelled-bg` |
-| `--radius` | `--radius-md` |
+| `--color-on-accent` | Text and icons on accent backgrounds |
+| `--color-danger-border` | Border of danger-outline buttons |
+| `--status-waitlist-bar` | Amber fill of a full event's ProgressBar and OccupancyRing |
+| `--status-closed-bar` | Gray fill of a closed event that is not full |
+| `--radius-row`, `--radius-pill` | DataRow corners (14px) and pills |
+| `--font-sans` | Plus Jakarta Sans with the system fallback |
 
-After the migration:
-
-- `index.css` keeps only the reset, base typography and focus styles.
-- Delete each old global class (`.card`, `.badge-*`, `.filter-tab`, …) once nothing uses it.
+The migration from the old global stylesheet is done: `index.css` holds only the reset, base
+typography, focus styles and the `.visually-hidden` utility. Do not add global component
+classes again.
 
 ## Layout
 
