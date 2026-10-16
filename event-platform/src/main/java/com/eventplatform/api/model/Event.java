@@ -9,6 +9,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 
@@ -41,7 +43,7 @@ public class Event {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EventStatus status = EventStatus.SCHEDULED;
-
+    private static final Logger log = LoggerFactory.getLogger(Event.class);
     // Constructor vacío requerido por JPA
     public Event() {
     }
@@ -166,8 +168,8 @@ public class Event {
             System.out.println("The end date is missing");
             valid = false;
         } else {
-            if (startDate != null && endDate.isBefore(startDate)) {
-                System.out.println("The end date is before the start date");
+            if (startDate != null && !endDate.isAfter(startDate)) {
+                System.out.println("The end date must be after the start date");
                 valid = false;
             }
         }
@@ -182,7 +184,10 @@ public class Event {
             }
         }
 
-        if (registeredCount != null) {
+        if (registeredCount == null || registeredCount < 0) {
+            log.warn("The registered count must be non-negative");
+            valid = false;
+        } else {
             if (capacity != null && registeredCount > capacity) {
                 System.out.println("The registered count exceeds capacity");
                 valid = false;

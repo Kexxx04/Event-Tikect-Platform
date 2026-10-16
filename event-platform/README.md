@@ -28,6 +28,21 @@ También existen las entidades y tablas de eventos e inscripciones, pero todaví
 
 ## Requisitos
 
+### Elige cómo ejecutar el proyecto
+
+| Objetivo | Archivo | Comando |
+| --- | --- | --- |
+| Ejecutar todo con las imágenes del ZIP | `compose.yaml` | `docker compose up -d --wait` |
+| Desarrollar con la API en IntelliJ/Gradle | `compose.dev.yaml` | `docker compose -f compose.dev.yaml up -d` |
+
+Para el primer modo, carga las imágenes y configura `.env` siguiendo [DOCKER.md](DOCKER.md).
+Para el segundo, sigue los requisitos y pasos de desarrollo que aparecen abajo.
+El `Dockerfile` construye la imagen de la API; no es otro archivo Compose.
+
+Para ejecutar todo con Docker o compartir las imágenes con el grupo, consulta
+[DOCKER.md](DOCKER.md). Ese modo no requiere instalar Java y usa
+`compose.yaml`. Para desarrollar con IntelliJ se usa `compose.dev.yaml`, como se explica abajo.
+
 - JDK 21 instalado y disponible en `PATH`.
 - Docker Desktop o Docker Engine con Docker Compose.
 
@@ -62,8 +77,8 @@ Para un volumen existente, usa sus credenciales actuales: cambiar las variables 
 Para iniciar PostgreSQL desde la raíz del proyecto:
 
 ```powershell
-docker compose up -d
-docker compose ps
+docker compose -f compose.dev.yaml up -d
+docker compose -f compose.dev.yaml ps
 ```
 
 Flyway ejecutará automáticamente `V1__create_initial_schema.sql` cuando arranque la aplicación. Esta migración crea las tablas `users`, `events` y `registrations`.
@@ -73,7 +88,7 @@ Si el puerto `5432` está ocupado, se puede publicar PostgreSQL en otro puerto y
 ```powershell
 $env:POSTGRES_PORT = "5433"
 $env:DB_URL = "jdbc:postgresql://localhost:5433/event_platform"
-docker compose up -d
+docker compose -f compose.dev.yaml up -d
 ```
 
 También se pueden sobrescribir estas variables:
@@ -112,10 +127,10 @@ http://localhost:8080
 Para detenerla, usar `Ctrl+C`. Para detener posteriormente la base de datos:
 
 ```powershell
-docker compose down
+docker compose -f compose.dev.yaml down
 ```
 
-Este comando conserva los datos en el volumen de Docker. `docker compose down -v` también elimina el volumen y todos sus datos.
+Este comando conserva los datos en el volumen de Docker. `docker compose -f compose.dev.yaml down -v` también elimina el volumen y todos sus datos.
 
 ## Endpoints disponibles
 
@@ -234,8 +249,11 @@ Para ejecutar una clase concreta:
 Las pruebas actuales verifican:
 
 - Creación de usuarios activos con datos normalizados.
-- Rechazo de un correo duplicado.
-- Creación y consulta de usuarios mediante los endpoints.
+- Rechazo de correos y documentos duplicados al crear y actualizar usuarios.
+- Creación, consulta y listado ordenado de usuarios mediante los endpoints.
+- Actualizaciones parciales, conservación de campos omitidos y persistencia de cambios.
+- Cambio de estado, datos inválidos y respuestas `400`, `404` y `409`.
+- Validación de eventos: fechas, capacidad, inscritos y datos obligatorios.
 
 ## Pruebas de aceptación con Gherkin
 
@@ -256,8 +274,34 @@ Desde la carpeta `event-platform`:
 ```
 
 El reporte de Cucumber queda en `build/reports/cucumber/user-registration.html`.
-Las pruebas de integración existentes siguen requiriendo PostgreSQL cuando se
-ejecuta toda la suite con `.\gradlew.bat test`.
+Las pruebas de integración de la tarea `test` también usan H2 en memoria y no
+requieren PostgreSQL. Cucumber consulta el repositorio para comprobar los
+resultados, pero esas consultas se hacen únicamente contra su H2 temporal.
+
+## Migraciones y arranque con PostgreSQL aislado
+
+Para comprobar lo que H2 no valida, existe una tarea independiente:
+
+```powershell
+.\gradlew.bat postgresTest
+```
+
+Requiere Docker en ejecución. Testcontainers crea un PostgreSQL 16 desechable,
+con puerto asignado automáticamente y sin usar el volumen de Docker Compose.
+La conexión se obtiene directamente del contenedor y sustituye `DB_URL`,
+`DB_USERNAME` y `DB_PASSWORD`; no se usa la base de desarrollo ni datos reales.
+El contenedor se elimina al finalizar las pruebas.
+
+Esta tarea ejecuta la migración Flyway real, valida las entidades con Hibernate,
+comprueba las tablas, el índice parcial de lista de espera y las restricciones de
+eventos. También inicia el servidor HTTP en un puerto aleatorio y crea y consulta
+un usuario para comprobar el arranque y la persistencia fuera de una transacción
+de prueba. Si Docker no está disponible, la tarea falla; no se omite silenciosamente.
+
+El código está en `src/postgresTest/java` y el reporte en
+`build/reports/tests/postgresTest/index.html`. La tarea está separada de `build`,
+`test`, `acceptanceTest` y PIT para que las pruebas habituales sigan funcionando
+sin Docker. Su cobertura no se agrega al reporte JaCoCo de `test`.
 
 ## Cobertura con JaCoCo
 
@@ -315,6 +359,6 @@ src/main/resources/
 1. Implementar repositorios, DTO, servicios y controladores para eventos.
 2. Implementar la inscripción y cancelación de usuarios en eventos.
 3. Aplicar las reglas de capacidad y lista de espera.
-4. Añadir pruebas para actualización, cambio de estado, validaciones y respuestas `404`.
-5. Crear pruebas aisladas con una base de datos de prueba o Testcontainers para no depender de una instancia local compartida.
+4. Ampliar las pruebas cuando se implementen los endpoints de eventos e inscripciones.
+5. Ejecutar `postgresTest` en un agente con Docker para comprobar las migraciones y el arranque con PostgreSQL aislado.
 6. Añadir documentación OpenAPI/Swagger cuando crezca el número de endpoints.
