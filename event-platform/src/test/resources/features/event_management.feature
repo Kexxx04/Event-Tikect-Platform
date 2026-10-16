@@ -60,6 +60,34 @@ Feature: Event management
       | FINISHED  | ACTIVE    |
       | CANCELLED | SCHEDULED |
 
+  @acceptance @availability
+  Scenario: Report the availability of an open event
+    Given an existing event with status SCHEDULED
+    When the administrator checks the event availability
+    Then the event response has HTTP status code 200
+    And the event has 100 available seats
+    And the event is accepting registrations
+
+  @acceptance @availability
+  Scenario Outline: A closed event does not accept registrations
+    Given an existing event with status <status>
+    When the administrator checks the event availability
+    Then the event response has HTTP status code 200
+    And the event is not accepting registrations
+
+    Examples:
+      | status    |
+      | FINISHED  |
+      | CANCELLED |
+
+  @acceptance @availability
+  Scenario: An event that has already started does not accept registrations
+    Given the event starts at "2020-01-01T09:00:00"
+    And an existing event with status SCHEDULED
+    When the administrator checks the event availability
+    Then the event response has HTTP status code 200
+    And the event is not accepting registrations
+
   @acceptance @closed_event
   Scenario Outline: Reject modifying a closed event
     Given an existing event with status <status>

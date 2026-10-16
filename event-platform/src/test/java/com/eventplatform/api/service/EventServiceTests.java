@@ -1,14 +1,18 @@
 package com.eventplatform.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.eventplatform.api.dto.event.CreateEventRequest;
+import com.eventplatform.api.dto.event.EventAvailabilityResponse;
 import com.eventplatform.api.dto.event.EventResponse;
 import com.eventplatform.api.dto.event.UpdateEventRequest;
 import com.eventplatform.api.exception.BusinessRuleViolationException;
@@ -16,10 +20,15 @@ import com.eventplatform.api.exception.EventNotFoundException;
 import com.eventplatform.api.exception.InvalidEventDataException;
 import com.eventplatform.api.model.Event;
 import com.eventplatform.api.model.enums.EventStatus;
+import com.eventplatform.api.model.enums.RegistrationStatus;
 import com.eventplatform.api.repository.EventRepository;
+import com.eventplatform.api.repository.RegistrationRepository;
+import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,7 +37,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
@@ -38,12 +46,88 @@ class EventServiceTests {
 
     private static final LocalDateTime START = LocalDateTime.of(2030, 5, 10, 18, 0);
     private static final LocalDateTime END = START.plusHours(3);
+    private static final LocalDateTime NOW = LocalDateTime.of(2030, 5, 1, 12, 0);
 
     @Mock
     private EventRepository eventRepository;
 
-    @InjectMocks
+    @Mock
+    private RegistrationRepository registrationRepository;
+
     private EventService eventService;
+
+    @BeforeEach
+    void setUp() {
+        Clock clock = Clock.fixed(NOW.toInstant(ZoneOffset.UTC), ZoneOffset.UTC);
+        eventService = new EventService(eventRepository, registrationRepository, clock);
+    }
+
+    private Event storedEvent(EventStatus status, LocalDateTime startDate, int capacity, int registeredCount) {
+        Event event = new Event("Java Conf", null, startDate, startDate.plusHours(3), capacity, status);
+        event.setId(1L);
+        event.setRegisteredCount(registeredCount);
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        return event;
+    }
+
+    @Test
+    void reportsAvailabilityOfAnOpenEvent() {
+        storedEvent(EventStatus.SCHEDULED, START, 50, 20);
+
+        EventAvailabilityResponse availability = eventService.getAvailability(1L);
+
+        assertEquals(new EventAvailabilityResponse(1L, 50, 20, 30, 0, EventStatus.SCHEDULED, true), availability);
+    }
+
+    @Test
+    void reportsAFullEventWithItsWaitlist() {
+        storedEvent(EventStatus.ACTIVE, START, 50, 50);
+        when(registrationRepository.countByEventIdAndStatus(1L, RegistrationStatus.WAITING_LIST)).thenReturn(3L);
+
+        EventAvailabilityResponse availability = eventService.getAvailability(1L);
+
+        assertEquals(0, availability.availableSeats());
+        assertEquals(3, availability.waitlistCount());
+        assertTrue(availability.acceptingRegistrations());
+    }
+
+    @Test
+    void neverReportsNegativeAvailableSeats() {
+        storedEvent(EventStatus.SCHEDULED, START, 10, 12);
+        assertEquals(0, eventService.getAvailability(1L).availableSeats());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = EventStatus.class, names = {"FINISHED", "CANCELLED"})
+    void closedEventsDoNotAcceptRegistrations(EventStatus status) {
+        storedEvent(status, START, 50, 10);
+
+        EventAvailabilityResponse availability = eventService.getAvailability(1L);
+
+        assertFalse(availability.acceptingRegistrations());
+        assertEquals(status, availability.status());
+        assertEquals(40, availability.availableSeats());
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {0, 1, 600})
+    void startedEventsDoNotAcceptRegistrations(long minutesSinceStart) {
+        storedEvent(EventStatus.ACTIVE, NOW.minusMinutes(minutesSinceStart), 50, 10);
+        assertFalse(eventService.getAvailability(1L).acceptingRegistrations());
+    }
+
+    @Test
+    void acceptsRegistrationsUntilTheMomentBeforeStart() {
+        storedEvent(EventStatus.SCHEDULED, NOW.plusSeconds(1), 50, 10);
+        assertTrue(eventService.getAvailability(1L).acceptingRegistrations());
+    }
+
+    @Test
+    void rejectsAvailabilityOfMissingEvents() {
+        when(eventRepository.findById(99L)).thenReturn(Optional.empty());
+        assertThrows(EventNotFoundException.class, () -> eventService.getAvailability(99L));
+        verifyNoInteractions(registrationRepository);
+    }
 
     private Event event(EventStatus status) {
         Event event = new Event("Java Conf", "Talks", START, END, 50, status);

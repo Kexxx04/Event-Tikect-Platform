@@ -1,6 +1,7 @@
 package com.eventplatform.api.service;
 
 import com.eventplatform.api.dto.event.CreateEventRequest;
+import com.eventplatform.api.dto.event.EventAvailabilityResponse;
 import com.eventplatform.api.dto.event.EventResponse;
 import com.eventplatform.api.dto.event.UpdateEventRequest;
 import com.eventplatform.api.exception.BusinessRuleViolationException;
@@ -8,7 +9,10 @@ import com.eventplatform.api.exception.EventNotFoundException;
 import com.eventplatform.api.exception.InvalidEventDataException;
 import com.eventplatform.api.model.Event;
 import com.eventplatform.api.model.enums.EventStatus;
+import com.eventplatform.api.model.enums.RegistrationStatus;
 import com.eventplatform.api.repository.EventRepository;
+import com.eventplatform.api.repository.RegistrationRepository;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -30,10 +34,20 @@ public class EventService {
             EventStatus.CANCELLED, EnumSet.noneOf(EventStatus.class)
     ));
 
-    private final EventRepository eventRepository;
+    private static final Set<EventStatus> OPEN_STATUSES = EnumSet.of(EventStatus.SCHEDULED, EventStatus.ACTIVE);
 
-    public EventService(EventRepository eventRepository) {
+    private final EventRepository eventRepository;
+    private final RegistrationRepository registrationRepository;
+    private final Clock clock;
+
+    public EventService(
+            EventRepository eventRepository,
+            RegistrationRepository registrationRepository,
+            Clock clock
+    ) {
         this.eventRepository = eventRepository;
+        this.registrationRepository = registrationRepository;
+        this.clock = clock;
     }
 
     @Transactional
@@ -61,8 +75,13 @@ public class EventService {
     }
 
     public EventResponse findById(Long id) {
-        return EventResponse.from(eventRepository.findById(id)
-                .orElseThrow(() -> new EventNotFoundException(id)));
+        return EventResponse.from(getEvent(id));
+    }
+
+    public EventAvailabilityResponse getAvailability(Long id) {
+        Event event = getEvent(id);
+        long waitlistCount = registrationRepository.countByEventIdAndStatus(id, RegistrationStatus.WAITING_LIST);
+        return EventAvailabilityResponse.from(event, waitlistCount, isAcceptingRegistrations(event));
     }
 
     @Transactional
@@ -94,6 +113,16 @@ public class EventService {
         }
         event.setStatus(status);
         return EventResponse.from(event);
+    }
+
+    private Event getEvent(Long id) {
+        return eventRepository.findById(id)
+                .orElseThrow(() -> new EventNotFoundException(id));
+    }
+
+    private boolean isAcceptingRegistrations(Event event) {
+        return OPEN_STATUSES.contains(event.getStatus())
+                && LocalDateTime.now(clock).isBefore(event.getStartDate());
     }
 
     private Event getEventForUpdate(Long id) {

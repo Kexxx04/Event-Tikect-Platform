@@ -1,6 +1,7 @@
 package com.eventplatform.api.controller;
 
 import com.eventplatform.api.dto.event.CreateEventRequest;
+import com.eventplatform.api.dto.event.EventAvailabilityResponse;
 import com.eventplatform.api.dto.event.EventResponse;
 import com.eventplatform.api.dto.event.UpdateEventRequest;
 import com.eventplatform.api.dto.event.UpdateEventStatusRequest;
@@ -44,6 +45,11 @@ public class EventController {
     @GetMapping("/{id}")
     public EventResponse findById(@PathVariable Long id) {
         return eventService.findById(id);
+    }
+
+    @GetMapping("/{id}/availability")
+    public EventAvailabilityResponse getAvailability(@PathVariable Long id) {
+        return eventService.getAvailability(id);
     }
 
     @PutMapping("/{id}")
