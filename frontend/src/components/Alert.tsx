@@ -10,15 +10,16 @@ interface AlertProps {
   children?: ReactNode
   /** Defaults to "alert" for errors and warnings and "status" for success; use "note" for static callouts. */
   role?: AriaRole
+  icon?: boolean
 }
 
 const ICONS = { error: AlertCircleIcon, warning: AlertTriangleIcon, success: CheckCircleIcon }
 
-export function Alert({ tone, title, children, role }: AlertProps) {
+export function Alert({ tone, title, children, role, icon = true }: AlertProps) {
   const Icon = ICONS[tone]
   return (
     <div className={`${styles.alert} ${styles[tone]}`} role={role ?? (tone === 'success' ? 'status' : 'alert')}>
-      <Icon className={styles.icon} size={20} />
+      {icon && <Icon className={styles.icon} size={20} />}
       <div className={styles.body}>
         {title && <p className={styles.title}>{title}</p>}
         {children}
