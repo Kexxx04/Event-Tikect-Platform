@@ -39,3 +39,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Design mockups (local only) ###
+/docs/design/*.png
