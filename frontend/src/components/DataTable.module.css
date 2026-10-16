@@ -1,4 +1,6 @@
+/* position: relative keeps visually hidden header text inside the scroll box on narrow screens. */
 .scroll {
+  position: relative;
   overflow-x: auto;
 }
 
