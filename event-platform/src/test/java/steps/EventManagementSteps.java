@@ -73,6 +73,11 @@ public class EventManagementSteps {
         eventData.put("capacity", capacity);
     }
 
+    @Given("the event starts at {string}")
+    public void theEventStartsAt(String startDate) {
+        eventData.put("startDate", startDate);
+    }
+
     @Given("an existing event with status {word}")
     public void anExistingEventWithStatus(String targetStatus) throws Exception {
         eventLocation = mockMvc.perform(post("/api/events")
@@ -105,6 +110,26 @@ public class EventManagementSteps {
         response = mockMvc.perform(put(eventLocation)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(eventData)));
+    }
+
+    @When("the administrator checks the event availability")
+    public void theAdministratorChecksTheEventAvailability() throws Exception {
+        response = mockMvc.perform(get(eventLocation + "/availability"));
+    }
+
+    @Then("the event has {int} available seats")
+    public void theEventHasAvailableSeats(int availableSeats) throws Exception {
+        response.andExpect(jsonPath("$.availableSeats").value(availableSeats));
+    }
+
+    @Then("the event is accepting registrations")
+    public void theEventIsAcceptingRegistrations() throws Exception {
+        response.andExpect(jsonPath("$.acceptingRegistrations").value(true));
+    }
+
+    @Then("the event is not accepting registrations")
+    public void theEventIsNotAcceptingRegistrations() throws Exception {
+        response.andExpect(jsonPath("$.acceptingRegistrations").value(false));
     }
 
     @Then("the event response has HTTP status code {int}")
