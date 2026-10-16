@@ -1,0 +1,47 @@
+/* Design tokens of the "Fresh" visual direction. Components never hardcode colors. */
+:root {
+  --color-bg: #f2f4f9;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f7f8fc;
+  --color-border: #e3e7f0;
+  --color-border-strong: #d6dce8;
+  --color-text: #141a2e;
+  --color-text-muted: #4a526a;
+  --color-accent: #2f5bea;
+  --color-accent-text: #2449c9;
+  --color-accent-soft: #eaf0ff;
+  --color-avatar: #dce5ff;
+  --color-danger: #b42318;
+  --color-focus: #b9c9ff;
+  --color-on-accent: #ffffff;
+
+  --status-scheduled-bg: #eaf0ff;
+  --status-scheduled-fg: #2449c9;
+  --status-active-bg: #dff6e7; /* event ACTIVE, CONFIRMED, user ACTIVE */
+  --status-active-fg: #17703a;
+  --status-waitlist-bg: #fef3e2; /* WAITING_LIST, full events */
+  --status-waitlist-fg: #b45309;
+  --status-cancelled-bg: #fde8e7;
+  --status-cancelled-fg: #b42318;
+  --status-finished-bg: #eef0f5; /* FINISHED, user INACTIVE */
+  --status-finished-fg: #4a526a;
+
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-row: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+  --shadow-card: 0 1px 2px rgba(20, 26, 46, 0.06);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
