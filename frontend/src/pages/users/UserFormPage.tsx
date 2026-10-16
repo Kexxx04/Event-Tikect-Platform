@@ -1,12 +1,16 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ApiError } from '../../api/client'
 import { usersApi, type User } from '../../api/users'
+import { Breadcrumb, type Crumb } from '../../components/Breadcrumb'
+import { Button, ButtonLink } from '../../components/Button'
+import { Card } from '../../components/Card'
 import { ErrorAlert } from '../../components/ErrorAlert'
-import { Loading, SuccessAlert } from '../../components/Feedback'
-import { StatusBadge } from '../../components/StatusBadge'
+import { Loading } from '../../components/Feedback'
+import { fieldA11y } from '../../components/fieldA11y'
 import { FormField } from '../../components/FormField'
-import { UserEventsCard } from './UserEventsCard'
+import { PageHeader } from '../../components/PageHeader'
+import styles from './UserFormPage.module.css'
 
 interface UserForm {
   name: string
@@ -29,6 +33,7 @@ function validate(form: UserForm): FieldErrors {
   return errors
 }
 
+/** Create (/users/new) and edit (/users/:id/edit). Status and registrations live on the detail page. */
 export function UserFormPage() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -41,7 +46,6 @@ export function UserFormPage() {
   const [loadError, setLoadError] = useState<unknown>(null)
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [submitError, setSubmitError] = useState<unknown>(null)
-  const [notice, setNotice] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -70,16 +74,8 @@ export function UserFormPage() {
     setFieldErrors((previous) => ({ ...previous, [field]: undefined }))
   }
 
-  function handleError(error: unknown) {
-    setSubmitError(error)
-    if (error instanceof ApiError) {
-      setFieldErrors(error.details)
-    }
-  }
-
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setNotice(null)
     setSubmitError(null)
     const errors = validate(form)
     setFieldErrors(errors)
@@ -89,46 +85,33 @@ export function UserFormPage() {
     setSaving(true)
     try {
       if (isEdit) {
-        const updated = await usersApi.update(userId, payload)
-        setUser(updated)
-        setForm({ name: updated.name, email: updated.email, document: updated.document })
-        setNotice('User saved')
+        await usersApi.update(userId, payload)
+        navigate(`/users/${userId}`, { state: { notice: 'User saved' } })
       } else {
         await usersApi.create(payload)
         navigate('/users')
       }
     } catch (error) {
-      handleError(error)
+      setSubmitError(error)
+      if (error instanceof ApiError) {
+        setFieldErrors(error.details)
+      }
     } finally {
       setSaving(false)
     }
   }
 
-  async function toggleStatus() {
-    if (!user) return
-    setNotice(null)
-    setSubmitError(null)
-    const nextStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
-    setSaving(true)
-    try {
-      const updated = await usersApi.updateStatus(user.id, nextStatus)
-      setUser(updated)
-      setNotice(nextStatus === 'ACTIVE' ? 'User activated' : 'User deactivated')
-    } catch (error) {
-      handleError(error)
-    } finally {
-      setSaving(false)
-    }
-  }
+  const backLink = isEdit ? `/users/${userId}` : '/users'
+  const crumbs: Crumb[] = isEdit
+    ? [{ label: 'Users', to: '/users' }, { label: user?.name ?? 'User', to: backLink }, { label: 'Edit' }]
+    : [{ label: 'Users', to: '/users' }, { label: 'New user' }]
 
   if (loading) return <Loading label="Loading user…" />
 
   if (loadError) {
     return (
       <section>
-        <Link to="/users" className="back-link">
-          ← Back to users
-        </Link>
+        <Breadcrumb items={[{ label: 'Users', to: '/users' }, { label: 'Edit' }]} />
         <ErrorAlert error={loadError} />
       </section>
     )
@@ -136,73 +119,61 @@ export function UserFormPage() {
 
   return (
     <section>
-      <Link to="/users" className="back-link">
-        ← Back to users
-      </Link>
-      <div className="page-header">
-        <h1>{isEdit ? `Edit user #${userId}` : 'New user'}</h1>
-        {user && (
-          <div className="actions">
-            <StatusBadge status={user.status} />
-            <button
-              type="button"
-              className={user.status === 'ACTIVE' ? 'button-danger' : 'button-secondary'}
-              onClick={toggleStatus}
-              disabled={saving}
-            >
-              {user.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
-            </button>
+      <Breadcrumb items={crumbs} />
+      <PageHeader
+        title={isEdit ? 'Edit user' : 'New user'}
+        subtitle={isEdit ? user?.name : 'New users are created as Active.'}
+      />
+
+      <Card className={styles.card}>
+        <form onSubmit={handleSubmit} noValidate>
+          <ErrorAlert error={submitError} fieldsShownInline={FORM_FIELDS} />
+
+          <FormField label="Full name" htmlFor="name" error={fieldErrors.name} required>
+            <input
+              id="name"
+              value={form.name}
+              maxLength={255}
+              autoComplete="off"
+              onChange={(e) => updateField('name', e.target.value)}
+              {...fieldA11y('name', fieldErrors.name)}
+              autoFocus
+            />
+          </FormField>
+
+          <FormField label="Email" htmlFor="email" error={fieldErrors.email} required>
+            <input
+              id="email"
+              type="email"
+              value={form.email}
+              maxLength={255}
+              autoComplete="off"
+              onChange={(e) => updateField('email', e.target.value)}
+              {...fieldA11y('email', fieldErrors.email)}
+            />
+          </FormField>
+
+          <FormField label="Document number" htmlFor="document" error={fieldErrors.document} required>
+            <input
+              id="document"
+              value={form.document}
+              maxLength={255}
+              autoComplete="off"
+              onChange={(e) => updateField('document', e.target.value)}
+              {...fieldA11y('document', fieldErrors.document)}
+            />
+          </FormField>
+
+          <div className={styles.footer}>
+            <ButtonLink to={backLink} variant="secondary">
+              Cancel
+            </ButtonLink>
+            <Button type="submit" loading={saving}>
+              {isEdit ? 'Save changes' : 'Create user'}
+            </Button>
           </div>
-        )}
-      </div>
-
-      <form className="card form" onSubmit={handleSubmit} noValidate>
-        <SuccessAlert message={notice} />
-        <ErrorAlert error={submitError} fieldsShownInline={FORM_FIELDS} />
-
-        <FormField label="Name" htmlFor="name" error={fieldErrors.name} required>
-          <input
-            id="name"
-            value={form.name}
-            maxLength={255}
-            onChange={(e) => updateField('name', e.target.value)}
-            aria-invalid={Boolean(fieldErrors.name)}
-            autoFocus
-          />
-        </FormField>
-
-        <FormField label="Email" htmlFor="email" error={fieldErrors.email} required>
-          <input
-            id="email"
-            type="email"
-            value={form.email}
-            maxLength={255}
-            onChange={(e) => updateField('email', e.target.value)}
-            aria-invalid={Boolean(fieldErrors.email)}
-          />
-        </FormField>
-
-        <FormField label="Document" htmlFor="document" error={fieldErrors.document} required>
-          <input
-            id="document"
-            value={form.document}
-            maxLength={255}
-            onChange={(e) => updateField('document', e.target.value)}
-            aria-invalid={Boolean(fieldErrors.document)}
-          />
-        </FormField>
-
-        <div className="actions">
-          <button type="submit" disabled={saving}>
-            {saving ? 'Saving…' : isEdit ? 'Save changes' : 'Create user'}
-          </button>
-          <Link to="/users" className="button button-secondary">
-            Cancel
-          </Link>
-        </div>
-      </form>
-
-      {user && <UserEventsCard userId={user.id} />}
+        </form>
+      </Card>
     </section>
   )
 }
