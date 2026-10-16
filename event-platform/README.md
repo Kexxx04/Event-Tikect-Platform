@@ -4,17 +4,33 @@ API REST para gestionar una plataforma de eventos. El proyecto está construido 
 
 ## Estado actual
 
-Actualmente está implementada la gestión de usuarios:
+Están implementadas todas las funcionalidades mínimas del proyecto:
 
-- Crear un usuario.
-- Listar todos los usuarios.
-- Consultar un usuario por su identificador.
-- Actualizar parcialmente el nombre, correo o documento de un usuario.
-- Cambiar el estado de un usuario entre `ACTIVE` e `INACTIVE`.
-- Validar los datos de entrada y evitar correos o documentos duplicados.
-- Responder con errores estructurados para datos inválidos, duplicados y usuarios inexistentes.
+- Usuarios: registrar, listar, consultar, actualizar y activar/inactivar.
+- Eventos: crear, modificar, consultar, listar, cambiar de estado y consultar disponibilidad.
+- Inscripciones: inscribir, cancelar, consultar inscritos y consultar los eventos de un usuario.
+- Lista de espera: cuando el evento está lleno la inscripción queda en `WAITING_LIST`; al liberarse
+  un cupo (cancelación o aumento de capacidad) la inscripción en espera más antigua pasa a `CONFIRMED`.
+- Concurrencia: toda operación que cambia `registeredCount` bloquea la fila del evento con
+  `PESSIMISTIC_WRITE` dentro de una sola transacción, por lo que nunca hay sobrecupos.
 
-También existen las entidades y tablas de eventos e inscripciones, pero todavía no hay controladores, servicios ni endpoints para operarlas.
+### Reglas de negocio
+
+| # | Regla | Respuesta |
+| --- | --- | --- |
+| 1 | Un usuario no puede inscribirse dos veces en el mismo evento (inscripción `CONFIRMED` o `WAITING_LIST`) | `409` |
+| 2 | Un evento nunca supera su capacidad (`registeredCount <= capacity`) | Bloqueo pesimista + `CHECK` en BD |
+| 3 | No se aceptan inscripciones cuando el evento ya inició (`now >= startDate`) | `409` |
+| 4 | Un evento `CANCELLED` no acepta inscripciones | `409` |
+| 5 | Un evento `FINISHED` no acepta inscripciones | `409` |
+| 6 | La capacidad debe ser mayor que cero | `400` |
+| 7 | Cancelar una inscripción `CONFIRMED` libera un cupo | `200` |
+| 8 | Con el evento lleno, la nueva inscripción queda `WAITING_LIST` | `201` |
+| 9 | Al liberarse un cupo, la inscripción en espera más antigua (fecha y luego id) pasa a `CONFIRMED` | Automático |
+| 10 | Un usuario `INACTIVE` no puede inscribirse | `409` |
+
+Un usuario que canceló puede volver a inscribirse: se reutiliza su inscripción (la tabla tiene una
+restricción única `user_id, event_id`) con una nueva fecha, por lo que entra al final de la lista de espera.
 
 ## Tecnologías
 
@@ -166,7 +182,22 @@ $auth = "Authorization: Bearer $($login.token)"
 
 ## Endpoints disponibles
 
-La ruta base es `/api/users`.
+### Correspondencia con los endpoints mínimos del enunciado
+
+| Enunciado | Endpoint de la API |
+| --- | --- |
+| `POST /usuarios` | `POST /api/users` |
+| `POST /eventos` | `POST /api/events` |
+| `GET /eventos` | `GET /api/events` |
+| `GET /eventos/{id}` | `GET /api/events/{id}` |
+| `PUT /eventos/{id}` | `PUT /api/events/{id}` |
+| `POST /eventos/{id}/inscripciones` | `POST /api/events/{eventId}/registrations` |
+| `DELETE /eventos/{eventoId}/inscripciones/{usuarioId}` | `DELETE /api/events/{eventId}/registrations/{userId}` |
+| `GET /eventos/{id}/inscritos` | `GET /api/events/{eventId}/registrations?status=CONFIRMED` |
+| `GET /eventos/{id}/disponibilidad` | `GET /api/events/{id}/availability` |
+| `GET /usuarios/{id}/eventos` | `GET /api/users/{userId}/events` |
+
+### Usuarios
 
 | Método | Ruta | Función | Respuesta correcta |
 | --- | --- | --- | --- |
@@ -175,6 +206,50 @@ La ruta base es `/api/users`.
 | `GET` | `/api/users/{id}` | Consultar un usuario | `200 OK` |
 | `PATCH` | `/api/users/{id}` | Actualizar uno o varios datos | `200 OK` |
 | `PATCH` | `/api/users/{id}/status` | Cambiar el estado | `200 OK` |
+| `GET` | `/api/users/{id}/events` | Eventos del usuario por fecha de inicio (`?status=` opcional) | `200 OK` |
+
+### Eventos
+
+| Método | Ruta | Función | Respuesta correcta |
+| --- | --- | --- | --- |
+| `POST` | `/api/events` | Crear un evento (queda `SCHEDULED`) | `201 Created` |
+| `GET` | `/api/events` | Listar eventos ordenados por ID | `200 OK` |
+| `GET` | `/api/events/{id}` | Consultar un evento | `200 OK` |
+| `PUT` | `/api/events/{id}` | Reemplazar nombre, descripción, fechas y capacidad | `200 OK` |
+| `PATCH` | `/api/events/{id}/status` | Cambiar el estado (`SCHEDULED → ACTIVE → FINISHED`, o `CANCELLED`) | `200 OK` |
+| `GET` | `/api/events/{id}/availability` | Capacidad, inscritos, cupos libres y tamaño de la lista de espera | `200 OK` |
+
+Si un `PUT` aumenta la capacidad, los nuevos cupos se asignan automáticamente a la lista de espera.
+La capacidad no puede quedar por debajo de los inscritos confirmados (`409`).
+
+### Inscripciones y lista de espera
+
+| Método | Ruta | Función | Respuesta correcta |
+| --- | --- | --- | --- |
+| `POST` | `/api/events/{eventId}/registrations` | Inscribir con `{"userId": 1}`; queda `CONFIRMED` o `WAITING_LIST` | `201 Created` |
+| `GET` | `/api/events/{eventId}/registrations` | Inscripciones del evento (`?status=CONFIRMED`, `WAITING_LIST` o `CANCELLED`) | `200 OK` |
+| `GET` | `/api/events/{eventId}/registrations/{userId}` | Inscripción de un usuario en el evento | `200 OK` |
+| `DELETE` | `/api/events/{eventId}/registrations/{userId}` | Cancelar; devuelve la inscripción cancelada y la promovida | `200 OK` |
+| `GET` | `/api/events/{eventId}/waitlist` | Lista de espera numerada en orden de promoción | `200 OK` |
+
+Ejemplo (evento lleno: el usuario 101 queda en espera y luego otro usuario cancela):
+
+```powershell
+curl.exe -X POST "http://localhost:8080/api/events/1/registrations" -H $auth `
+  -H "Content-Type: application/json" -d '{"userId":101}'
+# {"id":101,"eventId":1,"eventName":"Java Conf","userId":101,...,"status":"WAITING_LIST"}
+
+curl.exe -X DELETE "http://localhost:8080/api/events/1/registrations/7" -H $auth
+```
+
+```json
+{
+  "cancelled": { "id": 7, "eventId": 1, "userId": 7, "status": "CANCELLED" },
+  "promoted": { "id": 101, "eventId": 1, "userId": 101, "status": "CONFIRMED" }
+}
+```
+
+`promoted` es `null` cuando se cancela una inscripción en espera o no hay nadie esperando.
 
 ### 1. Crear un usuario
 
@@ -236,9 +311,21 @@ Los únicos estados válidos son `ACTIVE` e `INACTIVE`.
 
 La API puede devolver:
 
-- `400 Bad Request`: JSON inválido o campos que no cumplen las validaciones.
-- `404 Not Found`: el usuario solicitado no existe.
-- `409 Conflict`: el correo o documento ya está registrado.
+- `400 Bad Request`: JSON inválido, campos que no cumplen las validaciones o parámetros con un valor inválido (por ejemplo `?status=UNKNOWN`).
+- `401 Unauthorized`: falta el token o no es válido.
+- `404 Not Found`: el usuario, el evento o la inscripción no existe.
+- `409 Conflict`: dato duplicado o regla de negocio violada (inscripción repetida, evento cerrado o ya iniciado, usuario inactivo, capacidad menor que los inscritos, transición de estado inválida).
+
+Mensajes `409` de inscripciones:
+
+| Situación | `message` |
+| --- | --- |
+| Inscripción repetida | `User is already registered for this event` |
+| Usuario inactivo | `Inactive users cannot register for events` |
+| Evento cancelado o finalizado | `Event with status CANCELLED does not accept registrations` |
+| Evento ya iniciado | `Registrations are closed because the event has already started` |
+| Cancelar dos veces | `Registration is already cancelled` |
+| Cancelar en un evento cerrado | `Registrations of an event with status FINISHED cannot be cancelled` |
 
 Ejemplo de error de validación:
 
@@ -286,14 +373,26 @@ Las pruebas actuales verifican:
 - Actualizaciones parciales, conservación de campos omitidos y persistencia de cambios.
 - Cambio de estado, datos inválidos y respuestas `400`, `404` y `409`.
 - Validación de eventos: fechas, capacidad, inscritos y datos obligatorios.
+- Inscripción confirmada, lista de espera, duplicados, usuarios inactivos y eventos cerrados o iniciados.
+- Cancelación con liberación de cupo y promoción automática en orden de la lista de espera.
+- Promoción de la lista de espera al aumentar la capacidad de un evento.
+- Estrés de concurrencia (`RegistrationConcurrencyIntegrationTests`): 1000 usuarios compiten en paralelo
+  por 100 cupos y el resultado es siempre 100 `CONFIRMED`, 900 `WAITING_LIST` y 0 sobrecupos; además,
+  20 cancelaciones simultáneas promueven exactamente a 20 usuarios distintos.
 
 ## Pruebas de aceptación con Gherkin
 
-Los dos escenarios en inglés de `src/test/resources/features/user_registration.feature`
-comprueban el registro exitoso de un usuario (`201`, estado `ACTIVE`) y el rechazo
-de un correo duplicado (`409`, sin crear otro usuario ni modificar el existente).
+Los escenarios en inglés están en `src/test/resources/features`:
 
-`src/test/java/steps/RegistrationUser.java` implementa los pasos y
+- `user_registration.feature`: registro exitoso de un usuario y rechazo de un correo duplicado.
+- `event_management.feature`: creación, capacidad positiva, transiciones de estado y disponibilidad.
+- `event_registration.feature`: inscripción confirmada, lista de espera, el ejemplo del enunciado
+  (100 cupos, el usuario 101 queda en espera y pasa a `CONFIRMED` cuando alguien cancela),
+  orden de la lista de espera, cancelaciones, reinscripción, duplicados, usuarios inactivos y
+  eventos cancelados, finalizados o ya iniciados.
+- `authentication.feature`: login del administrador y endpoints protegidos.
+
+Los pasos están en `src/test/java/steps` y
 `src/test/java/runners/RunCucumberTest.java` ejecuta los escenarios con Cucumber.
 Se carga la aplicación con MockMvc y el perfil `acceptance`, que usa H2 en memoria.
 Cada escenario revierte su transacción al terminar. No requiere iniciar PostgreSQL
@@ -328,7 +427,9 @@ Esta tarea ejecuta la migración Flyway real, valida las entidades con Hibernate
 comprueba las tablas, el índice parcial de lista de espera y las restricciones de
 eventos. También inicia el servidor HTTP en un puerto aleatorio y crea y consulta
 un usuario para comprobar el arranque y la persistencia fuera de una transacción
-de prueba. Si Docker no está disponible, la tarea falla; no se omite silenciosamente.
+de prueba. `PostgresRegistrationConcurrencyTests` repite el escenario de estrés
+(1000 usuarios, 100 cupos) contra PostgreSQL real con 64 hilos.
+Si Docker no está disponible, la tarea falla; no se omite silenciosamente.
 
 El código está en `src/postgresTest/java` y el reporte en
 `build/reports/tests/postgresTest/index.html`. La tarea está separada de `build`,
@@ -388,9 +489,6 @@ src/main/resources/
 
 ## Próximos pasos sugeridos
 
-1. Implementar repositorios, DTO, servicios y controladores para eventos.
-2. Implementar la inscripción y cancelación de usuarios en eventos.
-3. Aplicar las reglas de capacidad y lista de espera.
-4. Ampliar las pruebas cuando se implementen los endpoints de eventos e inscripciones.
-5. Ejecutar `postgresTest` en un agente con Docker para comprobar las migraciones y el arranque con PostgreSQL aislado.
-6. Añadir documentación OpenAPI/Swagger cuando crezca el número de endpoints.
+1. Ejecutar `postgresTest` en un agente con Docker para comprobar las migraciones, el arranque y la concurrencia con PostgreSQL aislado.
+2. Añadir documentación OpenAPI/Swagger.
+3. Ejecutar el escenario de estrés contra la API desplegada con una herramienta de carga (JMeter, k6 o Gatling).
