@@ -5,7 +5,9 @@ Frontend mínimo (Vite + React + TypeScript + React Router) que consume la API R
 ## Requisitos
 
 - Node.js 20 o superior (probado con Node 24) y npm.
-- La API corriendo en `http://localhost:8080` (ver `../event-platform/README.md`).
+- La API corriendo en `http://localhost:8080` (ver `../event-platform/README.md`). Para probar sin
+  PostgreSQL, desde `../event-platform` ejecuta `.\gradlew.bat bootTestRun --args="--spring.profiles.active=test"`
+  (H2 en memoria; usuario `admin`, contraseña `test-admin-password`; los datos se pierden al detenerla).
 
 ## Cómo ejecutar
 
