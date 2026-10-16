@@ -39,8 +39,9 @@ export default function App() {
         <Route path="events/new" element={<EventFormPage />} />
         <Route path="events/:id" element={<EventDetailPage />} />
         <Route path="events/:id/edit" element={<EventEditRoute />} />
-        <Route path="*" element={<NotFoundPage />} />
       </Route>
+      {/* Outside RequireAuth and the app shell: unknown URLs show the 404 page with or without a session. */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }
