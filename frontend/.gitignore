@@ -26,3 +26,6 @@ dist-ssr
 # Environment
 .env
 !.env.example
+
+# Local design mockups
+docs/design/
