@@ -169,6 +169,7 @@ export function EventDetailPage() {
         eventId={event.id}
         acceptingRegistrations={availability.acceptingRegistrations}
         isFull={availability.availableSeats === 0}
+        closed={!editable}
         registerOpen={registerOpen && availability.acceptingRegistrations}
         onCloseRegister={() => setRegisterOpen(false)}
         onChanged={reload}

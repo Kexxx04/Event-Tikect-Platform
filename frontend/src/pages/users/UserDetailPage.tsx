@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useLocation, useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { usersApi, type UserStatus } from '../../api/users'
 import { Avatar } from '../../components/Avatar'
 import { Breadcrumb } from '../../components/Breadcrumb'
@@ -22,11 +22,17 @@ export function UserDetailPage() {
   const { id } = useParams()
   const userId = Number(id)
   const location = useLocation()
+  const navigate = useNavigate()
   const { data: user, error, loading, setData } = useLoader(() => usersApi.get(userId), [userId])
   const [notice, setNotice] = useState<string | null>(() => noticeFrom(location.state))
   const [actionError, setActionError] = useState<unknown>(null)
   const [confirmingDeactivate, setConfirmingDeactivate] = useState(false)
   const [saving, setSaving] = useState(false)
+
+  // The notice is shown once: drop it from the history entry so a reload or back does not repeat it.
+  useEffect(() => {
+    if (noticeFrom(location.state)) navigate(location.pathname, { replace: true, state: null })
+  }, [location, navigate])
 
   async function changeStatus(status: UserStatus) {
     setNotice(null)

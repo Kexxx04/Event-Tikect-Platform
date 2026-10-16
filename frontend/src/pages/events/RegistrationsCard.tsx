@@ -27,6 +27,8 @@ interface RegistrationsCardProps {
   eventId: number
   acceptingRegistrations: boolean
   isFull: boolean
+  /** Finished or cancelled: the API rejects cancellations (409), so the Cancel actions are hidden. */
+  closed: boolean
   /** The register panel is opened from the "Register user" button of the event header. */
   registerOpen: boolean
   onCloseRegister: () => void
@@ -38,6 +40,7 @@ export function RegistrationsCard({
   eventId,
   acceptingRegistrations,
   isFull,
+  closed,
   registerOpen,
   onCloseRegister,
   onChanged,
@@ -215,7 +218,7 @@ export function RegistrationsCard({
                   </td>
                   <td className={styles.muted}>{formatDate(registration.registrationDate)}</td>
                   <td data-align="end">
-                    {registration.status !== 'CANCELLED' && (
+                    {!closed && registration.status !== 'CANCELLED' && (
                       <Button
                         variant="secondary"
                         onClick={() => setPendingCancel(registration)}
