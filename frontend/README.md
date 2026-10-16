@@ -58,13 +58,15 @@ $env:CORS_ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:4173"
 | Ruta | Contenido |
 | --- | --- |
 | `/login` | Inicio de sesión del administrador (`POST /api/auth/login`); el resto de rutas redirige aquí sin sesión |
-| `/users` | Tabla de usuarios y botón **New user** |
+| `/users` | Totales (activos/inactivos), tabla de usuarios con búsqueda y paginación en el cliente, y botón **New user** |
 | `/users/new` | Formulario de creación (`POST /api/users`) |
-| `/users/:id` | Edición (`PATCH /api/users/{id}`), **Activate/Deactivate** (`PATCH /api/users/{id}/status`) y eventos del usuario (`GET /api/users/{id}/events`) |
-| `/events` | Tabla de eventos y botón **New event** |
+| `/users/:id` | Detalle: **Edit**, **Activate/Deactivate** (`PATCH /api/users/{id}/status`, desactivar pide confirmación) y eventos del usuario filtrables por estado (`GET /api/users/{id}/events`) |
+| `/users/:id/edit` | Edición (`PATCH /api/users/{id}`) |
+| `/events` | Tarjetas de eventos con ocupación, filtro por estado, búsqueda por nombre y botón **New event** |
 | `/events/new` | Formulario de creación (`POST /api/events`) |
-| `/events/:id` | Detalle, tarjeta de disponibilidad (`GET /api/events/{id}/availability`), botones de estado (`PATCH /api/events/{id}/status`) e inscripciones: inscribir un usuario (`POST /api/events/{id}/registrations`), filtrar por estado, ver la posición en la lista de espera y cancelar (`DELETE /api/events/{id}/registrations/{userId}`), con aviso de quién fue promovido |
+| `/events/:id` | Detalle, ocupación / cupos / lista de espera (`GET /api/events/{id}/availability`), botones de estado (`PATCH /api/events/{id}/status`, finalizar y cancelar piden confirmación) e inscripciones: **Register user** (`POST /api/events/{id}/registrations`), filtrar por estado, ver la posición en la lista de espera y cancelar (`DELETE /api/events/{id}/registrations/{userId}`), con aviso de quién fue promovido |
 | `/events/:id/edit` | Edición completa (`PUT /api/events/{id}`) |
+| cualquier otra | Página 404, con o sin sesión |
 
 ## Estructura
 
@@ -72,12 +74,24 @@ $env:CORS_ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:4173"
 src/
   api/          client.ts (fetch + ApiError + token), auth.ts, users.ts, events.ts, registrations.ts (tipos = DTOs del backend)
   auth/         session.ts (sessionStorage), AuthContext/AuthProvider, RequireAuth
-  components/   Layout, ErrorAlert, FormField, Feedback (loading, vacío, badges)
+  components/   Layout (sidebar), Button, Card, StatusBadge, Alert, ErrorAlert, FormField, PillTabs,
+                SearchInput, Avatar, DateTile, ProgressBar, OccupancyRing, StatTile, ConfirmPanel,
+                DataTable, Breadcrumb, PageHeader, Feedback (loading, vacío, éxito), icons/
   hooks/        useLoader (carga con estados loading/error)
   pages/        users/, events/
-  utils/        dates.ts (LocalDateTime <-> datetime-local)
-  index.css     único archivo de estilos
+  utils/        dates.ts (LocalDateTime <-> datetime-local y formatos), status.ts (etiquetas), initials.ts
+  styles/       tokens.css (colores, radios, espacios)
+  index.css     solo reset, tipografía base y foco
 ```
+
+## Estilos
+
+- Diseño "Fresh": las guías y los mockups están en la skill `web-design`
+  (`../event-platform/.claude/skills/web-design/SKILL.md`).
+- Cada componente y página tiene su `*.module.css`; los colores salen solo de `src/styles/tokens.css`.
+- Sin `style` en línea, `innerHTML` ni CSS-in-JS: la barra de ocupación y el anillo se dibujan con
+  atributos SVG, así que la app funciona con una CSP `style-src 'self'` (más Google Fonts para
+  Plus Jakarta Sans).
 
 ## Manejo de errores
 
