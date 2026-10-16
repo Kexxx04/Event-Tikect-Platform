@@ -60,7 +60,21 @@ La aplicación usa estos valores predeterminados:
 | Puerto | `5432` |
 | URL JDBC | `jdbc:postgresql://localhost:5432/event_platform` |
 
-Antes de iniciar la aplicación, define las credenciales en la misma sesión de PowerShell:
+La forma recomendada es un archivo `.env` en esta carpeta (Git lo ignora). **Docker Compose y la API
+(`bootRun` o IntelliJ) lo leen automáticamente**, así que no hace falta definir variables en cada terminal:
+
+```powershell
+Copy-Item .env.example .env
+notepad .env   # pon el mismo usuario y contraseña en POSTGRES_* y en DB_*
+```
+
+La API importa el archivo con `spring.config.import=optional:file:.env[.properties]`, relativo al
+directorio de trabajo, así que ejecútala desde esta carpeta (`event-platform`). Las variables de entorno
+reales, si existen, tienen prioridad sobre el `.env`.
+
+Para un volumen existente, usa sus credenciales actuales: cambiar el `.env` no cambia la contraseña almacenada en PostgreSQL (o borra el volumen con `docker compose -f compose.dev.yaml down -v`, perdiendo los datos).
+
+Alternativa sin `.env`: define las variables en la misma sesión de PowerShell antes de cada comando:
 
 ```powershell
 $env:DB_USERNAME = Read-Host 'Usuario de PostgreSQL'
@@ -69,10 +83,6 @@ $env:DB_PASSWORD = [System.Net.NetworkCredential]::new('', $dbSecret).Password
 $env:POSTGRES_USER = $env:DB_USERNAME
 $env:POSTGRES_PASSWORD = $env:DB_PASSWORD
 ```
-
-Para un volumen existente, usa sus credenciales actuales: cambiar las variables no cambia la contraseña almacenada en PostgreSQL.
-
-`.env.example` enumera las variables sin secretos reales. Si lo copias a `.env`, Git ignorará ese archivo. Docker Compose lo carga automáticamente; Spring y Gradle requieren las variables en su entorno (por ejemplo, con los comandos anteriores o la configuración del IDE).
 
 Para iniciar PostgreSQL desde la raíz del proyecto:
 
