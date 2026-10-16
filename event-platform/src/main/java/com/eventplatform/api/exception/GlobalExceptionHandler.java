@@ -12,11 +12,16 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({UserNotFoundException.class, EventNotFoundException.class})
+    @ExceptionHandler({
+            UserNotFoundException.class,
+            EventNotFoundException.class,
+            RegistrationNotFoundException.class
+    })
     public ResponseEntity<ApiError> handleNotFound(
             RuntimeException exception,
             HttpServletRequest request
@@ -64,6 +69,19 @@ public class GlobalExceptionHandler {
         return buildError(
                 HttpStatus.BAD_REQUEST,
                 "Malformed JSON request",
+                request,
+                Map.of()
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> handleTypeMismatch(
+            MethodArgumentTypeMismatchException exception,
+            HttpServletRequest request
+    ) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "Invalid value for parameter '" + exception.getName() + "'",
                 request,
                 Map.of()
         );
