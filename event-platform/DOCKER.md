@@ -47,16 +47,32 @@ está construida para Linux AMD64 (equipos Intel/AMD). No necesitas Java ni Grad
    docker compose up -d --wait --wait-timeout 180
    ```
 
-5. Consulta `http://localhost:8080/api/users` en el navegador. Una base nueva devuelve
-   `[]`. La aplicación es una API REST, no tiene página de inicio ni interfaz web.
-   Si cambiaste `API_PORT`, usa ese puerto en la URL.
+   > **Problema conocido:** el `HEALTHCHECK` de la imagen consulta `/api/users` sin token, y desde
+   > que la API exige login esa ruta responde `401`. Por eso el contenedor `api` aparece como
+   > `unhealthy` y `--wait` termina con error aunque la API funcione. Mientras se corrige, inicia con
+   > `docker compose up -d` y revisa con `docker compose logs api` que aparezca
+   > `Started EventPlatformApplication`. Ver "Problemas conocidos" en `README.md`.
 
-Puedes crear un usuario desde PowerShell:
+5. Comprueba que la API responde. Todas las rutas exigen token, así que abrir
+   `http://localhost:8080/api/users` en el navegador devuelve `401 Authentication is required`:
+   eso confirma que la API está activa. Si cambiaste `API_PORT`, usa ese puerto en la URL.
+
+Para usarla desde PowerShell, primero inicia sesión con `ADMIN_USERNAME` y `ADMIN_PASSWORD` del `.env`
+y luego envía el token en cada petición:
 
 ```powershell
-$body = @{name='Ada Lovelace'; email='ada@example.com'; document='12345'} | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri http://localhost:8080/api/users -ContentType 'application/json' -Body $body
+$login = Invoke-RestMethod -Method Post -Uri http://localhost:8080/api/auth/login -ContentType 'application/json' `
+  -Body (@{ username = 'admin'; password = (Read-Host 'Contraseña del administrador') } | ConvertTo-Json)
+$headers = @{ Authorization = "Bearer $($login.token)" }
+
+$body = @{ name = 'Ada Lovelace'; email = 'ada@example.com'; document = '12345' } | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri http://localhost:8080/api/users -Headers $headers -ContentType 'application/json' -Body $body
+Invoke-RestMethod -Uri http://localhost:8080/api/users -Headers $headers
 ```
+
+En `README.md` está la función `Invoke-Api`, que simplifica estas llamadas y muestra los errores de la
+API, y la lista completa de endpoints. El paquete Docker contiene solo la API y PostgreSQL; la interfaz
+web (`frontend/`) se ejecuta aparte con `npm run dev` y se conecta a `http://localhost:8080`.
 
 Para consultar el estado, los logs y detener los servicios:
 
@@ -66,7 +82,7 @@ docker compose logs --tail 100 api
 docker compose down
 ```
 
-`down` conserva los usuarios en un volumen local. Cambiar la contraseña en `.env`
+`down` conserva los datos en un volumen local. Cambiar la contraseña en `.env`
 después del primer arranque no cambia la contraseña de una base ya creada.
 Cada integrante tiene su propia base de datos; los datos no se sincronizan.
 

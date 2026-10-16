@@ -5,6 +5,7 @@ import { usersApi, type User } from '../../api/users'
 import { ErrorAlert } from '../../components/ErrorAlert'
 import { Loading, StatusBadge, SuccessAlert } from '../../components/Feedback'
 import { FormField } from '../../components/FormField'
+import { UserEventsCard } from './UserEventsCard'
 
 interface UserForm {
   name: string
@@ -199,6 +200,8 @@ export function UserFormPage() {
           </Link>
         </div>
       </form>
+
+      {user && <UserEventsCard userId={user.id} />}
     </section>
   )
 }

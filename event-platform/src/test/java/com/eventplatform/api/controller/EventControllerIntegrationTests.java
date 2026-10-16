@@ -257,6 +257,31 @@ class EventControllerIntegrationTests {
     }
 
     @Test
+    void increasingTheCapacityPromotesTheWaitlistInOrder() throws Exception {
+        String location = createEvent("Java Conf");
+        eventRepository.findById(idOf(location)).orElseThrow().setRegisteredCount(50);
+        register(location, "W1", RegistrationStatus.WAITING_LIST);
+        register(location, "W2", RegistrationStatus.WAITING_LIST);
+        register(location, "W3", RegistrationStatus.WAITING_LIST);
+        entityManager.flush();
+
+        mockMvc.perform(put(location).contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_EVENT.replace("\"capacity\":50", "\"capacity\":52")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.capacity").value(52))
+                .andExpect(jsonPath("$.registeredCount").value(52));
+
+        mockMvc.perform(get(location + "/waitlist")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].position").value(1))
+                .andExpect(jsonPath("$[0].userEmail").value("W3@example.com"));
+        mockMvc.perform(get(location + "/registrations").param("status", "CONFIRMED"))
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].userEmail").value("W1@example.com"))
+                .andExpect(jsonPath("$[1].userEmail").value("W2@example.com"));
+    }
+
+    @Test
     void reportsAvailabilityOfANewEvent() throws Exception {
         String location = createEvent("Java Conf");
         mockMvc.perform(get(location + "/availability")).andExpect(status().isOk())

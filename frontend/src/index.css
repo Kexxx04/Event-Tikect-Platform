@@ -483,6 +483,16 @@ select:focus {
   color: var(--color-danger);
 }
 
+.badge-confirmed {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.badge-waiting_list {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
 .badge-finished {
   background: #eceff3;
   color: var(--color-muted);
@@ -584,4 +594,42 @@ progress.occupancy.full::-moz-progress-bar {
   .details dd {
     margin-bottom: 0.6rem;
   }
+}
+
+/* Registrations */
+.registration-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.registration-form select {
+  flex: 1;
+}
+
+.filter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.filter-tab {
+  padding: 0.3rem 0.8rem;
+  background: var(--color-surface);
+  color: var(--color-muted);
+  border-color: var(--color-border);
+  font-size: 0.9rem;
+}
+
+.filter-tab:hover {
+  background: var(--color-bg);
+  border-color: var(--color-muted);
+}
+
+.filter-tab-active,
+.filter-tab-active:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
 }

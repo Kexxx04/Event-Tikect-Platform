@@ -38,15 +38,18 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final RegistrationRepository registrationRepository;
+    private final WaitlistService waitlistService;
     private final Clock clock;
 
     public EventService(
             EventRepository eventRepository,
             RegistrationRepository registrationRepository,
+            WaitlistService waitlistService,
             Clock clock
     ) {
         this.eventRepository = eventRepository;
         this.registrationRepository = registrationRepository;
+        this.waitlistService = waitlistService;
         this.clock = clock;
     }
 
@@ -101,6 +104,8 @@ public class EventService {
         event.setStartDate(request.startDate());
         event.setEndDate(request.endDate());
         event.setCapacity(request.capacity());
+        // Seats added by a larger capacity go to the waitlist, under the same row lock.
+        waitlistService.fillFreeSeats(event);
         return EventResponse.from(event);
     }
 

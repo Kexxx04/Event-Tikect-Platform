@@ -5,7 +5,9 @@ Frontend mínimo (Vite + React + TypeScript + React Router) que consume la API R
 ## Requisitos
 
 - Node.js 20 o superior (probado con Node 24) y npm.
-- La API corriendo en `http://localhost:8080` (ver `../event-platform/README.md`).
+- La API corriendo en `http://localhost:8080` (ver `../event-platform/README.md`). Para probar sin
+  PostgreSQL, desde `../event-platform` ejecuta `.\gradlew.bat bootTestRun --args="--spring.profiles.active=test"`
+  (H2 en memoria; usuario `admin`, contraseña `test-admin-password`; los datos se pierden al detenerla).
 
 ## Cómo ejecutar
 
@@ -58,17 +60,17 @@ $env:CORS_ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:4173"
 | `/login` | Inicio de sesión del administrador (`POST /api/auth/login`); el resto de rutas redirige aquí sin sesión |
 | `/users` | Tabla de usuarios y botón **New user** |
 | `/users/new` | Formulario de creación (`POST /api/users`) |
-| `/users/:id` | Edición (`PATCH /api/users/{id}`) y **Activate/Deactivate** (`PATCH /api/users/{id}/status`) |
+| `/users/:id` | Edición (`PATCH /api/users/{id}`), **Activate/Deactivate** (`PATCH /api/users/{id}/status`) y eventos del usuario (`GET /api/users/{id}/events`) |
 | `/events` | Tabla de eventos y botón **New event** |
 | `/events/new` | Formulario de creación (`POST /api/events`) |
-| `/events/:id` | Detalle, tarjeta de disponibilidad (`GET /api/events/{id}/availability`) y botones de estado (`PATCH /api/events/{id}/status`) |
+| `/events/:id` | Detalle, tarjeta de disponibilidad (`GET /api/events/{id}/availability`), botones de estado (`PATCH /api/events/{id}/status`) e inscripciones: inscribir un usuario (`POST /api/events/{id}/registrations`), filtrar por estado, ver la posición en la lista de espera y cancelar (`DELETE /api/events/{id}/registrations/{userId}`), con aviso de quién fue promovido |
 | `/events/:id/edit` | Edición completa (`PUT /api/events/{id}`) |
 
 ## Estructura
 
 ```
 src/
-  api/          client.ts (fetch + ApiError + token), auth.ts, users.ts, events.ts (tipos = DTOs del backend)
+  api/          client.ts (fetch + ApiError + token), auth.ts, users.ts, events.ts, registrations.ts (tipos = DTOs del backend)
   auth/         session.ts (sessionStorage), AuthContext/AuthProvider, RequireAuth
   components/   Layout, ErrorAlert, FormField, Feedback (loading, vacío, badges)
   hooks/        useLoader (carga con estados loading/error)
