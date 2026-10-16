@@ -6,6 +6,7 @@ import { Loading, StatusBadge, SuccessAlert } from '../../components/Feedback'
 import { useLoader } from '../../hooks/useLoader'
 import { formatDateTime } from '../../utils/dates'
 import { AvailabilityCard } from './AvailabilityCard'
+import { RegistrationsCard } from './RegistrationsCard'
 
 const STATUS_ACTIONS: Record<EventStatus, { label: string; className: string; confirm?: string }> = {
   SCHEDULED: { label: 'Schedule', className: 'button-secondary' },
@@ -112,6 +113,12 @@ export function EventDetailPage() {
 
         <AvailabilityCard availability={availability} />
       </div>
+
+      <RegistrationsCard
+        eventId={event.id}
+        acceptingRegistrations={availability.acceptingRegistrations}
+        onChanged={reload}
+      />
     </section>
   )
 }
