@@ -12,6 +12,7 @@
   --color-accent-soft: #eaf0ff;
   --color-avatar: #dce5ff;
   --color-danger: #b42318;
+  --color-danger-border: #f1b9b4;
   --color-focus: #b9c9ff;
   --color-on-accent: #ffffff;
 
@@ -21,10 +22,12 @@
   --status-active-fg: #17703a;
   --status-waitlist-bg: #fef3e2; /* WAITING_LIST, full events */
   --status-waitlist-fg: #b45309;
+  --status-waitlist-bar: #d97706; /* progress fill of a full event */
   --status-cancelled-bg: #fde8e7;
   --status-cancelled-fg: #b42318;
   --status-finished-bg: #eef0f5; /* FINISHED, user INACTIVE */
   --status-finished-fg: #4a526a;
+  --status-closed-bar: #a8b0c2; /* progress fill of a closed event that is not full */
 
   --radius-sm: 10px;
   --radius-md: 12px;

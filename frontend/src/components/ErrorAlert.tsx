@@ -1,4 +1,5 @@
 import { ApiError, errorMessage } from '../api/client'
+import { Alert } from './Alert'
 
 interface ErrorAlertProps {
   error: unknown
@@ -17,11 +18,7 @@ export function ErrorAlert({ error, fieldsShownInline = [] }: ErrorAlertProps) {
       : []
 
   return (
-    <div className="alert alert-error" role="alert">
-      <p className="alert-title">
-        {error instanceof ApiError && error.status > 0 ? `Error ${error.status}: ` : ''}
-        {errorMessage(error)}
-      </p>
+    <Alert tone="error" title={errorMessage(error)}>
       {otherDetails.length > 0 && (
         <ul>
           {otherDetails.map(([field, message]) => (
@@ -31,6 +28,6 @@ export function ErrorAlert({ error, fieldsShownInline = [] }: ErrorAlertProps) {
           ))}
         </ul>
       )}
-    </div>
+    </Alert>
   )
 }

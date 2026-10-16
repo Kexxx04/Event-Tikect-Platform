@@ -1,0 +1,19 @@
+.bar {
+  display: block;
+}
+
+.track {
+  fill: var(--color-border);
+}
+
+.accent .fill {
+  fill: var(--color-accent);
+}
+
+.full .fill {
+  fill: var(--status-waitlist-bar);
+}
+
+.closed .fill {
+  fill: var(--status-closed-bar);
+}

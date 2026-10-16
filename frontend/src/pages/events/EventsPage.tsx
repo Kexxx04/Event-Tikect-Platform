@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 import { eventsApi } from '../../api/events'
 import { ErrorAlert } from '../../components/ErrorAlert'
-import { EmptyState, Loading, StatusBadge } from '../../components/Feedback'
+import { EmptyState, Loading } from '../../components/Feedback'
+import { StatusBadge } from '../../components/StatusBadge'
 import { useLoader } from '../../hooks/useLoader'
 import { formatDateTime } from '../../utils/dates'
 
