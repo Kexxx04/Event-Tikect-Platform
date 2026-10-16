@@ -1,237 +1,455 @@
 ---
 name: web-design
-description: Guía visual del frontend React de Event Platform basada en los mockups de diseño (login, events, event detail, event form, users, user form, user detail, 404). Úsala siempre que crees, rediseñes o ajustes pantallas, estilos o componentes en ../frontend (index.css, Layout, páginas de events y users, login, 404).
+description: Use for any screen, component, layout or styling work in ../frontend. Defines the "Fresh" visual direction, design tokens, screen references in docs/design, how every screen maps to the existing REST API, and CSP-safe styling rules.
 ---
 
-# Web design — Event Platform frontend
+# Web design — Event Platform "Fresh"
 
-Esta skill define cómo debe verse el frontend (`../frontend`, Vite + React 19 + TypeScript +
-React Router) para que coincida con los mockups. Es la fuente de verdad visual; la fuente de
-verdad funcional sigue siendo la API y el `CLAUDE.md` del backend.
+This skill lives in the backend project (`event-platform/`). The frontend is `../frontend`
+(Vite + React 19 + TypeScript + React Router 7). Every `src/...` path below is inside
+`../frontend`, and every `docs/design/...` path is inside `event-platform/`.
 
-## Mockups
+## Working on the existing frontend
 
-Están en `../frontend/docs/design/event-platform (1)/` (rutas relativas a `event-platform/`).
-La carpeta está en `frontend/.gitignore`, así que solo existe en la máquina donde se copiaron.
-Si no están, usa las especificaciones de esta skill.
+- **Restyle before you create.** Adapt and restyle the existing components and pages before
+  creating new ones. Do not change business logic, API calls (`src/api/*.ts`) or URLs that
+  already work. Change only the visual layer and the component structure.
+- **Keep behaviour the mockups don't show:**
+  - event status transitions (`NEXT_STATUSES`);
+  - the "X was promoted from the waitlist" notice after a cancellation;
+  - waitlist positions;
+  - the "Your session has expired" notice;
+  - per-field 400 errors.
+- **Tests.** The frontend has no automated tests, because there is no test runner in
+  `package.json`. Verify with build, lint and a visual check (see Verification). If a task
+  also touches the backend, `.\gradlew.bat test` must stay green.
 
-| Mockup | Ruta | Página actual |
+## Reference screens
+
+ALWAYS open the matching PNG with Read before building a screen. Match its layout, spacing,
+hierarchy and colors. The images are 2x, so divide measured sizes by 2 to get CSS px. Sample
+data in the images is fake: render API data only.
+
+| Mockup | Route | Files |
 | --- | --- | --- |
-| `01 · login.png` | `/login` | `src/pages/LoginPage.tsx` |
-| `02 · register.png` | — | No existe: ver "Fuera de alcance" |
-| `03 · 404.png` | `*` | `src/pages/NotFoundPage.tsx` |
-| `04 · events.png` | `/events` | `src/pages/events/EventsPage.tsx` |
-| `05 · events id.png` | `/events/:id` | `EventDetailPage.tsx`, `AvailabilityCard.tsx`, `RegistrationsCard.tsx` |
-| `06 · events new · events id edit.png` | `/events/new`, `/events/:id/edit` | `EventFormPage.tsx` |
-| `07 · users.png` | `/users` | `src/pages/users/UsersPage.tsx` |
-| `08 · users new.png` | `/users/new` | `UserFormPage.tsx` |
-| `09 · users id.png` | `/users/:id` | `UserFormPage.tsx`, `UserEventsCard.tsx` |
+| `docs/design/01-login.png` | `/login` | `src/pages/LoginPage.tsx` |
+| `docs/design/02-register.png` | `/register` | Not built: see "Not supported by the API" |
+| `docs/design/03-not-found.png` | `*` | `src/pages/NotFoundPage.tsx` |
+| `docs/design/04-events-list.png` | `/events` | `src/pages/events/EventsPage.tsx` |
+| `docs/design/05-event-detail.png` | `/events/:id` | `EventDetailPage.tsx`, `AvailabilityCard.tsx`, `RegistrationsCard.tsx` |
+| `docs/design/06-event-form.png` | `/events/new`, `/events/:id/edit` | `EventFormPage.tsx` |
+| `docs/design/07-users-list.png` | `/users` | `src/pages/users/UsersPage.tsx` |
+| `docs/design/08-user-form.png` | `/users/new`, `/users/:id/edit` | `UserFormPage.tsx` |
+| `docs/design/09-user-detail.png` | `/users/:id` | New `UserDetailPage.tsx` + `UserEventsCard.tsx` |
 
-Antes de tocar una pantalla, abre su PNG con la herramienta Read y compáralo con el resultado.
-Las imágenes están a 2x: divide las medidas que veas entre 2 para obtener px de CSS.
+The PNGs are git-ignored and exist only locally. If they are missing, the originals are in
+`../frontend/docs/design/event-platform (1).zip`. If neither exists, follow this spec.
 
-## Reglas que no se negocian
+## API contract (source of truth for data)
 
-1. **Los datos salen de la API, nunca del mockup.** Nombres, cifras ("87 / 100", "128 users",
-   "Diego R.") son de ejemplo. No inventes campos que los DTOs de `src/api/*.ts` no tienen.
-2. **No quites funcionalidad que el mockup no muestra.** Se conservan: cambio de estado del
-   evento según `NEXT_STATUSES`, aviso de quién fue promovido al cancelar, posición en la lista
-   de espera, mensajes de `ErrorAlert` con `details` por campo, expiración de sesión.
-3. **Mismo stack.** Sin Tailwind, sin librerías de componentes ni de iconos. Todo el estilo vive
-   en `src/index.css` con variables CSS; los iconos son SVG inline (trazo 1.75–2 px, estilo
-   lucide) en `src/components/icons.tsx`.
-4. **Reutiliza antes de crear:** `Layout`, `FormField`, `ErrorAlert`, `Feedback` (`Loading`,
-   `EmptyState`, `SuccessAlert`, `StatusBadge`), `useLoader`, `utils/dates.ts`. La capa
-   `src/api/` no cambia por motivos visuales.
-5. **Textos de la interfaz en inglés**, con la redacción de los mockups cuando aplique.
+Every endpoint except `POST /api/auth/login` requires the admin JWT, which `src/api/client.ts`
+already adds.
 
-## Tokens
+| Screen | Calls | Data used |
+| --- | --- | --- |
+| Login | `POST /api/auth/login` `{ username, password }` | `token`, `username`, `expiresAt` |
+| Events list | `GET /api/events` | `id`, `name`, `startDate`, `endDate`, `capacity`, `registeredCount`, `status` |
+| Event detail | `GET /api/events/{id}`, `GET /api/events/{id}/availability`, `GET /api/events/{id}/registrations`, `GET /api/users`, `POST /api/events/{id}/registrations` `{ userId }`, `DELETE /api/events/{id}/registrations/{userId}`, `PATCH /api/events/{id}/status` | `availableSeats`, `waitlistCount`, `acceptingRegistrations`; for each registration: `userName`, `userEmail`, `registrationDate`, `status`; after a cancellation: `promoted` |
+| Event form | `POST /api/events`, `PUT /api/events/{id}` | `name`, `description`, `startDate`, `endDate`, `capacity` |
+| Users list | `GET /api/users` | `name`, `email`, `document`, `status` |
+| User form | `POST /api/users`, `PATCH /api/users/{id}` | `name`, `email`, `document` |
+| User detail | `GET /api/users/{id}`, `GET /api/users/{id}/events`, `PATCH /api/users/{id}/status` | `eventId`, `eventName`, `startDate`, `eventStatus`, `registrationStatus`, `registrationDate` |
 
-Sustituyen o amplían los de `:root` en `src/index.css`. Mantén los nombres existentes.
+### Enums
+
+Keep the backend names in code and use the labels only in the UI.
+
+- **EventStatus:** `SCHEDULED`, `ACTIVE`, `FINISHED`, `CANCELLED`.
+  - Valid transitions: `SCHEDULED → ACTIVE | CANCELLED` and `ACTIVE → FINISHED | CANCELLED`.
+  - `FINISHED` and `CANCELLED` events cannot be edited (409).
+- **RegistrationStatus:** `CONFIRMED`, `WAITING_LIST`, `CANCELLED`. The UI label for
+  `WAITING_LIST` is "Waitlisted", or "Waitlist" in tabs.
+- **UserStatus:** `ACTIVE`, `INACTIVE`.
+
+### Business rules
+
+These rules appear in the UI copy and have been checked against the backend:
+
+- Registrations close when `now >= startDate`.
+- `acceptingRegistrations` is true only when the event is `SCHEDULED` or `ACTIVE` and has not
+  started yet. A full event still accepts registrations: they go to the waitlist.
+- Capacity must be greater than 0 and cannot be lowered below `registeredCount` (409).
+- Raising capacity promotes the oldest waitlisted registrations.
+- Inactive users cannot register (409).
+
+### Errors
+
+Errors arrive as `ApiError` from `client.ts`.
+
+- **400:** each entry in `details` (field → message) goes under its field. A 400 with no
+  `details` (for example "End date must be after start date") goes in the top Alert.
+- **404:** shown in an Alert.
+- **409:** the backend `message` goes in the top Alert. A 409 has no `details`, so never parse
+  the message to guess a field. Duplicate users return "Email is already registered" or
+  "Document is already registered".
+- **401:** already handled: the session is cleared and the user is sent to the login.
+
+### Data the API does not have
+
+Never fake it.
+
+- The events list has no waitlist count. Cards show "Full", not "Full · 12 waiting". Do not
+  call availability once per card.
+- The admin has no display name or role. The sidebar shows `session.username` and "Admin".
+- There is no server-side search, filtering or pagination. Do these on the client.
+
+## Not supported by the API (ask before building)
+
+- **`/register` (02-register.png):** there is no public endpoint, users have no password and
+  there is no attendee role. Do not add the route or any link to it.
+- **Login extras:** omit "Forgot password?" and "Create an attendee account".
+- **Login field:** the API authenticates with a username, so the mockup's "Email" field is
+  "Username".
+
+## Visual direction
+
+- **Look:** soft, friendly SaaS. Light gray-blue background, white rounded cards, subtle
+  shadows, a white left sidebar and one blue accent.
+- **Font:** Plus Jakarta Sans 400/500/600/700/800, loaded in `index.html` from Google Fonts with
+  the system font stack as fallback.
+- **Type scale:**
+  - Page titles 32px/800 with letter-spacing -0.02em.
+  - Card titles 20px/800.
+  - Body 15px.
+- **Icons:** inline stroke SVG components (2px stroke, round caps) in `src/components/icons/`.
+  `lucide-react` is not installed, so do not add it without asking. Never use emoji.
+
+## Design tokens (`src/styles/tokens.css`)
+
+Never hardcode hex values in components. Import `tokens.css` first in `src/main.tsx`.
 
 ```css
 :root {
-  --color-bg: #f2f4f9;            /* fondo de la app */
-  --color-surface: #ffffff;       /* tarjetas, sidebar */
-  --color-surface-muted: #f6f7fb; /* filas de tabla, inputs */
-  --color-text: #111827;
-  --color-muted: #5f6b7a;
-  --color-border: #e2e6ee;
-  --color-ink: #141b2d;           /* pill de filtro activa */
-  --color-primary: #2f5bea;
-  --color-primary-hover: #2449c4;
-  --color-primary-soft: #e8eefd;  /* date chip, avatar, item activo del menú */
-  --color-success: #1b7a3d;
-  --color-success-bg: #e7f6ec;
-  --color-warning: #b45309;       /* "Full · 12 waiting", número de waitlist */
-  --color-warning-bg: #fdf1e1;
-  --color-warning-bar: #d97706;   /* barra de ocupación llena */
-  --color-danger: #c62828;
-  --color-danger-bg: #fdecec;
-  --radius-sm: 10px;              /* botones, inputs */
-  --radius: 16px;                 /* tarjetas */
-  --radius-lg: 28px;              /* panel azul del login */
-  --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --color-bg: #F2F4F9;
+  --color-surface: #FFFFFF;
+  --color-surface-alt: #F7F8FC;
+  --color-border: #E3E7F0;
+  --color-border-strong: #D6DCE8;
+  --color-text: #141A2E;
+  --color-text-muted: #4A526A;
+  --color-accent: #2F5BEA;
+  --color-accent-text: #2449C9;
+  --color-accent-soft: #EAF0FF;
+  --color-avatar: #DCE5FF;
+  --color-danger: #B42318;
+  --color-focus: #B9C9FF;
+
+  --status-scheduled-bg: #EAF0FF;
+  --status-scheduled-fg: #2449C9;
+  --status-active-bg: #DFF6E7;    /* event ACTIVE, CONFIRMED, user ACTIVE */
+  --status-active-fg: #17703A;
+  --status-waitlist-bg: #FEF3E2;  /* WAITING_LIST, full events */
+  --status-waitlist-fg: #B45309;
+  --status-cancelled-bg: #FDE8E7;
+  --status-cancelled-fg: #B42318;
+  --status-finished-bg: #EEF0F5;  /* FINISHED, user INACTIVE */
+  --status-finished-fg: #4A526A;
+
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --shadow-card: 0 1px 2px rgba(20, 26, 46, 0.06);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
 }
 ```
 
-- **Tipografía:** Plus Jakarta Sans (Google Fonts, pesos 400/500/600/700/800) con fallback de
-  sistema. H1 de página ~2rem/800 con `letter-spacing: -0.02em`; H2 de tarjeta ~1.25rem/700;
-  subtítulos en `--color-muted`.
-- **Números grandes** (stat cards, date chip, 404): 700–800, `font-variant-numeric: tabular-nums`.
+### Migrating from the current `src/index.css`
+
+| Old token | New token |
+| --- | --- |
+| `--color-primary` | `--color-accent` |
+| `--color-primary-hover` | `--color-accent-text` (hover background) |
+| `--color-muted` | `--color-text-muted` |
+| `--color-success*` | `--status-active-*` |
+| `--color-warning*` | `--status-waitlist-*` |
+| `--color-danger-bg` | `--status-cancelled-bg` |
+| `--radius` | `--radius-md` |
+
+After the migration:
+
+- `index.css` keeps only the reset, base typography and focus styles.
+- Delete each old global class (`.card`, `.badge-*`, `.filter-tab`, …) once nothing uses it.
 
 ## Layout
 
-- **Sidebar fija a la izquierda** (~240 px, fondo `--color-surface`, borde derecho) que
-  reemplaza la navbar oscura actual:
-  - Arriba: logo (cuadrado redondeado `--color-primary` con icono de calendario blanco) +
-    "Event Platform" en 700.
-  - Menú: **Events** e **Users** con icono. Activo: fondo `--color-primary-soft`, texto
-    `--color-primary`, radio `--radius-sm`.
-  - Abajo: tarjeta de usuario con avatar de iniciales, `session.username` y el rol "Admin", y
-    un botón-icono de logout con `aria-label="Log out"`.
-- **Contenido:** fondo `--color-bg`, padding ~2.5rem, ancho máximo ~1200 px.
-- **Cabecera de página:** H1 + subtítulo a la izquierda y la acción principal a la derecha
-  ("+ New event", "+ New user").
-- **Breadcrumbs** (`Events / Tech Summit Medellín`) en lugar del `back-link` en las pantallas de
-  detalle y formulario. El primer tramo es un link en `--color-primary` y el último es texto muted.
-- **Responsive:** por debajo de ~900 px la sidebar pasa a barra superior; los grids de 3
-  columnas bajan a 1 y las tablas hacen scroll horizontal. No debe haber scroll horizontal de
-  página a 375 px.
+- **AppShell:** the current `src/components/Layout.tsx`, restyled. It keeps `<Outlet />`,
+  `useAuth()` and `logout()`.
+  - White sidebar, 240px wide, containing the logo (accent rounded square with a calendar icon
+    and "Event Platform") and the nav (Events, Users).
+  - Active nav item: accent-soft background, accent-text color, bold.
+  - At the bottom, a user card: Avatar with the initials of `session.username`, the username,
+    the caption "Admin" and an icon button `aria-label="Sign out"`.
+- **Content:** max-width 1080px, padding 32px 40px. Detail and form pages show a breadcrumb
+  ("Events / Tech Summit Medellín") instead of the current `back-link`.
+- **Below 768px:**
+  - The sidebar becomes a top bar.
+  - Grids go to 1 column.
+  - Tables scroll horizontally inside their card.
+  - There is no page-level horizontal scroll at 375px.
+- **Auth pages (login):** no sidebar. Split screen with the accent panel on the left and the
+  form on the right. On mobile the panel stacks on top.
 
-## Componentes
+### Route changes
 
-- **Card:** `--color-surface`, `--radius`, `--shadow`, padding 1.5–2rem y sin borde visible.
-- **Botones:** radio `--radius-sm`, peso 600.
-  - Primario: relleno `--color-primary`.
-  - Secundario ("Edit", "Cancel", "View"): blanco con borde `--color-border`.
-  - Peligro ("Deactivate"): blanco con texto y borde `--color-danger`.
-  - Los botones con "+" llevan icono.
-- **Filter pills:** completamente redondeadas. Activa: relleno `--color-ink` y texto blanco.
-  Inactiva: blanco con borde. Pueden llevar contador: `Confirmed · 87`.
-- **Search input:** icono de lupa a la izquierda dentro del input y radio `--radius-sm`.
-- **Badges de estado:** pill con fondo suave y texto en Title Case, nunca el enum crudo.
+These are the only route changes. Every URL that works today still works.
 
-  | Enum | Texto | Color |
+1. **404:** move `<Route path="*">` out of the `RequireAuth` layout so the page renders on its
+   own, like 03-not-found.png.
+2. **User detail and edit:**
+   - `/users/:id` becomes the detail page (09).
+   - The edit form moves to a new route, `/users/:id/edit`, remounted with `key={id}` the same
+     way as `EventEditRoute`.
+   - Update every link that pointed to `/users/:id` to edit a user.
+
+## Components (`src/components`, CSS modules)
+
+- **Button:**
+  - Variants: primary (accent background, white text), secondary (white, border-strong) and
+    danger-outline (white, danger text and border).
+  - Min height 44px, radius 12px, weight 600–700.
+  - Can render as `<Link>` for navigation.
+- **StatusBadge:** replaces the one in `Feedback.tsx`. Pill, 12px/700, always shows the label as
+  text.
+
+  | Value | Label | Tokens |
   | --- | --- | --- |
-  | Event `SCHEDULED` | Scheduled | primary sobre primary-soft |
-  | Event `ACTIVE` | Active | success |
-  | Event `FINISHED` | Finished | muted sobre gris `#eceff3` |
-  | Event `CANCELLED` | Cancelled | danger |
-  | Registration `CONFIRMED` | Confirmed | success |
-  | Registration `WAITING_LIST` | Waitlisted | warning |
-  | Registration `CANCELLED` | Cancelled | danger |
-  | User `ACTIVE` | Active | success |
-  | User `INACTIVE` | Inactive | muted sobre gris (no rojo) |
+  | Event `SCHEDULED` | Scheduled | `--status-scheduled-*` |
+  | Event `ACTIVE` | Active | `--status-active-*` |
+  | Event `FINISHED` | Finished | `--status-finished-*` |
+  | Event `CANCELLED` | Cancelled | `--status-cancelled-*` |
+  | Registration `CONFIRMED` | Confirmed | `--status-active-*` |
+  | Registration `WAITING_LIST` | Waitlisted | `--status-waitlist-*` |
+  | Registration `CANCELLED` | Cancelled | `--status-cancelled-*` |
+  | User `ACTIVE` | Active | `--status-active-*` |
+  | User `INACTIVE` | Inactive | `--status-finished-*` |
 
-- **Date chip:** cuadrado redondeado (radio 12 px) con fondo `--color-primary-soft`. Mes abreviado
-  en mayúsculas pequeñas con letter-spacing (`NOV`) y día con 2 dígitos en 800 (`05`), ambos en
-  `--color-primary`. Fórmalo con `toLocaleDateString('en-US', …)` desde `startDate`.
-- **Avatar de iniciales:** círculo `--color-primary-soft` con iniciales en `--color-primary`
-  (primeras letras de las dos primeras palabras del nombre).
-- **Tablas:** cabecera en mayúsculas, 0.75rem, letter-spacing, `--color-muted` y sin fondo.
-  Cada fila es un bloque redondeado `--color-surface-muted` separado por ~8 px de espacio en
-  lugar de líneas.
-- **Stat card:** etiqueta muted arriba y número grande debajo, con una línea de contexto
-  opcional en color semántico.
-- **Barra de ocupación:** track gris claro y relleno `--color-primary`. Cuando
-  `registeredCount >= capacity` el relleno es `--color-warning-bar`, no rojo.
-- **Donut de ocupación:** SVG con dos `circle` y `stroke-dasharray`; el porcentaje va al lado,
-  en 800.
-- **Formularios:**
-  - Labels en 600 y asterisco rojo en los obligatorios.
-  - Inputs con fondo `--color-surface-muted` y borde `--color-border`.
-  - Error: borde `--color-danger` y mensaje rojo debajo. Ayuda: texto muted debajo.
-  - Pie con separador y botones a la derecha ("Cancel" secundario + acción primaria).
-- **Callout de aviso:** fondo `--color-warning-bg`, texto `--color-warning` y la primera palabra
-  en negrita ("**Editing:** …").
+- **Card:** surface background, radius-xl, shadow-card, padding 24–28px.
+- **StatTile:** label (13px, muted) + big number (28–36px/800, `tabular-nums`) + optional
+  caption.
+- **OccupancyRing:** SVG donut with the track in the border color and the value in the accent.
+  Uses `role="img"` and an `aria-label` with the percentage.
+- **ProgressBar:** 8px track.
+  - Fill: accent by default; amber (`--status-waitlist-fg`) when
+    `registeredCount >= capacity`; gray when the event is closed and not full.
+  - Replaces the current `<progress>`.
+- **PillTabs:** the active pill is filled with `--color-text` and has white text; the others are
+  outlined. Each pill is a `button` with `aria-pressed`. Pills can show a count:
+  `Confirmed · 87`.
+- **DataRow:** rounded row (radius 14px) on surface-alt, with an 8px gap between rows instead
+  of borders. Column headers are uppercase, 12px, letter-spaced and muted.
+- **Avatar:** circle with initials (first letter of the first two words) on `--color-avatar`,
+  in accent-text. Sizes sm (list rows) and lg (detail header).
+- **DateTile:** rounded square on accent-soft with the month in small caps (`NOV`) and the
+  2-digit day (`05`). Build it from `startDate` with `toLocaleDateString('en-US', …)` and reuse
+  `src/utils/dates.ts`.
+- **FormField:** restyle the existing component: label + input + hint + error.
+- **Alert:**
+  - Variants: error (cancelled tokens), warning (waitlist tokens) and success (active tokens).
+    Error uses `role="alert"`; success uses `role="status"`.
+  - Keep the logic of `ErrorAlert` (ApiError → message + list of `details`) and
+    `SuccessAlert`.
+- **ConfirmPanel:** inline confirmation with a title, text, a "Keep as is" button and the
+  action button.
+  - Replaces `window.confirm` in `EventDetailPage` (finish or cancel an event) and
+    `RegistrationsCard` (cancel a registration).
+  - Also used for "Deactivate" on the user detail page.
+- **EmptyState, Spinner, SearchInput:** SearchInput has a search icon and a visually hidden
+  `<label>`.
 
-## Pantallas
+## Screens
 
-- **Login (01):** dos columnas.
-  - Izquierda: panel `--color-primary` con `--radius-lg`, logo, titular "Every seat, accounted
-    for.", subtítulo y una tarjeta de ejemplo abajo (puramente decorativa).
-  - Derecha: "Welcome back" / "Sign in to manage your events.", campos y botón "Sign in" de
-    ancho completo.
-  - El campo es **Username**, no Email, porque la API recibe `username`.
-  - El botón "Show" del password es solo de frontend y se permite.
-  - Omite "Forgot password?" y "Create an attendee account".
-  - En móvil se oculta el panel azul.
-- **404 (03):** tarjeta centrada con chip `ERR / 404` (estilo date chip, más grande), título
-  "This page has no seats", texto y botones "Back to events" (primario) y "Sign in" (secundario,
-  solo sin sesión).
-- **Events (04):**
-  - Cabecera "Events" / "Create events and follow their availability in real time.".
-  - Filter pills (All, Scheduled, Active, Finished, Cancelled) y buscador por nombre, ambos
-    filtrando en cliente.
-  - Grid de tarjetas (3 columnas): date chip, badge arriba a la derecha, nombre, fecha
-    (`Nov 28, 2026 · 6:00 PM`, o rango si dura varios días), barra de ocupación y
-    `X / Y registered`. A la derecha: "N seats left" en primary; "Full" en warning si está
-    lleno; "Closed" si está `FINISHED` o `CANCELLED`.
-  - El listado no trae `waitlistCount`: no hagas una llamada a availability por tarjeta solo
-    para mostrar "· 12 waiting".
-  - La tarjeta completa enlaza al detalle.
-- **Event detail (05):**
-  - Tarjeta cabecera con date chip, nombre + badge, rango de fechas · `Capacity N`, y acciones
-    "Edit", los botones de cambio de estado válidos y "+ Register user".
-  - Debajo, 3 stat cards desde `availability`:
-    - Occupancy: donut + %.
-    - Seats available: número en primary y "Accepting registrations" en success o el motivo
-      en muted.
-    - Waitlist: número en warning y "Promoted automatically".
-  - Después, la tarjeta "Registrations" con pills con contador por estado y filas con avatar,
-    nombre, email, badge, fecha y "Cancel".
-- **Event form (06):**
-  - Breadcrumb, título ("New event" / "Edit event") y subtítulo "The event starts as Scheduled
-    with 0 registrations." (solo al crear).
-  - Formulario en tarjeta: Name, Description, Start date + End date en 2 columnas y Capacity
-    con la ayuda "Must be greater than 0.".
-  - Columna lateral con la tarjeta "Good to know" (lista con checks: registrations close when
-    the event starts, full events go to the waitlist, raising capacity promotes people) y, solo
-    al editar, el callout de aviso sobre capacidad y estados.
-- **Users (07):**
-  - Cabecera "Users" / "People who can register to events. Inactive users cannot register.".
-  - 3 stat cards: Total users, Active (número en success) e Inactive (número en muted).
-  - Tarjeta con buscador ("Search by name, email or document", en cliente), tabla NAME / EMAIL /
-    DOCUMENT / STATUS con avatar y "View", y pie "Showing X of Y" con Previous/Next. La
-    paginación es en cliente, porque la API devuelve la lista completa.
-- **User form (08) y user detail (09):**
-  - Tarjeta cabecera con avatar grande, nombre + badge, `email · Doc. 123`, "Edit" y
-    "Deactivate" (peligro) o "Activate" (primario) según el estado.
-  - Tarjeta "Events" con pills (All, Confirmed, Waitlisted, Cancelled) y tabla DATE (date chip) /
-    EVENT / STATUS / REGISTRATION / REGISTERED ON.
+### Login (01)
 
-## Fuera de alcance (pregunta antes)
+- **Accent panel:**
+  - Logo, the title "Every seat, accounted for." and the text "Create events, manage
+    registrations and let the waitlist fill freed seats automatically."
+  - The bottom card is a static decorative illustration with `aria-hidden="true"`. No API
+    data is available before login.
+- **Form:**
+  - Title "Welcome back" and subtitle "Sign in to manage your events."
+  - Fields: Username, and Password with a Show/Hide toggle button.
+  - A full-width "Sign in" button with a spinner while the request is pending.
+- **Session expired:** the session-expired notice is a warning Alert.
 
-El mockup 02 (registro de asistentes), "Forgot password?" y cualquier login de asistentes
-necesitan cambios en el backend que hoy no existen: los usuarios no tienen contraseña y el único
-login es el del admin. No los implementes ni simules en el frontend sin que el usuario lo pida
-explícitamente.
+### Not found (03)
 
-## Accesibilidad
+- A centered card with a tile reading "ERR / 404".
+- Title "This page has no seats" and the text "The page you are looking for does not exist or
+  was moved. Check the address or go back to the events."
+- Buttons: "Back to events" (primary link) and "Sign in" (secondary, shown only without a
+  session).
 
-- Contraste AA. No cambies `--color-muted` a un gris más claro.
-- Foco visible: `outline: 2px solid var(--color-primary)` con offset.
-- Los botones-icono llevan `aria-label`.
-- Las pills de filtro son `button` con `aria-pressed`.
-- El donut lleva `role="img"` y `aria-label` con el porcentaje.
-- Los cambios de carga y éxito usan `role="status"`.
+### Events list (04)
 
-## Verificación
+- **Header:**
+  - Title "Events" with the text "Create events and follow their availability in real time."
+  - "+ New event" on the right.
+- **Filters:** PillTabs All / Scheduled / Active / Finished / Cancelled and a SearchInput
+  "Search events" (by name). Both filter on the client.
+- **Cards:** a 3-column grid. Each card links to `/events/:id` and shows:
+  - a DateTile and a StatusBadge in the top-right corner;
+  - the name and a date line:
+    - same day: `Nov 28, 2026 · 6:00 PM`;
+    - multi-day: `Nov 20 — 21, 2026`;
+  - a ProgressBar and `X / Y registered`.
+- **Right-hand label on each card:**
+  - "Closed" for `FINISHED` or `CANCELLED`;
+  - otherwise "Full" in waitlist-fg when the event is full;
+  - otherwise "N seats left" in accent-text.
+- **Empty state:** when there are no events or no matches.
 
-Desde `../frontend`:
+### Event detail (05)
 
-1. `npm run build` (incluye `tsc -b`) y `npm run lint` sin errores.
-2. Levanta la API con el perfil test (ver `../frontend/README.md`) y `npm run dev`.
-3. Recorre cada pantalla tocada y compárala con su PNG a ~1280 px y a 375 px.
-4. Prueba los estados vacío, cargando, error y evento lleno.
+- **Breadcrumb:** Events / {name}.
+- **Header card:** DateTile, name + StatusBadge, `{start} — {end} · Capacity N`, and these
+  actions:
+  - "Edit" (secondary), hidden for `FINISHED` and `CANCELLED`;
+  - one button per entry in `NEXT_STATUSES[status]`: "Activate" (secondary), "Finish"
+    (secondary + ConfirmPanel), "Cancel event" (danger-outline + ConfirmPanel);
+  - "+ Register user" (primary), disabled when `!acceptingRegistrations`.
+- **Register user:** the button opens an inline panel with the existing user picker: users
+  without an active registration, same logic as today. When the event is full, show the
+  warning "The event is full: the user will join the waitlist."
+- **Stat tiles** (from availability):
+  - Occupancy: OccupancyRing + `min(registeredCount, capacity) / capacity` as %.
+  - Seats available: `availableSeats` in accent-text, with the caption "Accepting
+    registrations" (active fg) or "Registrations closed" (muted).
+  - Waitlist: `waitlistCount` in waitlist-fg, with the caption "Promoted automatically".
+- **Registrations card:**
+  - Title "Registrations" with PillTabs: "Confirmed · N" (default), "Waitlist · N" and
+    "Cancelled · N".
+  - Each DataRow shows an Avatar, `userName`, `userEmail`, a StatusBadge, `registrationDate`
+    (date only) and a "Cancel" button (secondary; only for `CONFIRMED` and `WAITING_LIST`).
+  - "Cancel" opens a ConfirmPanel and then calls DELETE. Afterwards, show a success Alert that
+    names the `promoted` user when there is one.
+  - Waitlist rows show their position (`#1`, `#2`, …) in list order: oldest first.
+
+### Event form (06)
+
+- **Header:**
+  - Breadcrumb: Events / New event, or Events / {name} / Edit.
+  - Title: "New event" or "Edit event".
+  - Create only: the subtitle "The event starts as Scheduled with 0 registrations."
+- **Form card:**
+  - Fields: Name*, Description, Start date* + End date* (`datetime-local`, 2 columns) and
+    Capacity* with the hint "Must be greater than 0."
+  - Footer with a divider, then "Cancel" + "Create event" / "Save changes".
+- **Client-side checks before submit** (they mirror the backend):
+  - end date after start date, with the error under End date: "End date must be after the
+    start date.";
+  - capacity > 0.
+- **Side column:**
+  - A "Good to know" card with checkmarks: "Registrations close automatically when the event
+    starts.", "When full, new registrations go to the waitlist." and "Raising capacity later
+    promotes people from the waitlist."
+  - Edit only: a warning Alert, "**Editing:** capacity cannot be lower than current
+    registrations, and finished or cancelled events cannot be edited."
+
+### Users list (07)
+
+- **Header:**
+  - Title "Users" with the text "People who can register to events. Inactive users cannot
+    register."
+  - "+ New user" on the right.
+- **Stat tiles** (computed from the list): Total users, Active (active fg) and Inactive (muted).
+- **Table card:**
+  - A SearchInput "Search by name, email or document".
+  - Columns NAME (Avatar + name), EMAIL, DOCUMENT and STATUS, plus a "View" link to
+    `/users/:id`.
+  - Footer "Showing X of Y" with Previous/Next. Pagination is client-side, 10 users per page.
+
+### User form (08)
+
+- **Header:**
+  - Breadcrumb: Users / New user, or Users / {name} / Edit.
+  - Title: "New user" or "Edit user".
+  - Create only: the subtitle "New users are created as Active."
+- **Fields:** Full name* (`name`), Email* (`email`) and Document number* (`document`).
+- **Errors:** a 409 goes in the top Alert; 400 `details` go under each field.
+- **Footer:** "Cancel" + "Create user" / "Save changes". When editing, keep the current PATCH
+  logic.
+
+### User detail (09)
+
+- **Breadcrumb:** Users / {name}.
+- **Header card:**
+  - A large Avatar, name + StatusBadge and `{email} · Doc. {document}`.
+  - Actions: "Edit" (→ `/users/:id/edit`), and "Deactivate" (danger-outline + ConfirmPanel)
+    or "Activate" (primary) depending on the status.
+- **Events card:**
+  - Title "Events" with PillTabs All / Confirmed / Waitlisted / Cancelled, filtered on the
+    client.
+  - Table columns: DATE (DateTile), EVENT (link to `/events/:eventId`), STATUS, REGISTRATION
+    and REGISTERED ON.
+  - Empty state: "This user has no registrations yet."
+
+## Forms
+
+- The label goes above the input (14px/600), with the required mark in the danger color.
+- Inputs are 48px high, with radius 12px, a border-strong border and a surface-alt
+  background.
+- Error state: a 1.5px danger border and `aria-invalid`, with the message below linked by
+  `aria-describedby`.
+- Backend 400 errors appear per field; backend 409 messages appear in an Alert at the top.
+- The submit button is disabled and shows a spinner while the request is pending.
+
+## Accessibility
+
+- Contrast meets WCAG AA. The focus ring is visible: `3px solid var(--color-focus)`.
+- Use real `<button>`, `<a href>` / `<Link>` and `<label for>` elements. Icon-only buttons get
+  an `aria-label`.
+- Status is always shown as text, never only as color. Errors use `role="alert"`.
+- Touch targets are at least 44px.
+
+## Security (mandatory, CSP compatible)
+
+There is no CSP today. These rules keep the app ready for `style-src 'self'`.
+
+- Use CSS modules only (`*.module.css`, supported natively by Vite). No `style` attributes, no
+  inline `<style>` and no runtime CSS-in-JS.
+- Drive dynamic visuals (progress bar, ring) through SVG attributes, such as the `width` of a
+  `<rect>` or `stroke-dasharray`, or through predefined classes. Never use `style={{}}`.
+- No `dangerouslySetInnerHTML`, `innerHTML` or `eval`. Render user data as text.
+- If a CSP is added later, Google Fonts needs `fonts.googleapis.com` (style) and
+  `fonts.gstatic.com` (font), or the font must be self-hosted.
+
+## Verification
+
+From `../frontend`:
+
+1. Run `npm run build` (it includes `tsc -b`) and `npm run lint`. Both must pass with no errors.
+2. Start the API from `event-platform/` with
+   `.\gradlew.bat bootTestRun --args="--spring.profiles.active=test"` (H2; user `admin`,
+   password `test-admin-password`), then run `npm run dev`.
+3. Compare every screen you touched with its PNG at about 1280px and at 375px. Check these
+   states: loading, empty, error, a full event, a closed event and an inactive user.
+4. Check that this grep returns nothing:
+   `grep -rnE "style=|dangerouslySetInnerHTML|innerHTML" src`. Also check that the only hex
+   colors are in `src/styles/tokens.css`.
 
 ## Commits
 
-Sigue el `CLAUDE.md` con el scope `frontend`, por ejemplo:
+Follow `CLAUDE.md`: Conventional Commits in English with the scope `frontend`, one commit per
+component or screen. For example:
 
-- `feat(frontend): add sidebar layout and design tokens`
+- `feat(frontend): add design tokens and app shell`
 - `feat(frontend): restyle events list as cards`
-
-Haz un commit por pantalla o pieza lógica.
