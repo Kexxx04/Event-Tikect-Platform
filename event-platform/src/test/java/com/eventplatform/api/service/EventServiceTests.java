@@ -54,12 +54,15 @@ class EventServiceTests {
     @Mock
     private RegistrationRepository registrationRepository;
 
+    @Mock
+    private WaitlistService waitlistService;
+
     private EventService eventService;
 
     @BeforeEach
     void setUp() {
         Clock clock = Clock.fixed(NOW.toInstant(ZoneOffset.UTC), ZoneOffset.UTC);
-        eventService = new EventService(eventRepository, registrationRepository, clock);
+        eventService = new EventService(eventRepository, registrationRepository, waitlistService, clock);
     }
 
     private Event storedEvent(EventStatus status, LocalDateTime startDate, int capacity, int registeredCount) {
@@ -252,6 +255,33 @@ class EventServiceTests {
         assertEquals(80, event.getCapacity());
         assertEquals(5, response.registeredCount());
         assertEquals(status, response.status());
+    }
+
+    @Test
+    void increasingTheCapacityFillsTheNewSeatsFromTheWaitlist() {
+        Event event = lockedEvent(EventStatus.SCHEDULED);
+        event.setRegisteredCount(50);
+        when(waitlistService.fillFreeSeats(event)).thenAnswer(invocation -> {
+            assertEquals(80, event.getCapacity());
+            event.setRegisteredCount(53);
+            return List.of();
+        });
+
+        EventResponse response = eventService.update(1L, validUpdate(80));
+
+        assertEquals(80, response.capacity());
+        assertEquals(53, response.registeredCount());
+        verify(waitlistService).fillFreeSeats(event);
+    }
+
+    @Test
+    void doesNotTouchTheWaitlistWhenTheUpdateIsRejected() {
+        Event event = lockedEvent(EventStatus.ACTIVE);
+        event.setRegisteredCount(20);
+        UpdateEventRequest request = validUpdate(19);
+
+        assertThrows(BusinessRuleViolationException.class, () -> eventService.update(1L, request));
+        verifyNoInteractions(waitlistService);
     }
 
     @Test
