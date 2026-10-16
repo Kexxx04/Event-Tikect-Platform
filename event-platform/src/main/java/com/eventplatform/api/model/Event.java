@@ -1,5 +1,6 @@
 package com.eventplatform.api.model;
 
+import com.eventplatform.api.model.enums.EventStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -8,6 +9,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -38,21 +42,29 @@ public class Event {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private EventStatus status;
-
+    private EventStatus status = EventStatus.SCHEDULED;
+    private static final Logger log = LoggerFactory.getLogger(Event.class);
+    // Constructor vacío requerido por JPA
     public Event() {
     }
 
-    public Event(String name, String description, LocalDateTime startDate, LocalDateTime endDate, Integer capacity, EventStatus status) {
+    // Constructor para crear eventos
+    public Event(
+            String name,
+            String description,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Integer capacity,
+            EventStatus status
+    ) {
         this.name = name;
         this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
         this.capacity = capacity;
-        this.status = status;
         this.registeredCount = 0;
+        this.status = status != null ? status : EventStatus.SCHEDULED;
     }
-
     public Long getId() {
         return id;
     }
@@ -115,5 +127,82 @@ public class Event {
 
     public void setStatus(EventStatus status) {
         this.status = status;
+    }
+
+    public boolean validateForPublication() throws Exception {
+        boolean valid = true;
+
+        if (name == null) {
+            System.out.println("The event name is missing");
+            valid = false;
+        } else {
+            if (name.trim().isEmpty()) {
+                System.out.println("The event name is empty");
+                valid = false;
+            } else {
+                if (name.length() < 3) {
+                    System.out.println("The event name is too short");
+                    valid = false;
+                }
+            }
+        }
+
+        if (description != null) {
+            if (description.length() > 1000) {
+                System.out.println("The description is too long");
+                valid = false;
+            }
+        }
+
+        if (startDate == null) {
+            System.out.println("The start date is missing");
+            valid = false;
+        } else {
+            if (startDate.isBefore(LocalDateTime.now())) {
+                System.out.println("The start date is in the past");
+                valid = false;
+            }
+        }
+
+        if (endDate == null) {
+            System.out.println("The end date is missing");
+            valid = false;
+        } else {
+            if (startDate != null && !endDate.isAfter(startDate)) {
+                System.out.println("The end date must be after the start date");
+                valid = false;
+            }
+        }
+
+        if (capacity == null) {
+            System.out.println("The capacity is missing");
+            valid = false;
+        } else {
+            if (capacity <= 0) {
+                System.out.println("The capacity must be positive");
+                valid = false;
+            }
+        }
+
+        if (registeredCount == null || registeredCount < 0) {
+            log.warn("The registered count must be non-negative");
+            valid = false;
+        } else {
+            if (capacity != null && registeredCount > capacity) {
+                System.out.println("The registered count exceeds capacity");
+                valid = false;
+            }
+        }
+
+        if (status == null) {
+            System.out.println("The event status is missing");
+            valid = false;
+        }
+
+        if (!valid) {
+            throw new Exception("The event is not valid for publication");
+        }
+
+        return true;
     }
 }

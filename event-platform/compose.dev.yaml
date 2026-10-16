@@ -1,0 +1,23 @@
+# Desarrollo: solo PostgreSQL. Ejecuta la API desde IntelliJ o Gradle.
+# Uso: docker compose -f compose.dev.yaml up -d
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: event-platform-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-event_platform}
+      POSTGRES_USER: ${POSTGRES_USER:?Define POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - event-platform-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  event-platform-postgres-data:

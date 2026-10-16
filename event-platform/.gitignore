@@ -1,4 +1,8 @@
 HELP.md
+.env
+.env.*
+!.env.example
+!.env.docker.example
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar

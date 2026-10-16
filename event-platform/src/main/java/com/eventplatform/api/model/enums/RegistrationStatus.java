@@ -1,4 +1,4 @@
-package com.eventplatform.api.model;
+package com.eventplatform.api.model.enums;
 
 public enum RegistrationStatus {
     CONFIRMED,
