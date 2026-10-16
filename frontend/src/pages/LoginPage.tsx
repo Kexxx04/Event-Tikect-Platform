@@ -2,8 +2,14 @@ import { useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { useAuth } from '../auth/AuthContext'
+import { Alert } from '../components/Alert'
+import { Button } from '../components/Button'
 import { ErrorAlert } from '../components/ErrorAlert'
+import { fieldA11y } from '../components/fieldA11y'
 import { FormField } from '../components/FormField'
+import { CalendarIcon } from '../components/icons'
+import { OccupancyRing } from '../components/OccupancyRing'
+import styles from './LoginPage.module.css'
 
 interface LoginForm {
   username: string
@@ -30,6 +36,7 @@ export function LoginPage() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [submitError, setSubmitError] = useState<unknown>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const target = redirectTarget(location.state)
 
@@ -65,40 +72,79 @@ export function LoginPage() {
   }
 
   return (
-    <main className="login-page">
-      <form className="card login-card" onSubmit={handleSubmit} noValidate>
-        <h1>Event Platform</h1>
-        <p className="login-subtitle">Sign in as administrator</p>
+    <div className={styles.page}>
+      <section className={styles.panel} aria-label="Event Platform">
+        <div className={styles.brand}>
+          <span className={styles.logo}>
+            <CalendarIcon size={24} />
+          </span>
+          Event Platform
+        </div>
 
-        {notice && !submitError && <div className="alert alert-warning">{notice}</div>}
-        <ErrorAlert error={submitError} fieldsShownInline={FORM_FIELDS} />
+        <div className={styles.pitch}>
+          <p className={styles.headline}>Every seat, accounted for.</p>
+          <p className={styles.tagline}>
+            Create events, manage registrations and let the waitlist fill freed seats automatically.
+          </p>
+        </div>
 
-        <FormField label="Username" htmlFor="username" error={fieldErrors.username} required>
-          <input
-            id="username"
-            value={form.username}
-            autoComplete="username"
-            onChange={(e) => updateField('username', e.target.value)}
-            aria-invalid={Boolean(fieldErrors.username)}
-            autoFocus
-          />
-        </FormField>
+        {/* Decorative preview: no event data is available before signing in. */}
+        <div className={styles.preview} aria-hidden="true">
+          <OccupancyRing percentage={87} size={56} />
+          <div className={styles.previewText}>
+            <span className={styles.previewTitle}>Live availability</span>
+            <span className={styles.previewLine}>Seats and waitlist, always in sync</span>
+          </div>
+        </div>
+      </section>
 
-        <FormField label="Password" htmlFor="password" error={fieldErrors.password} required>
-          <input
-            id="password"
-            type="password"
-            value={form.password}
-            autoComplete="current-password"
-            onChange={(e) => updateField('password', e.target.value)}
-            aria-invalid={Boolean(fieldErrors.password)}
-          />
-        </FormField>
+      <main className={styles.formSide}>
+        <form className={styles.form} onSubmit={handleSubmit} noValidate>
+          <h1 className={styles.title}>Welcome back</h1>
+          <p className={styles.subtitle}>Sign in to manage your events.</p>
 
-        <button type="submit" className="button-block" disabled={submitting}>
-          {submitting ? 'Signing in…' : 'Sign in'}
-        </button>
-      </form>
-    </main>
+          {notice && !submitError && <Alert tone="warning" title={notice} />}
+          <ErrorAlert error={submitError} fieldsShownInline={FORM_FIELDS} />
+
+          <FormField label="Username" htmlFor="username" error={fieldErrors.username} required>
+            <input
+              id="username"
+              value={form.username}
+              autoComplete="username"
+              placeholder="Your username"
+              onChange={(e) => updateField('username', e.target.value)}
+              {...fieldA11y('username', fieldErrors.username)}
+              autoFocus
+            />
+          </FormField>
+
+          <FormField label="Password" htmlFor="password" error={fieldErrors.password} required>
+            <div className={styles.password}>
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={form.password}
+                autoComplete="current-password"
+                onChange={(e) => updateField('password', e.target.value)}
+                {...fieldA11y('password', fieldErrors.password)}
+              />
+              <button
+                type="button"
+                className={styles.toggle}
+                onClick={() => setShowPassword((value) => !value)}
+                aria-pressed={showPassword}
+                aria-controls="password"
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
+          </FormField>
+
+          <Button type="submit" block loading={submitting} className={styles.submit}>
+            {submitting ? 'Signing in…' : 'Sign in'}
+          </Button>
+        </form>
+      </main>
+    </div>
   )
 }

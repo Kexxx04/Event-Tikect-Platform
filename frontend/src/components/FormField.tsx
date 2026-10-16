@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import styles from './FormField.module.css'
 
 interface FormFieldProps {
   label: string
@@ -9,17 +10,27 @@ interface FormFieldProps {
   children: ReactNode
 }
 
+/** Label + control + hint + error. Spread fieldA11y(...) on the control to link the messages. */
 export function FormField({ label, htmlFor, error, required = false, hint, children }: FormFieldProps) {
   return (
-    <div className={error ? 'field field-invalid' : 'field'}>
+    <div className={error ? `${styles.field} ${styles.invalid}` : styles.field}>
       <label htmlFor={htmlFor}>
         {label}
-        {required && <span className="required" aria-hidden="true"> *</span>}
+        {required && (
+          <span className={styles.required} aria-hidden="true">
+            {' '}
+            *
+          </span>
+        )}
       </label>
       {children}
-      {hint && !error && <p className="field-hint">{hint}</p>}
+      {hint && !error && (
+        <p className={styles.hint} id={`${htmlFor}-hint`}>
+          {hint}
+        </p>
+      )}
       {error && (
-        <p className="field-error" id={`${htmlFor}-error`}>
+        <p className={styles.error} id={`${htmlFor}-error`}>
           {error}
         </p>
       )}

@@ -1,0 +1,72 @@
+.page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--space-6) var(--space-4);
+}
+
+.card {
+  width: 100%;
+  max-width: 520px;
+  padding: 48px var(--space-10);
+  border-radius: 28px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+
+.code {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  width: 96px;
+  height: 96px;
+  border-radius: var(--radius-xl);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+  line-height: 1;
+}
+
+.codeLabel {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.codeNumber {
+  font-size: 34px;
+  font-weight: 800;
+}
+
+.title {
+  margin: var(--space-6) 0 0;
+  font-size: 30px;
+}
+
+.text {
+  margin: var(--space-3) auto 0;
+  max-width: 40ch;
+  color: var(--color-text-muted);
+  font-size: 16px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+@media (max-width: 767px) {
+  .card {
+    padding: var(--space-8) var(--space-5);
+  }
+
+  .title {
+    font-size: 24px;
+  }
+}

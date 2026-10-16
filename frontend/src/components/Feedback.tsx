@@ -1,29 +1,27 @@
 import type { ReactNode } from 'react'
+import { Alert } from './Alert'
+import styles from './Feedback.module.css'
+
+export function Spinner() {
+  return <span className={styles.spinner} aria-hidden="true" />
+}
 
 export function Loading({ label = 'Loading…' }: { label?: string }) {
   return (
-    <p className="loading" role="status">
-      <span className="spinner" aria-hidden="true" />
+    <p className={styles.loading} role="status">
+      <Spinner />
       {label}
     </p>
   )
 }
 
 export function EmptyState({ children }: { children: ReactNode }) {
-  return <div className="empty-state">{children}</div>
+  return <div className={styles.empty}>{children}</div>
 }
 
 export function SuccessAlert({ message }: { message: string | null }) {
   if (!message) {
     return null
   }
-  return (
-    <div className="alert alert-success" role="status">
-      {message}
-    </div>
-  )
-}
-
-export function StatusBadge({ status }: { status: string }) {
-  return <span className={`badge badge-${status.toLowerCase()}`}>{status}</span>
+  return <Alert tone="success" title={message} />
 }

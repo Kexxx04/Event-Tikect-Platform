@@ -6,10 +6,16 @@ import { EventDetailPage } from './pages/events/EventDetailPage'
 import { EventFormPage } from './pages/events/EventFormPage'
 import { EventsPage } from './pages/events/EventsPage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { UserDetailPage } from './pages/users/UserDetailPage'
 import { UserFormPage } from './pages/users/UserFormPage'
 import { UsersPage } from './pages/users/UsersPage'
 
-// Remount the form when the id changes so no state from the previous user survives.
+// Remount the page when the id changes so no state from the previous user survives.
+function UserDetailRoute() {
+  const { id } = useParams()
+  return <UserDetailPage key={id} />
+}
+
 function UserEditRoute() {
   const { id } = useParams()
   return <UserFormPage key={id} />
@@ -34,13 +40,15 @@ export default function App() {
         <Route index element={<Navigate to="/events" replace />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="users/new" element={<UserFormPage />} />
-        <Route path="users/:id" element={<UserEditRoute />} />
+        <Route path="users/:id" element={<UserDetailRoute />} />
+        <Route path="users/:id/edit" element={<UserEditRoute />} />
         <Route path="events" element={<EventsPage />} />
         <Route path="events/new" element={<EventFormPage />} />
         <Route path="events/:id" element={<EventDetailPage />} />
         <Route path="events/:id/edit" element={<EventEditRoute />} />
-        <Route path="*" element={<NotFoundPage />} />
       </Route>
+      {/* Outside RequireAuth and the app shell: unknown URLs show the 404 page with or without a session. */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }
