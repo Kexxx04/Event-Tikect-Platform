@@ -26,7 +26,12 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
         "spring.flyway.enabled=true",
-        "spring.jpa.hibernate.ddl-auto=validate"
+        "spring.jpa.hibernate.ddl-auto=validate",
+        // Test-only credentials and signing key.
+        "app.security.admin.username=admin",
+        "app.security.admin.password=postgres-test-password",
+        "app.security.jwt.secret=postgres-test-jwt-secret-with-32-plus-chars",
+        "app.security.jwt.expiration=PT1H"
 })
 class PostgresIntegrationTests {
     @Container
@@ -68,8 +73,21 @@ class PostgresIntegrationTests {
         String unique = UUID.randomUUID().toString();
         URI base = URI.create("http://localhost:" + port);
         try (HttpClient client = HttpClient.newHttpClient()) {
+            var login = client.send(HttpRequest.newBuilder(base.resolve("/api/auth/login"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(
+                            "{\"username\":\"admin\",\"password\":\"postgres-test-password\"}"))
+                    .build(), HttpResponse.BodyHandlers.ofString());
+            assertEquals(200, login.statusCode(), login.body());
+            String bearer = "Bearer " + login.body().replaceAll(".*\"token\"\\s*:\\s*\"([^\"]+)\".*", "$1");
+
+            var unauthenticated = client.send(HttpRequest.newBuilder(base.resolve("/api/users")).GET().build(),
+                    HttpResponse.BodyHandlers.ofString());
+            assertEquals(401, unauthenticated.statusCode());
+
             HttpRequest request = HttpRequest.newBuilder(base.resolve("/api/users"))
                     .header("Content-Type", "application/json")
+                    .header("Authorization", bearer)
                     .POST(HttpRequest.BodyPublishers.ofString("""
                             {"name":"Postgres Test", "email":"%s@example.com", "document":"%s"}
                             """.formatted(unique, unique)))
@@ -77,7 +95,7 @@ class PostgresIntegrationTests {
             var created = client.send(request, HttpResponse.BodyHandlers.ofString());
             assertEquals(201, created.statusCode(), created.body());
             URI location = base.resolve(created.headers().firstValue("Location").orElseThrow());
-            var retrieved = client.send(HttpRequest.newBuilder(location).GET().build(),
+            var retrieved = client.send(HttpRequest.newBuilder(location).header("Authorization", bearer).GET().build(),
                     HttpResponse.BodyHandlers.ofString());
             assertEquals(200, retrieved.statusCode());
             assertEquals(created.body(), retrieved.body());
