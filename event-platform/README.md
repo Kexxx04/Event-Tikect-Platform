@@ -142,6 +142,28 @@ docker compose -f compose.dev.yaml down
 
 Este comando conserva los datos en el volumen de Docker. `docker compose -f compose.dev.yaml down -v` también elimina el volumen y todos sus datos.
 
+## Autenticación
+
+Todos los endpoints de `/api/**` requieren un token JWT, excepto `POST /api/auth/login`.
+Hay una única cuenta de administrador, definida en `.env` (`ADMIN_USERNAME`, `ADMIN_PASSWORD`);
+`JWT_SECRET` (mínimo 32 caracteres) firma los tokens y `JWT_EXPIRATION` (por defecto `PT8H`) fija su vigencia.
+Si falta `ADMIN_PASSWORD` o `JWT_SECRET`, la API no arranca y el error indica qué variable definir.
+
+| Método | Ruta | Función | Respuesta |
+| --- | --- | --- | --- |
+| `POST` | `/api/auth/login` | Inicia sesión con `{"username","password"}` | `200` con `token`, `tokenType`, `expiresAt`, `username`; `401` si las credenciales no son válidas |
+| `GET` | `/api/auth/me` | Devuelve el usuario del token | `200`; `401` sin token |
+
+Sin token, o con un token inválido o expirado, la API responde `401` con el formato de error habitual.
+
+Obtén el token una vez por sesión de PowerShell y reutilízalo en los ejemplos siguientes:
+
+```powershell
+$body = @{ username = 'admin'; password = (Read-Host 'Contraseña del administrador') } | ConvertTo-Json
+$login = Invoke-RestMethod -Method Post -Uri "http://localhost:8080/api/auth/login" -ContentType "application/json" -Body $body
+$auth = "Authorization: Bearer $($login.token)"
+```
+
 ## Endpoints disponibles
 
 La ruta base es `/api/users`.
@@ -157,7 +179,7 @@ La ruta base es `/api/users`.
 ### 1. Crear un usuario
 
 ```powershell
-curl.exe -i -X POST "http://localhost:8080/api/users" `
+curl.exe -i -X POST "http://localhost:8080/api/users" -H $auth `
   -H "Content-Type: application/json" `
   -d '{"name":"Ada Lovelace","email":"ada@example.com","document":"12345"}'
 ```
@@ -179,13 +201,13 @@ El nombre, el correo y el documento son obligatorios. El correo se guarda en min
 ### 2. Listar usuarios
 
 ```powershell
-curl.exe "http://localhost:8080/api/users"
+curl.exe -H $auth "http://localhost:8080/api/users"
 ```
 
 ### 3. Consultar un usuario por ID
 
 ```powershell
-curl.exe "http://localhost:8080/api/users/1"
+curl.exe -H $auth "http://localhost:8080/api/users/1"
 ```
 
 ### 4. Actualizar parcialmente un usuario
@@ -193,7 +215,7 @@ curl.exe "http://localhost:8080/api/users/1"
 Solo es necesario enviar los campos que se quieran modificar:
 
 ```powershell
-curl.exe -X PATCH "http://localhost:8080/api/users/1" `
+curl.exe -X PATCH "http://localhost:8080/api/users/1" -H $auth `
   -H "Content-Type: application/json" `
   -d '{"name":"Ada Byron","email":"ada.byron@example.com"}'
 ```
@@ -203,7 +225,7 @@ Los campos permitidos son `name`, `email` y `document`.
 ### 5. Cambiar el estado de un usuario
 
 ```powershell
-curl.exe -X PATCH "http://localhost:8080/api/users/1/status" `
+curl.exe -X PATCH "http://localhost:8080/api/users/1/status" -H $auth `
   -H "Content-Type: application/json" `
   -d '{"status":"INACTIVE"}'
 ```

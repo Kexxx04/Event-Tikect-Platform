@@ -1,6 +1,9 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { useAuth } from '../auth/AuthContext'
 
 export function Layout() {
+  const { session, logout } = useAuth()
+
   return (
     <>
       <header className="navbar">
@@ -12,6 +15,16 @@ export function Layout() {
             <NavLink to="/users">Users</NavLink>
             <NavLink to="/events">Events</NavLink>
           </nav>
+          {session && (
+            <div className="navbar-user">
+              <span className="navbar-username" title="Signed in as">
+                {session.username}
+              </span>
+              <button type="button" className="button-ghost" onClick={logout}>
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </header>
       <main className="container page">

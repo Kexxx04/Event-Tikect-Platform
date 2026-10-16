@@ -1,5 +1,7 @@
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
+import { RequireAuth } from './auth/RequireAuth'
 import { Layout } from './components/Layout'
+import { LoginPage } from './pages/LoginPage'
 import { EventDetailPage } from './pages/events/EventDetailPage'
 import { EventFormPage } from './pages/events/EventFormPage'
 import { EventsPage } from './pages/events/EventsPage'
@@ -21,7 +23,14 @@ function EventEditRoute() {
 export default function App() {
   return (
     <Routes>
-      <Route element={<Layout />}>
+      <Route path="login" element={<LoginPage />} />
+      <Route
+        element={
+          <RequireAuth>
+            <Layout />
+          </RequireAuth>
+        }
+      >
         <Route index element={<Navigate to="/events" replace />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="users/new" element={<UserFormPage />} />

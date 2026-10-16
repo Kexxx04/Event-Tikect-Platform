@@ -21,6 +21,17 @@ Abre <http://localhost:5173>.
 `VITE_API_URL` en `.env` indica la URL de la API (por defecto `http://localhost:8080`).
 Si cambias `.env`, reinicia `npm run dev`.
 
+## Inicio de sesión
+
+Todas las pantallas requieren iniciar sesión como administrador en `/login`. El usuario y la
+contraseña son `ADMIN_USERNAME` y `ADMIN_PASSWORD` del archivo `../event-platform/.env`.
+
+- El token JWT se guarda en `sessionStorage`: sobrevive a recargas, pero se pierde al cerrar la pestaña.
+- Cada petición envía `Authorization: Bearer <token>`.
+- Si la API responde `401` (token expirado o inválido), la sesión se cierra y se vuelve al
+  login con el aviso "Your session has expired". También se cierra sola al llegar a `expiresAt`.
+- **Logout** (barra superior) borra el token.
+
 ## CORS
 
 La API solo acepta peticiones del navegador desde los orígenes de la propiedad
@@ -44,6 +55,7 @@ $env:CORS_ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:4173"
 
 | Ruta | Contenido |
 | --- | --- |
+| `/login` | Inicio de sesión del administrador (`POST /api/auth/login`); el resto de rutas redirige aquí sin sesión |
 | `/users` | Tabla de usuarios y botón **New user** |
 | `/users/new` | Formulario de creación (`POST /api/users`) |
 | `/users/:id` | Edición (`PATCH /api/users/{id}`) y **Activate/Deactivate** (`PATCH /api/users/{id}/status`) |
@@ -56,7 +68,8 @@ $env:CORS_ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:4173"
 
 ```
 src/
-  api/          client.ts (fetch + ApiError), users.ts, events.ts (tipos = DTOs del backend)
+  api/          client.ts (fetch + ApiError + token), auth.ts, users.ts, events.ts (tipos = DTOs del backend)
+  auth/         session.ts (sessionStorage), AuthContext/AuthProvider, RequireAuth
   components/   Layout, ErrorAlert, FormField, Feedback (loading, vacío, badges)
   hooks/        useLoader (carga con estados loading/error)
   pages/        users/, events/
