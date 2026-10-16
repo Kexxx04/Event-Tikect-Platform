@@ -31,7 +31,7 @@ está construida para Linux AMD64 (equipos Intel/AMD). No necesitas Java ni Grad
    docker load -i event-platform-images.tar
    ```
 
-3. Copia la plantilla y cambia `POSTGRES_PASSWORD` por una contraseña local:
+3. Copia la plantilla y cambia `POSTGRES_PASSWORD`, `ADMIN_PASSWORD` (contraseña para iniciar sesión como `admin`) y `JWT_SECRET` (mínimo 32 caracteres aleatorios):
 
    ```powershell
    Copy-Item .env.docker.example .env
