@@ -677,12 +677,39 @@ Selecciona `event-platform/azure-pipelines.yml` al crear el pipeline. Se ejecuta
 Maven y .NET.
 
 Pasos: verificar Java y Gradle → `clean build jacocoTestReport` → `acceptanceTest` → publicar
-resultados JUnit/Cucumber → publicar cobertura → `pitest` → SonarQube (opcional) → publicar el
-artefacto `quality-reports` con todos los reportes.
+resultados JUnit/Cucumber → publicar cobertura → `pitest` → SonarQube (opcional) → OWASP ZAP
+Baseline (activado por defecto) → publicar el artefacto `quality-reports` con todos los reportes.
 
 SonarQube es opcional: crea `SONAR_TOKEN` como variable secreta y `SONAR_HOST_URL` como variable, y
 marca `runSonar` al ejecutar el pipeline manualmente. `localhost` apunta al agente, no a tu equipo.
-El pipeline no ejecuta `postgresTest`, por eso el agente no necesita Docker.
+El pipeline no ejecuta `postgresTest`.
+
+### Análisis de seguridad con OWASP ZAP
+
+Los pasos `ZAP 01` a `ZAP 07` hacen un análisis pasivo (DAST) de la API en ejecución:
+
+1. Levantan un PostgreSQL desechable en Docker (contraseña aleatoria, puerto aleatorio en `127.0.0.1`).
+2. Arrancan el bootJar con el perfil `zap` (`application-zap.properties`) en el puerto `8081`, con un
+   administrador `zap_admin` y un `JWT_SECRET` aleatorios en cada ejecución (ocultos en el log).
+3. Usan `POST /api/auth/login` como chequeo de salud (es el único endpoint público), crean un evento de
+   prueba y pasan el token a ZAP con `ZAP_AUTH_HEADER_VALUE`, limitado al host `host.docker.internal`.
+4. Ejecutan `zap-baseline.py` contra `http://host.docker.internal:8081/api/events` (spider de 2 minutos;
+   las advertencias no fallan el pipeline por `-I`).
+5. Publican el artefacto `reporte-seguridad-zap` y siempre detienen la API y borran el contenedor.
+
+El artefacto contiene `reporte-zap.html`, `reporte-zap.json`, `ejecucion.txt` (build, commit, fecha y
+códigos HTTP que recibió ZAP), `acceso-http.log` (cada petición y su código) y los logs de la API.
+Si ZAP solo recibe `401`, el paso 05 deja una advertencia: el token no llegó y el análisis no es válido.
+
+Requisitos del agente: Docker Desktop abierto con contenedores Linux y el agente ejecutándose con un
+usuario que tenga acceso a Docker. Si Windows pide permiso de firewall para Java en el puerto `8081`,
+permite redes privadas. Desmarca `runZap` para ejecutar el pipeline sin Docker. En el paso 04 puede
+aparecer `The STDIO streams did not close within 10 seconds`: es normal, la API sigue en segundo plano.
+
+Alcance: como la API solo responde JSON, el spider encuentra pocas rutas (`/api/events`, `/`, `/api`,
+`/robots.txt`, `/sitemap.xml`). En la prueba local (ZAP 2.17) el resultado fue 0 alertas y 61 reglas
+`PASS`: Spring Security ya envía `X-Content-Type-Options`, `X-Frame-Options` y `Cache-Control`, y la
+regla de CSP solo aplica a respuestas HTML.
 
 ## Construir la aplicación
 
