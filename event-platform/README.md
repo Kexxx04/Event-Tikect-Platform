@@ -695,7 +695,8 @@ Los pasos `ZAP 01` a `ZAP 07` hacen un análisis pasivo (DAST) de la API en ejec
    prueba y pasan el token a ZAP con `ZAP_AUTH_HEADER_VALUE`, limitado al host `host.docker.internal`.
 4. Ejecutan `zap-baseline.py` contra `http://host.docker.internal:8081/api/events` (spider de 2 minutos;
    las advertencias no fallan el pipeline por `-I`).
-5. Publican el artefacto `reporte-seguridad-zap` y siempre detienen la API y borran el contenedor.
+5. Siempre detienen la API y borran el contenedor, y después publican el artefacto
+   `reporte-seguridad-zap` (con la API corriendo, sus logs siguen abiertos y no se pueden subir).
 
 El artefacto contiene `reporte-zap.html`, `reporte-zap.json`, `ejecucion.txt` (build, commit, fecha y
 códigos HTTP que recibió ZAP), `acceso-http.log` (cada petición y su código) y los logs de la API.
