@@ -280,18 +280,13 @@ steps:
       env:
         ZAP_TOKEN: $(ZapAuthToken)
 
-    - task: PublishPipelineArtifact@1
-      displayName: 'ZAP 06 - Publicar evidencias'
-      condition: and(succeededOrFailed(), eq(variables['ZapDirReady'], 'true'))
-      inputs:
-        targetPath: '$(Build.ArtifactStagingDirectory)/zap'
-        artifact: 'reporte-seguridad-zap'
-        publishLocation: 'pipeline'
-
+    # Detener la API ANTES de publicar: mientras Java corre, sus logs siguen abiertos
+    # y PublishPipelineArtifact no puede leerlos.
     - powershell: |
         $procesoId = '$(AppPid)'
         if ($procesoId -match '^\d+$') {
           Stop-Process -Id ([int]$procesoId) -Force -ErrorAction SilentlyContinue
+          Wait-Process -Id ([int]$procesoId) -Timeout 30 -ErrorAction SilentlyContinue
           Write-Host "Aplicacion detenida (PID $procesoId)"
         }
         $db = '$(ZapDbContainer)'
@@ -301,7 +296,15 @@ steps:
         }
         $global:LASTEXITCODE = 0
       condition: always()
-      displayName: 'ZAP 07 - Detener aplicacion y base de laboratorio'
+      displayName: 'ZAP 06 - Detener aplicacion y base de laboratorio'
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'ZAP 07 - Publicar evidencias'
+      condition: and(succeededOrFailed(), eq(variables['ZapDirReady'], 'true'))
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/zap'
+        artifact: 'reporte-seguridad-zap'
+        publishLocation: 'pipeline'
 
   - task: PublishBuildArtifacts@1
     condition: succeededOrFailed()
