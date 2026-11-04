@@ -10,7 +10,7 @@ parameters:
     type: boolean
     default: false
   - name: runZap
-    displayName: Ejecutar OWASP ZAP Baseline (DAST pasivo)
+    displayName: Ejecutar OWASP ZAP API Scan (DAST pasivo)
     type: boolean
     default: true
 
@@ -27,7 +27,8 @@ variables:
   appPort: '8081'                          # puerto libre en el agente
   loginPath: '/api/auth/login'             # unico endpoint publico: sirve de chequeo de salud y entrega el JWT
   springProfile: 'zap'                     # perfil de laboratorio (application-zap.properties)
-  zapPath: '/api/events'                   # ruta desde la que ZAP empieza a explorar
+  apiDocsPath: '/v3/api-docs'              # contrato OpenAPI (solo con el perfil zap) que ZAP importa
+  zapSampleId: '10'                        # valor que ZAP pone en los parametros numericos de ruta
   zapImage: 'ghcr.io/zaproxy/zaproxy:stable'
   dbImage: 'postgres:16-alpine'
   dbName: 'eventplatform_zap'
@@ -103,10 +104,12 @@ steps:
         SONAR_HOST_URL: $(SONAR_HOST_URL)
 
   # =====================================================================
-  # ET0202 - Analisis pasivo de seguridad con OWASP ZAP Baseline
+  # ET0202 - Analisis pasivo de seguridad con OWASP ZAP API Scan
   # Requiere Docker Desktop abierto (contenedores Linux) en el agente.
   # La API exige JWT en todas las rutas menos el login, asi que ZAP se
   # autentica con un administrador de laboratorio creado en cada ejecucion.
+  # Un spider no descubre las rutas de una API JSON: ZAP importa el contrato
+  # OpenAPI de la API y llama a cada endpoint (GET, POST, PUT, PATCH, DELETE).
   # =====================================================================
   - ${{ if eq(parameters.runZap, true) }}:
     - powershell: |
@@ -216,39 +219,79 @@ steps:
         }
         Write-Host "##vso[task.setvariable variable=ZapAuthToken;issecret=true]$token"
 
-        # Un evento de prueba para que GET /api/events devuelva datos reales
-        # (de paso confirma que Flyway y JPA funcionan contra PostgreSQL).
+        # Datos de prueba (de paso confirman que Flyway y JPA funcionan contra PostgreSQL).
+        # ZAP rellena los parametros numericos de ruta ({id}, {eventId}, {userId}) con zapSampleId, asi que
+        # se crean eventos y usuarios hasta ese id y se inscribe a ese usuario en ese evento. Sin esto,
+        # casi todas las rutas responden 404 y ZAP solo analiza respuestas de error.
         $cabeceras = @{ Authorization = "Bearer $token" }
+        $api = 'http://127.0.0.1:$(appPort)/api'
+        $idZap = [long]'$(zapSampleId)'
         $inicio = (Get-Date).AddDays(30)
-        $evento = @{
-          name        = 'ZAP lab event'
-          description = 'Created by the pipeline for the OWASP ZAP baseline scan'
-          startDate   = $inicio.ToString("yyyy-MM-dd'T'HH:mm:ss")
-          endDate     = $inicio.AddHours(2).ToString("yyyy-MM-dd'T'HH:mm:ss")
-          capacity    = 10
-        } | ConvertTo-Json
-        Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:$(appPort)/api/events' -Headers $cabeceras `
-          -ContentType 'application/json' -Body $evento | Out-Null
-        $eventos = Invoke-RestMethod -Uri 'http://127.0.0.1:$(appPort)$(zapPath)' -Headers $cabeceras
-        Write-Host ('Aplicacion lista. Eventos en {0}: {1}' -f '$(zapPath)', @($eventos).Count)
-      displayName: 'ZAP 04 - Iniciar aplicacion, autenticar y crear datos de prueba'
+        $evento = $null
+        for ($n = 1; $n -le $idZap -and $evento.id -ne $idZap; $n++) {
+          $datosEvento = @{
+            name        = "ZAP lab event $n"
+            description = 'Created by the pipeline for the OWASP ZAP API scan'
+            startDate   = $inicio.ToString("yyyy-MM-dd'T'HH:mm:ss")
+            endDate     = $inicio.AddHours(2).ToString("yyyy-MM-dd'T'HH:mm:ss")
+            capacity    = 10
+          } | ConvertTo-Json
+          $evento = Invoke-RestMethod -Method Post -Uri "$api/events" -Headers $cabeceras `
+            -ContentType 'application/json' -Body $datosEvento
+        }
+        $usuario = $null
+        for ($n = 1; $n -le $idZap -and $usuario.id -ne $idZap; $n++) {
+          $datosUsuario = @{ name = "ZAP lab user $n"; email = "zap-user-$n@example.com"; document = "ZAP-$n" } |
+            ConvertTo-Json
+          $usuario = Invoke-RestMethod -Method Post -Uri "$api/users" -Headers $cabeceras `
+            -ContentType 'application/json' -Body $datosUsuario
+        }
+        if ($evento.id -eq $idZap -and $usuario.id -eq $idZap) {
+          $registro = Invoke-RestMethod -Method Post -Uri "$api/events/$idZap/registrations" -Headers $cabeceras `
+            -ContentType 'application/json' -Body (@{ userId = $idZap } | ConvertTo-Json)
+          Write-Host ('Datos de prueba: evento {0}, usuario {0} e inscripcion {1}' -f $idZap, $registro.status)
+        } else {
+          Write-Host ('##vso[task.logissue type=warning]No hay evento y usuario con id {0} (ultimos ids: {1} y {2}): ZAP recibira 404 en las rutas con id.' -f $idZap, $evento.id, $usuario.id)
+        }
+        $eventos = Invoke-RestMethod -Uri "$api/events" -Headers $cabeceras
+        Write-Host ('Aplicacion lista. Eventos en /api/events: {0}' -f @($eventos).Count)
+
+        # Contrato OpenAPI con todas las rutas y metodos (tambien exige el JWT). ZAP 05 lo importa
+        # desde esta carpeta y queda publicado como evidencia del alcance del analisis.
+        $contratoArchivo = Join-Path $dir 'openapi.json'
+        Invoke-WebRequest -Uri 'http://127.0.0.1:$(appPort)$(apiDocsPath)' -Headers $cabeceras `
+          -UseBasicParsing -OutFile $contratoArchivo
+        $contrato = Get-Content $contratoArchivo -Raw -Encoding UTF8 | ConvertFrom-Json
+        $metodosHttp = 'get', 'post', 'put', 'patch', 'delete'
+        $rutas = @($contrato.paths.PSObject.Properties)
+        $operaciones = 0
+        foreach ($ruta in $rutas) {
+          $operaciones += @($ruta.Value.PSObject.Properties | Where-Object { $metodosHttp -contains $_.Name }).Count
+        }
+        if ($operaciones -eq 0) { throw 'El contrato OpenAPI ($(apiDocsPath)) no tiene operaciones.' }
+        Write-Host "##vso[task.setvariable variable=ZapOperaciones]$operaciones"
+        Write-Host ('Contrato OpenAPI: {0} rutas y {1} operaciones' -f $rutas.Count, $operaciones)
+      displayName: 'ZAP 04 - Iniciar aplicacion, autenticar y descargar contrato OpenAPI'
       env:
         ZAP_DB_PASSWORD: $(ZapDbPassword)
 
     - powershell: |
         $dir    = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'zap'
         $mount  = "${dir}:/zap/wrk:rw"
-        $target = 'http://host.docker.internal:$(appPort)$(zapPath)'
+        $target = 'http://host.docker.internal:$(appPort)'
         # ZAP agrega "Authorization: Bearer <token>" a cada peticion enviada a ese host.
         $env:ZAP_AUTH_HEADER_VALUE = "Bearer $env:ZAP_TOKEN"
         $env:ZAP_AUTH_HEADER_SITE  = 'host.docker.internal'
-        Write-Host "Objetivo ZAP: $target (autenticado como $(adminUser))"
+        Write-Host "Objetivo ZAP: $target, $(ZapOperaciones) operaciones de openapi.json (autenticado como $(adminUser))"
         # Las lineas que ya tiene el registro de acceso son de ZAP 04; las nuevas seran de ZAP.
         $acceso = Get-ChildItem $dir -Filter 'acceso-http*.log' | Select-Object -First 1
         $lineasPrevias = 0
         if ($acceso) { $lineasPrevias = @(Get-Content $acceso.FullName).Count }
+        # -t: contrato que ZAP 04 guardo en la carpeta montada.
+        # -O: el contrato apunta a 127.0.0.1, pero desde Docker la API se alcanza por host.docker.internal.
+        # -S: modo seguro, sin escaneo activo (solo analisis pasivo de las respuestas).
         docker run --rm -e ZAP_AUTH_HEADER_VALUE -e ZAP_AUTH_HEADER_SITE -v "$mount" '$(zapImage)' `
-          zap-baseline.py -t $target -m 2 `
+          zap-api-scan.py -t /zap/wrk/openapi.json -f openapi -O $target -S `
           -r reporte-zap.html -J reporte-zap.json -I
         $codigo = $LASTEXITCODE
         $global:LASTEXITCODE = 0
@@ -258,25 +301,34 @@ steps:
         if (-not (Test-Path (Join-Path $dir 'reporte-zap.html'))) { throw 'No existe reporte-zap.html' }
         if (-not (Test-Path (Join-Path $dir 'reporte-zap.json'))) { throw 'No existe reporte-zap.json' }
 
-        # Resumen de las respuestas que recibio ZAP, segun el registro de acceso de Tomcat.
+        # Resumen de lo que envio y recibio ZAP, segun el registro de acceso de Tomcat.
         $acceso = Get-ChildItem $dir -Filter 'acceso-http*.log' | Select-Object -First 1
         $resumen = 'sin registro de acceso'
+        $resumenMetodos = 'sin registro de acceso'
         if ($acceso) {
-          # Formato: %t %a "%r" %s %b -> el codigo HTTP es el penultimo campo.
-          $codigos = @(Get-Content $acceso.FullName) | Select-Object -Skip $lineasPrevias |
-            ForEach-Object { ($_ -split ' ')[-2] } | Group-Object | Sort-Object Name
+          $lineasZap = @(Get-Content $acceso.FullName) | Select-Object -Skip $lineasPrevias
+          # Formato: %t %a "%r" %s %b -> el codigo HTTP es el penultimo campo y el metodo abre "%r".
+          $codigos = $lineasZap | ForEach-Object { ($_ -split ' ')[-2] } | Group-Object | Sort-Object Name
+          $metodos = $lineasZap | ForEach-Object { if ($_ -match '"([A-Z]+) ') { $Matches[1] } } |
+            Group-Object | Sort-Object Name
           $resumen = ($codigos | ForEach-Object { "$($_.Name)=$($_.Count)" }) -join ', '
+          $resumenMetodos = ($metodos | ForEach-Object { "$($_.Name)=$($_.Count)" }) -join ', '
           $total = ($codigos | Measure-Object -Property Count -Sum).Sum
           $no401 = ($codigos | Where-Object { $_.Name -ne '401' } | Measure-Object -Property Count -Sum).Sum
           if ($total -gt 0 -and -not $no401) {
             Write-Host '##vso[task.logissue type=warning]ZAP solo recibio 401: la autenticacion no funciono y el analisis cubrio solo respuestas de error.'
           }
+          if ($total -gt 0 -and -not ($metodos | Where-Object { $_.Name -ne 'GET' })) {
+            Write-Host '##vso[task.logissue type=warning]ZAP solo envio GET: no uso el contrato OpenAPI y el analisis no cubre las rutas de escritura.'
+          }
         }
         if (-not $resumen) { $resumen = 'ninguna' }
+        if (-not $resumenMetodos) { $resumenMetodos = 'ninguno' }
+        Write-Host "Metodos HTTP enviados por ZAP: $resumenMetodos"
         Write-Host "Respuestas HTTP a ZAP: $resumen"
-        "Build: $(Build.BuildNumber) | Id: $(Build.BuildId) | Rama: $(Build.SourceBranchName) | Commit: $(Build.SourceVersion) | Objetivo: $target | Autenticacion: JWT de $(adminUser) | Respuestas HTTP a ZAP: $resumen | Fecha: $(Get-Date -Format o)" |
+        "Build: $(Build.BuildNumber) | Id: $(Build.BuildId) | Rama: $(Build.SourceBranchName) | Commit: $(Build.SourceVersion) | Objetivo: $target | Contrato: openapi.json ($(ZapOperaciones) operaciones) | Autenticacion: JWT de $(adminUser) | Metodos HTTP de ZAP: $resumenMetodos | Respuestas HTTP a ZAP: $resumen | Fecha: $(Get-Date -Format o)" |
           Out-File (Join-Path $dir 'ejecucion.txt') -Encoding utf8
-      displayName: 'ZAP 05 - OWASP ZAP Baseline'
+      displayName: 'ZAP 05 - OWASP ZAP API Scan'
       env:
         ZAP_TOKEN: $(ZapAuthToken)
 
