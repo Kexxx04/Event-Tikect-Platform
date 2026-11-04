@@ -27,6 +27,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.CrossOriginResourcePolicyHeaderWriter.CrossOriginResourcePolicy;
 
 @Configuration
 @EnableConfigurationProperties(SecurityProperties.class)
@@ -44,6 +45,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Keeps the default security headers and adds Cross-Origin-Resource-Policy, so other sites
+                // cannot embed API responses. The frontend's CORS fetch requests are not affected by it.
+                .headers(headers -> headers.crossOriginResourcePolicy(corp -> corp
+                        .policy(CrossOriginResourcePolicy.SAME_ORIGIN)))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, LOGIN_PATH).permitAll()
                         .requestMatchers("/error").permitAll()
