@@ -224,7 +224,7 @@ sobre 100 cupos. Es decir, la prueba sí detecta los sobrecupos.
 | Framework | Spring Boot 4.1.1: Web MVC, Data JPA, Validation, Security, OAuth2 Resource Server (JWT) |
 | Base de datos | PostgreSQL 16, Flyway; H2 en memoria para pruebas |
 | Pruebas | JUnit 5, Mockito, MockMvc, Spring Security Test, Cucumber 7.34 (Gherkin), Testcontainers 2 |
-| Calidad | JaCoCo 0.8.14, PIT 1.19, SonarQube (plugin 7.3) |
+| Calidad | JaCoCo 0.8.14, PIT 1.19, SonarQube (plugin 7.3), OWASP ZAP API Scan con el contrato de springdoc 3.2 |
 | Contenedores | Docker, Docker Compose |
 | CI | Azure DevOps (`azure-pipelines.yml`) |
 | Frontend | Vite, React 19, TypeScript, React Router 7 (ver `../frontend/README.md`) |
@@ -678,7 +678,7 @@ Maven y .NET.
 
 Pasos: verificar Java y Gradle → `clean build jacocoTestReport` → `acceptanceTest` → publicar
 resultados JUnit/Cucumber → publicar cobertura → `pitest` → SonarQube (opcional) → OWASP ZAP
-Baseline (activado por defecto) → publicar el artefacto `quality-reports` con todos los reportes.
+API Scan (activado por defecto) → publicar el artefacto `quality-reports` con todos los reportes.
 
 SonarQube es opcional: crea `SONAR_TOKEN` como variable secreta y `SONAR_HOST_URL` como variable, y
 marca `runSonar` al ejecutar el pipeline manualmente. `localhost` apunta al agente, no a tu equipo.
@@ -692,25 +692,36 @@ Los pasos `ZAP 01` a `ZAP 07` hacen un análisis pasivo (DAST) de la API en ejec
 2. Arrancan el bootJar con el perfil `zap` (`application-zap.properties`) en el puerto `8081`, con un
    administrador `zap_admin` y un `JWT_SECRET` aleatorios en cada ejecución (ocultos en el log).
 3. Usan `POST /api/auth/login` como chequeo de salud (es el único endpoint público), crean un evento de
-   prueba y pasan el token a ZAP con `ZAP_AUTH_HEADER_VALUE`, limitado al host `host.docker.internal`.
-4. Ejecutan `zap-baseline.py` contra `http://host.docker.internal:8081/api/events` (spider de 2 minutos;
-   las advertencias no fallan el pipeline por `-I`).
+   prueba, descargan con el token el contrato OpenAPI (`/v3/api-docs`, con las 19 operaciones de la API)
+   y pasan el token a ZAP con `ZAP_AUTH_HEADER_VALUE`, limitado al host `host.docker.internal`.
+4. Ejecutan `zap-api-scan.py -f openapi -S` con ese contrato: ZAP llama a cada endpoint (GET, POST, PUT,
+   PATCH y DELETE) y analiza las respuestas. `-S` (modo seguro) omite el escaneo activo, así que el
+   análisis sigue siendo pasivo; `-O` cambia el servidor del contrato (`127.0.0.1`) por
+   `host.docker.internal`, y las advertencias no fallan el pipeline por `-I`.
 5. Siempre detienen la API y borran el contenedor, y después publican el artefacto
    `reporte-seguridad-zap` (con la API corriendo, sus logs siguen abiertos y no se pueden subir).
 
-El artefacto contiene `reporte-zap.html`, `reporte-zap.json`, `ejecucion.txt` (build, commit, fecha y
-códigos HTTP que recibió ZAP), `acceso-http.log` (cada petición y su código) y los logs de la API.
-Si ZAP solo recibe `401`, el paso 05 deja una advertencia: el token no llegó y el análisis no es válido.
+El artefacto contiene `reporte-zap.html`, `reporte-zap.json`, `openapi.json` (el contrato que usó ZAP),
+`ejecucion.txt` (build, commit, fecha, métodos HTTP que envió ZAP y códigos que recibió),
+`acceso-http.log` (cada petición y su código) y los logs de la API. El paso 05 deja una advertencia si
+ZAP solo recibe `401` (el token no llegó) o si solo envía `GET` (no usó el contrato): en ambos casos el
+análisis no es válido.
+
+El contrato OpenAPI lo genera springdoc (`springdoc-openapi-starter-webmvc-api`, sin Swagger UI). Está
+apagado por defecto (`springdoc.api-docs.enabled=false`), solo el perfil `zap` lo activa, siempre exige
+el JWT y se genera en OpenAPI 3.0 porque ZAP solo tiene soporte inicial para 3.1.
 
 Requisitos del agente: Docker Desktop abierto con contenedores Linux y el agente ejecutándose con un
 usuario que tenga acceso a Docker. Si Windows pide permiso de firewall para Java en el puerto `8081`,
 permite redes privadas. Desmarca `runZap` para ejecutar el pipeline sin Docker. En el paso 04 puede
 aparecer `The STDIO streams did not close within 10 seconds`: es normal, la API sigue en segundo plano.
 
-Alcance: como la API solo responde JSON, el spider encuentra pocas rutas (`/api/events`, `/`, `/api`,
-`/robots.txt`, `/sitemap.xml`). En la prueba local (ZAP 2.17) el resultado fue 0 alertas y 61 reglas
-`PASS`: Spring Security ya envía `X-Content-Type-Options`, `X-Frame-Options` y `Cache-Control`, y la
-regla de CSP solo aplica a respuestas HTML.
+Alcance: antes se usaba `zap-baseline.py`, pero su spider sigue enlaces HTML y la API solo responde
+JSON, así que encontraba 5 rutas GET (`/api/events`, `/`, `/api`, `/robots.txt`, `/sitemap.xml`). Esa
+prueba (ZAP 2.17) dio 0 alertas y 61 reglas `PASS`: Spring Security ya envía `X-Content-Type-Options`,
+`X-Frame-Options` y `Cache-Control`, y la regla de CSP solo aplica a respuestas HTML. Con el contrato,
+ZAP rellena los parámetros de ruta (`{id}`, `{eventId}`...) con valores de ejemplo, así que es normal
+ver respuestas `400` y `404`; las escrituras solo afectan a la base desechable.
 
 ## Construir la aplicación
 
@@ -784,5 +795,5 @@ event-platform/
 1. Corregir el healthcheck de Docker y la zona horaria del contenedor (problemas 1 y 2).
 2. Integrar `develop` en `main` antes de la entrega.
 3. Ejecutar `postgresTest` en un equipo o agente con Docker.
-4. Añadir documentación OpenAPI/Swagger.
+4. Publicar Swagger UI para el equipo (el contrato OpenAPI ya existe, pero solo lo activa el perfil `zap`).
 5. Ejecutar el escenario de estrés contra la API desplegada con una herramienta de carga (JMeter, k6 o Gatling).
