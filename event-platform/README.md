@@ -691,9 +691,12 @@ Los pasos `ZAP 01` a `ZAP 07` hacen un análisis pasivo (DAST) de la API en ejec
 1. Levantan un PostgreSQL desechable en Docker (contraseña aleatoria, puerto aleatorio en `127.0.0.1`).
 2. Arrancan el bootJar con el perfil `zap` (`application-zap.properties`) en el puerto `8081`, con un
    administrador `zap_admin` y un `JWT_SECRET` aleatorios en cada ejecución (ocultos en el log).
-3. Usan `POST /api/auth/login` como chequeo de salud (es el único endpoint público), crean un evento de
+3. Usan `POST /api/auth/login` como chequeo de salud (es el único endpoint público), crean datos de
    prueba, descargan con el token el contrato OpenAPI (`/v3/api-docs`, con las 19 operaciones de la API)
-   y pasan el token a ZAP con `ZAP_AUTH_HEADER_VALUE`, limitado al host `host.docker.internal`.
+   y pasan el token a ZAP con `ZAP_AUTH_HEADER_VALUE`, limitado al host `host.docker.internal`. ZAP
+   rellena los ids de ruta (`{id}`, `{eventId}`, `{userId}`) con `10` (variable `zapSampleId`), así que
+   se crean eventos y usuarios hasta el id 10 y se inscribe al usuario 10 en el evento 10; sin esos
+   datos casi todas las rutas responden `404`. Si no se logran esos ids, el paso deja una advertencia.
 4. Ejecutan `zap-api-scan.py -f openapi -S` con ese contrato: ZAP llama a cada endpoint (GET, POST, PUT,
    PATCH y DELETE) y analiza las respuestas. `-S` (modo seguro) omite el escaneo activo, así que el
    análisis sigue siendo pasivo; `-O` cambia el servidor del contrato (`127.0.0.1`) por
@@ -717,11 +720,16 @@ permite redes privadas. Desmarca `runZap` para ejecutar el pipeline sin Docker. 
 aparecer `The STDIO streams did not close within 10 seconds`: es normal, la API sigue en segundo plano.
 
 Alcance: antes se usaba `zap-baseline.py`, pero su spider sigue enlaces HTML y la API solo responde
-JSON, así que encontraba 5 rutas GET (`/api/events`, `/`, `/api`, `/robots.txt`, `/sitemap.xml`). Esa
-prueba (ZAP 2.17) dio 0 alertas y 61 reglas `PASS`: Spring Security ya envía `X-Content-Type-Options`,
-`X-Frame-Options` y `Cache-Control`, y la regla de CSP solo aplica a respuestas HTML. Con el contrato,
-ZAP rellena los parámetros de ruta (`{id}`, `{eventId}`...) con valores de ejemplo, así que es normal
-ver respuestas `400` y `404`; las escrituras solo afectan a la base desechable.
+JSON, así que encontraba 5 rutas GET (`/api/events`, `/`, `/api`, `/robots.txt`, `/sitemap.xml`) y dio
+0 alertas con 61 reglas `PASS`. Con el contrato, la prueba local (ZAP 2.17) llegó a las 19 operaciones
+(10 GET, 4 POST, 3 PATCH, 1 PUT, 1 DELETE) y recibió 13 respuestas `2xx`. Las demás son errores
+esperados con los cuerpos de ejemplo de ZAP: `400` (datos inválidos), `401` (login con credenciales
+falsas) y `409` (inscripción duplicada o cambio no permitido). Así encontró que faltaba
+`Cross-Origin-Resource-Policy` (regla 90004, riesgo bajo); `SecurityConfig` ahora la envía con
+`same-origin`, y el resultado final fue 0 advertencias y 120 reglas `PASS`, más alertas informativas
+(códigos 4xx, petición de login detectada y respuestas que no se guardan en caché). Spring Security
+también envía `X-Content-Type-Options`, `X-Frame-Options` y `Cache-Control`, y la regla de CSP solo
+aplica a respuestas HTML. Las escrituras de ZAP solo afectan a la base desechable.
 
 ## Construir la aplicación
 
