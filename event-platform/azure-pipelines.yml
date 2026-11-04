@@ -68,14 +68,19 @@ steps:
       failTaskOnMissingResultsFile: true
       testRunTitle: JUnit y Cucumber
 
+  # retryCountOnTaskFailure: los pasos que descargan o suben a Azure se reintentan si la red falla un
+  # momento (por ejemplo "No such host is known"), en vez de saltarse PIT, SonarQube y ZAP.
+  # PublishTestResults no se reintenta: falla a proposito si hay pruebas fallidas y duplicaria los resultados.
   - task: UseDotNet@2
     displayName: Preparar publicacion de cobertura
+    retryCountOnTaskFailure: 2
     inputs:
       packageType: sdk
       version: '8.x'
 
   - task: PublishCodeCoverageResults@2
     displayName: Publicar cobertura de lineas y ramas
+    retryCountOnTaskFailure: 2
     inputs:
       summaryFileLocation: '$(Build.SourcesDirectory)/$(projectDir)/build/reports/jacoco/test/jacocoTestReport.xml'
       pathToSources: '$(Build.SourcesDirectory)/$(projectDir)/src/main/java'
@@ -353,6 +358,7 @@ steps:
     - task: PublishPipelineArtifact@1
       displayName: 'ZAP 07 - Publicar evidencias'
       condition: and(succeededOrFailed(), eq(variables['ZapDirReady'], 'true'))
+      retryCountOnTaskFailure: 2
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/zap'
         artifact: 'reporte-seguridad-zap'
@@ -361,6 +367,7 @@ steps:
   - task: PublishBuildArtifacts@1
     condition: succeededOrFailed()
     displayName: Guardar reportes HTML y XML
+    retryCountOnTaskFailure: 2
     inputs:
       PathtoPublish: '$(Build.SourcesDirectory)/$(projectDir)/build/reports'
       ArtifactName: quality-reports
