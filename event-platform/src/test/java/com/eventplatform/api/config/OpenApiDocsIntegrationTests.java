@@ -1,5 +1,6 @@
 package com.eventplatform.api.config;
 
+import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -71,6 +72,14 @@ class OpenApiDocsIntegrationTests {
         @Test
         void requiresAuthentication() throws Exception {
             mockMvc.perform(get(API_DOCS_PATH)).andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        void usesOpenApi30BecauseZapOnlyHasInitialSupportFor31() throws Exception {
+            mockMvc.perform(get(API_DOCS_PATH)
+                            .header(HttpHeaders.AUTHORIZATION, obtainToken(mockMvc, objectMapper)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.openapi").value(startsWith("3.0.")));
         }
 
         @ParameterizedTest(name = "{0} {1}")
