@@ -28,6 +28,7 @@ variables:
   loginPath: '/api/auth/login'             # unico endpoint publico: sirve de chequeo de salud y entrega el JWT
   springProfile: 'zap'                     # perfil de laboratorio (application-zap.properties)
   apiDocsPath: '/v3/api-docs'              # contrato OpenAPI (solo con el perfil zap) que ZAP importa
+  zapSampleId: '10'                        # valor que ZAP pone en los parametros numericos de ruta
   zapImage: 'ghcr.io/zaproxy/zaproxy:stable'
   dbImage: 'postgres:16-alpine'
   dbName: 'eventplatform_zap'
@@ -218,20 +219,41 @@ steps:
         }
         Write-Host "##vso[task.setvariable variable=ZapAuthToken;issecret=true]$token"
 
-        # Un evento de prueba para que GET /api/events devuelva datos reales
-        # (de paso confirma que Flyway y JPA funcionan contra PostgreSQL).
+        # Datos de prueba (de paso confirman que Flyway y JPA funcionan contra PostgreSQL).
+        # ZAP rellena los parametros numericos de ruta ({id}, {eventId}, {userId}) con zapSampleId, asi que
+        # se crean eventos y usuarios hasta ese id y se inscribe a ese usuario en ese evento. Sin esto,
+        # casi todas las rutas responden 404 y ZAP solo analiza respuestas de error.
         $cabeceras = @{ Authorization = "Bearer $token" }
+        $api = 'http://127.0.0.1:$(appPort)/api'
+        $idZap = [long]'$(zapSampleId)'
         $inicio = (Get-Date).AddDays(30)
-        $evento = @{
-          name        = 'ZAP lab event'
-          description = 'Created by the pipeline for the OWASP ZAP API scan'
-          startDate   = $inicio.ToString("yyyy-MM-dd'T'HH:mm:ss")
-          endDate     = $inicio.AddHours(2).ToString("yyyy-MM-dd'T'HH:mm:ss")
-          capacity    = 10
-        } | ConvertTo-Json
-        Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:$(appPort)/api/events' -Headers $cabeceras `
-          -ContentType 'application/json' -Body $evento | Out-Null
-        $eventos = Invoke-RestMethod -Uri 'http://127.0.0.1:$(appPort)/api/events' -Headers $cabeceras
+        $evento = $null
+        for ($n = 1; $n -le $idZap -and $evento.id -ne $idZap; $n++) {
+          $datosEvento = @{
+            name        = "ZAP lab event $n"
+            description = 'Created by the pipeline for the OWASP ZAP API scan'
+            startDate   = $inicio.ToString("yyyy-MM-dd'T'HH:mm:ss")
+            endDate     = $inicio.AddHours(2).ToString("yyyy-MM-dd'T'HH:mm:ss")
+            capacity    = 10
+          } | ConvertTo-Json
+          $evento = Invoke-RestMethod -Method Post -Uri "$api/events" -Headers $cabeceras `
+            -ContentType 'application/json' -Body $datosEvento
+        }
+        $usuario = $null
+        for ($n = 1; $n -le $idZap -and $usuario.id -ne $idZap; $n++) {
+          $datosUsuario = @{ name = "ZAP lab user $n"; email = "zap-user-$n@example.com"; document = "ZAP-$n" } |
+            ConvertTo-Json
+          $usuario = Invoke-RestMethod -Method Post -Uri "$api/users" -Headers $cabeceras `
+            -ContentType 'application/json' -Body $datosUsuario
+        }
+        if ($evento.id -eq $idZap -and $usuario.id -eq $idZap) {
+          $registro = Invoke-RestMethod -Method Post -Uri "$api/events/$idZap/registrations" -Headers $cabeceras `
+            -ContentType 'application/json' -Body (@{ userId = $idZap } | ConvertTo-Json)
+          Write-Host ('Datos de prueba: evento {0}, usuario {0} e inscripcion {1}' -f $idZap, $registro.status)
+        } else {
+          Write-Host ('##vso[task.logissue type=warning]No hay evento y usuario con id {0} (ultimos ids: {1} y {2}): ZAP recibira 404 en las rutas con id.' -f $idZap, $evento.id, $usuario.id)
+        }
+        $eventos = Invoke-RestMethod -Uri "$api/events" -Headers $cabeceras
         Write-Host ('Aplicacion lista. Eventos en /api/events: {0}' -f @($eventos).Count)
 
         # Contrato OpenAPI con todas las rutas y metodos (tambien exige el JWT). ZAP 05 lo importa
