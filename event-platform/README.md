@@ -680,6 +680,11 @@ Pasos: verificar Java y Gradle → `clean build jacocoTestReport` → `acceptanc
 resultados JUnit/Cucumber → publicar cobertura → `pitest` → SonarQube (opcional) → OWASP ZAP
 API Scan (activado por defecto) → publicar el artefacto `quality-reports` con todos los reportes.
 
+Los pasos que descargan o suben a Azure (SDK de .NET, cobertura, evidencias de ZAP y reportes) se
+reintentan hasta 2 veces (`retryCountOnTaskFailure`) si la red del agente falla un momento, por ejemplo
+con `No such host is known`; sin eso, un corte breve se salta PIT, SonarQube y ZAP. La publicación de
+pruebas no se reintenta: falla a propósito si hay pruebas fallidas y repetirla duplicaría los resultados.
+
 SonarQube es opcional: crea `SONAR_TOKEN` como variable secreta y `SONAR_HOST_URL` como variable, y
 marca `runSonar` al ejecutar el pipeline manualmente. `localhost` apunta al agente, no a tu equipo.
 El pipeline no ejecuta `postgresTest`.
