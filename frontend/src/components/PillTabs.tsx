@@ -24,6 +24,7 @@ export function PillTabs<T extends string>({ options, value, onChange, label }: 
             type="button"
             className={active ? `${styles.pill} ${styles.active}` : styles.pill}
             aria-pressed={active}
+            data-testid={`filter-${option.value.toLowerCase()}`}
             onClick={() => onChange(option.value)}
           >
             {option.label}

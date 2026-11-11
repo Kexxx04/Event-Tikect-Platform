@@ -32,10 +32,10 @@ function EventCard({ event }: { event: Event }) {
   const tone: ProgressTone = full ? 'full' : closed ? 'closed' : 'accent'
 
   return (
-    <article className={styles.card}>
+    <article className={styles.card} data-testid="event-card">
       <div className={styles.cardTop}>
         <DateTile date={event.startDate} />
-        <StatusBadge status={event.status} />
+        <StatusBadge status={event.status} testId="event-card-status" />
       </div>
       <h2 className={styles.name}>
         <Link to={`/events/${event.id}`} className={styles.link}>

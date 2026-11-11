@@ -22,6 +22,7 @@ export function AvailabilityTiles({ availability }: { availability: EventAvailab
         value={`${percentage}%`}
         caption={`${registeredCount} / ${capacity} seats taken`}
         visual={<OccupancyRing percentage={percentage} full={isFull} />}
+        testId="availability-occupancy"
       />
       <StatTile
         label="Seats available"
@@ -29,8 +30,15 @@ export function AvailabilityTiles({ availability }: { availability: EventAvailab
         valueTone="accent"
         caption={seatsCaption}
         captionTone={!acceptingRegistrations ? 'muted' : isFull ? 'waitlist' : 'active'}
+        testId="availability-seats"
       />
-      <StatTile label="Waitlist" value={waitlistCount} valueTone="waitlist" caption="Promoted automatically" />
+      <StatTile
+        label="Waitlist"
+        value={waitlistCount}
+        valueTone="waitlist"
+        caption="Promoted automatically"
+        testId="availability-waitlist"
+      />
     </div>
   )
 }

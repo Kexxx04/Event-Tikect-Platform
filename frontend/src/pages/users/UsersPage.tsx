@@ -106,7 +106,7 @@ export function UsersPage() {
                   </thead>
                   <tbody>
                     {pageItems.map((user) => (
-                      <tr key={user.id}>
+                      <tr key={user.id} data-testid="user-row">
                         <td>
                           <span className={styles.person}>
                             <Avatar name={user.name} />

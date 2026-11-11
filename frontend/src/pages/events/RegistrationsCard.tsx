@@ -202,7 +202,7 @@ export function RegistrationsCard({
             {visible.map((registration) => {
               const position = waitlistPositions.get(registration.id)
               return (
-                <tr key={registration.id}>
+                <tr key={registration.id} data-testid="registration-row">
                   <td>
                     <span className={styles.person}>
                       <Avatar name={registration.userName} />
@@ -212,8 +212,12 @@ export function RegistrationsCard({
                   <td className={styles.muted}>{registration.userEmail}</td>
                   <td>
                     <span className={styles.status}>
-                      <StatusBadge status={registration.status} />
-                      {position !== undefined && <span className={styles.position}>#{position} in line</span>}
+                      <StatusBadge status={registration.status} testId="registration-status" />
+                      {position !== undefined && (
+                        <span className={styles.position} data-testid="waitlist-position">
+                          #{position} in line
+                        </span>
+                      )}
                     </span>
                   </td>
                   <td className={styles.muted}>{formatDate(registration.registrationDate)}</td>
@@ -224,6 +228,7 @@ export function RegistrationsCard({
                         onClick={() => setPendingCancel(registration)}
                         disabled={working || pendingCancel !== null}
                         aria-label={`Cancel the registration of ${registration.userName}`}
+                        data-testid="cancel-registration"
                       >
                         Cancel
                       </Button>
