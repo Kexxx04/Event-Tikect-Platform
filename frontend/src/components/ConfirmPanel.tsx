@@ -35,7 +35,12 @@ export function ConfirmPanel({
         <Button variant="secondary" onClick={onCancel} disabled={busy} autoFocus>
           Keep as is
         </Button>
-        <Button variant={tone === 'danger' ? 'danger' : 'primary'} onClick={onConfirm} loading={busy}>
+        <Button
+          variant={tone === 'danger' ? 'danger' : 'primary'}
+          onClick={onConfirm}
+          loading={busy}
+          data-testid="confirm-button"
+        >
           {confirmLabel}
         </Button>
       </div>

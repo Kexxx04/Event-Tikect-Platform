@@ -108,8 +108,10 @@ export function EventDetailPage() {
         <DateTile date={event.startDate} size="lg" />
         <div className={styles.info}>
           <div className={styles.titleRow}>
-            <h1 className={styles.title}>{event.name}</h1>
-            <StatusBadge status={event.status} />
+            <h1 className={styles.title} data-testid="event-title">
+              {event.name}
+            </h1>
+            <StatusBadge status={event.status} testId="event-status" />
           </div>
           <p className={styles.meta}>
             {formatDateTimeRange(event.startDate, event.endDate)} · Capacity {event.capacity}
@@ -133,11 +135,13 @@ export function EventDetailPage() {
               variant={STATUS_ACTIONS[status].variant}
               onClick={() => requestStatus(status)}
               disabled={changing || pendingStatus !== null}
+              data-testid={`status-action-${status.toLowerCase()}`}
             >
               {STATUS_ACTIONS[status].label}
             </Button>
           ))}
           <Button
+            data-testid="open-register-panel"
             onClick={() => setRegisterOpen(true)}
             disabled={!availability.acceptingRegistrations || registerOpen}
             title={availability.acceptingRegistrations ? undefined : 'This event is not accepting registrations'}

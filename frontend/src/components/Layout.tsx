@@ -37,7 +37,9 @@ export function Layout() {
           <div className={styles.user}>
             <Avatar name={session.username} size="md" />
             <div className={styles.userText}>
-              <span className={styles.userName}>{session.username}</span>
+              <span className={styles.userName} data-testid="current-username">
+                {session.username}
+              </span>
               <span className={styles.userRole}>Admin</span>
             </div>
             <button type="button" className={styles.signOut} onClick={logout} aria-label="Sign out" title="Sign out">

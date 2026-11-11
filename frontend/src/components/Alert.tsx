@@ -18,7 +18,11 @@ const ICONS = { error: AlertCircleIcon, warning: AlertTriangleIcon, success: Che
 export function Alert({ tone, title, children, role, icon = true }: AlertProps) {
   const Icon = ICONS[tone]
   return (
-    <div className={`${styles.alert} ${styles[tone]}`} role={role ?? (tone === 'success' ? 'status' : 'alert')}>
+    <div
+      className={`${styles.alert} ${styles[tone]}`}
+      role={role ?? (tone === 'success' ? 'status' : 'alert')}
+      data-testid={`alert-${tone}`}
+    >
       {icon && <Icon className={styles.icon} size={20} />}
       <div className={styles.body}>
         {title && <p className={styles.title}>{title}</p>}

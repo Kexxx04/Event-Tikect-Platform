@@ -7,7 +7,8 @@ PostgreSQL 16 y Flyway. El repositorio también incluye un frontend en React que
 ```text
 event-platform (1)/          raíz del repositorio Git
 |-- event-platform/          API Spring Boot (este README)
-`-- frontend/                Interfaz web Vite + React + TypeScript (ver frontend/README.md)
+|-- frontend/                Interfaz web Vite + React + TypeScript (ver frontend/README.md)
+`-- e2e-tests/               Pruebas end-to-end de la interfaz con Serenity BDD (ver e2e-tests/README.md)
 ```
 
 ## Contenido
