@@ -1,0 +1,14 @@
+# Gradle
+.gradle/
+build/
+
+# Serenity reports and history
+target/
+serenity-reports/
+history/
+
+# IDE
+.idea/
+*.iml
+out/
+.vscode/
