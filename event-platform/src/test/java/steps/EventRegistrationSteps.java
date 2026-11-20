@@ -8,9 +8,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.eventplatform.api.support.EventDates;
 import io.cucumber.datatable.DataTable;
-import io.cucumber.java.After;
-import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -24,15 +23,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 public class EventRegistrationSteps {
 
-    private static final String DEFAULT_START = "2030-05-10T18:00:00";
+    // An open event starts 30 days from today, so the scenarios never expire.
+    private static final String DEFAULT_START = "in 30 days at 18:00";
 
     // Valid transitions needed to move a new SCHEDULED event to each closed status.
     private static final Map<String, List<String>> PATH_TO_STATUS = Map.of(
@@ -42,25 +39,11 @@ public class EventRegistrationSteps {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
-    @Autowired private PlatformTransactionManager transactionManager;
 
-    private TransactionStatus transaction;
     private ResultActions response;
     private long eventId;
     private final Map<String, Long> userIds = new HashMap<>();
     private final List<String> confirmedParticipants = new ArrayList<>();
-
-    @Before("@registrations")
-    public void beginScenario() {
-        transaction = transactionManager.getTransaction(new DefaultTransactionDefinition());
-    }
-
-    @After("@registrations")
-    public void rollbackScenario() {
-        if (transaction != null && !transaction.isCompleted()) {
-            transactionManager.rollback(transaction);
-        }
-    }
 
     @Given("an open event with capacity {int}")
     public void anOpenEventWithCapacity(int capacity) throws Exception {
@@ -205,11 +188,12 @@ public class EventRegistrationSteps {
         assertEquals(Map.of(eventId, expectedStatus), statusByEvent);
     }
 
-    private void createEvent(int capacity, String startDate) throws Exception {
+    private void createEvent(int capacity, String start) throws Exception {
+        String startDate = EventDates.resolve(start);
         Map<String, Object> event = Map.of(
                 "name", "Java Conf",
                 "startDate", startDate,
-                "endDate", LocalDateTime.parse(startDate).plusHours(3).toString(),
+                "endDate", EventDates.iso(LocalDateTime.parse(startDate).plusHours(3)),
                 "capacity", capacity);
         String location = mockMvc.perform(post("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)

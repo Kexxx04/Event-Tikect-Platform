@@ -15,41 +15,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.eventplatform.api.repository.UserRepository;
 import io.cucumber.datatable.DataTable;
-import io.cucumber.java.Before;
-import io.cucumber.java.After;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import tools.jackson.databind.ObjectMapper;
 
 public class RegistrationUser {
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private UserRepository userRepository;
-    @Autowired private PlatformTransactionManager transactionManager;
 
-    private TransactionStatus transaction;
     private ResultActions response;
     private String existingUserLocation;
     private Map<String, String> existingUserData;
     private long initialUserCount;
-
-    @Before
-    public void beginScenario() {
-        transaction = transactionManager.getTransaction(new DefaultTransactionDefinition());
-    }
-
-    @After
-    public void rollbackScenario() {
-        if (transaction != null && !transaction.isCompleted()) {
-            transactionManager.rollback(transaction);
-        }
-    }
 
     @Given("no user exists with the email {string}")
     public void noUserExistsWithEmail(String email) {

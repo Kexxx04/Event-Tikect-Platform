@@ -1,0 +1,1 @@
+﻿Build: 20261120.1 | Id: 19 | Rama: develop | Commit: 6b6a509699055c94ae918a57c461bea69a7bd58c | Objetivo: http://host.docker.internal:8081 | Contrato: openapi.json (20 operaciones) | Autenticacion: JWT de zap_admin | Metodos HTTP de ZAP: DELETE=1, GET=11, PATCH=3, POST=4, PUT=1 | Respuestas HTTP a ZAP: 200=13, 201=1, 400=2, 401=1, 409=3 | Fecha: 2026-11-20T14:18:39.8440381-05:00

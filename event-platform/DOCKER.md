@@ -47,15 +47,17 @@ está construida para Linux AMD64 (equipos Intel/AMD). No necesitas Java ni Grad
    docker compose up -d --wait --wait-timeout 180
    ```
 
-   > **Problema conocido:** el `HEALTHCHECK` de la imagen consulta `/api/users` sin token, y desde
-   > que la API exige login esa ruta responde `401`. Por eso el contenedor `api` aparece como
-   > `unhealthy` y `--wait` termina con error aunque la API funcione. Mientras se corrige, inicia con
-   > `docker compose up -d` y revisa con `docker compose logs api` que aparezca
-   > `Started EventPlatformApplication`. Ver "Problemas conocidos" en `README.md`.
+   `--wait` espera a que el contenedor `api` quede `healthy`: su `HEALTHCHECK` consulta
+   `/actuator/health`, que responde `{"status":"UP"}` sin token cuando la API y PostgreSQL funcionan y
+   `503` si la base de datos no responde.
 
-5. Comprueba que la API responde. Todas las rutas exigen token, así que abrir
-   `http://localhost:8080/api/users` en el navegador devuelve `401 Authentication is required`:
-   eso confirma que la API está activa. Si cambiaste `API_PORT`, usa ese puerto en la URL.
+5. Comprueba que la API responde: abre `http://localhost:8080/actuator/health` en el navegador (debe
+   mostrar `{"status":"UP"}`). Las rutas de `/api` exigen token, así que `http://localhost:8080/api/users`
+   devuelve `401 Authentication is required`. Si cambiaste `API_PORT`, usa ese puerto en la URL.
+
+   La imagen usa la zona horaria `America/Bogota` (`TZ` y `-Duser.timezone`), porque las fechas de los
+   eventos son horas locales de Colombia; con UTC, las inscripciones se cerrarían 5 horas antes.
+   Si se usa una imagen 1.0.0 anterior a este cambio, hay que reconstruirla (ver más abajo).
 
 Para usarla desde PowerShell, primero inicia sesión con `ADMIN_USERNAME` y `ADMIN_PASSWORD` del `.env`
 y luego envía el token en cada petición:

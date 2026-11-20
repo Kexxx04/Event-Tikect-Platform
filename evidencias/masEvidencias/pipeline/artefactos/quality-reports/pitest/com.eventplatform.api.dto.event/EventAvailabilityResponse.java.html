@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>EventAvailabilityResponse.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package com.eventplatform.api.dto.event;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.eventplatform.api.model.Event;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.eventplatform.api.model.enums.EventStatus;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>public record EventAvailabilityResponse(</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        Long eventId,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        Integer capacity,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        Integer registeredCount,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        int availableSeats,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        long waitlistCount,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        EventStatus status,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        boolean acceptingRegistrations</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>) {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public static EventAvailabilityResponse from(Event event, long waitlistCount, boolean acceptingRegistrations) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_16'/>
+16
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_16'>1</a>
+<span>
+
+1. from : replaced return value with null for com/eventplatform/api/dto/event/EventAvailabilityResponse::from &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return new EventAvailabilityResponse(</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                event.getId(),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                event.getCapacity(),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                event.getRegisteredCount(),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_20'/>
+20
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_20'>1</a>
+<span>
+
+1. from : Replaced integer subtraction with addition &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                Math.max(0, event.getCapacity() - event.getRegisteredCount()),</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_21'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>                waitlistCount,</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                event.getStatus(),</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>                acceptingRegistrations</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        );</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_25'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@34997338_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@34997338_26'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@34997338_16'>16</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@34997338_16'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>from<br/><b>Killed by : </b>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:neverReportsNegativeAvailableSeats()]</span></span> replaced return value with null for com/eventplatform/api/dto/event/EventAvailabilityResponse::from &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@34997338_20'>20</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@34997338_20'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>from<br/><b>Killed by : </b>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:neverReportsNegativeAvailableSeats()]</span></span> Replaced integer subtraction with addition &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+
+<li class='mutator'>EMPTY_RETURNS</li>
+
+<li class='mutator'>FALSE_RETURNS</li>
+
+<li class='mutator'>INCREMENTS</li>
+
+<li class='mutator'>INVERT_NEGS</li>
+
+<li class='mutator'>MATH</li>
+
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+
+<li class='mutator'>NULL_RETURNS</li>
+
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+
+<li class='mutator'>TRUE_RETURNS</li>
+
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:neverReportsNegativeAvailableSeats()] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:closedEventsDoNotAcceptRegistrations(com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#1] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:closedEventsDoNotAcceptRegistrations(com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#2] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:startedEventsDoNotAcceptRegistrations(long)]/[test-template-invocation:#1] (2 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:reportsAFullEventWithItsWaitlist()] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:startedEventsDoNotAcceptRegistrations(long)]/[test-template-invocation:#3] (2 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:acceptsRegistrationsUntilTheMomentBeforeStart()] (2 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:startedEventsDoNotAcceptRegistrations(long)]/[test-template-invocation:#2] (2 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:reportsAvailabilityOfAnOpenEvent()] (2 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[method:startedEventDoesNotAcceptRegistrations()] (6 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[method:cancelledEventDoesNotAcceptRegistrations()] (11 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[method:reportsAvailabilityOfANewEvent()] (16 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[method:reportsAFullEventCountingOnlyItsWaitlistedRegistrations()] (13 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[method:cancellingWithoutWaitlistReleasesTheSeat()] (10 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[method:cancellingAWaitlistedRegistrationKeepsTheEventFull()] (18 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[method:waitlistsRegistrationsOnceTheEventIsFull()] (25 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.19.0
+
+</body>
+</html>

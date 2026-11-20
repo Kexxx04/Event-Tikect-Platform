@@ -1,0 +1,18 @@
+# API image for the performance tests: build/libs/event-platform-inmemory.jar (task inMemoryBootJar), with the
+# in-memory repositories of the inmemory profile instead of PostgreSQL. compose.perf.yaml builds it with the
+# repository root as context; Dockerfile.inmemory.dockerignore only lets that jar in.
+FROM eclipse-temurin:21-jre-alpine
+RUN apk add --no-cache curl tzdata \
+    && addgroup -S app && adduser -S app -G app
+# Event dates are local times in Colombia.
+ENV TZ=America/Bogota \
+    SPRING_PROFILES_ACTIVE=inmemory
+WORKDIR /app
+COPY --chown=app:app event-platform/build/libs/event-platform-inmemory.jar /app/app.jar
+USER app
+EXPOSE 8080
+HEALTHCHECK --interval=5s --timeout=3s --start-period=60s --retries=12 \
+    CMD curl --fail --silent http://localhost:8080/actuator/health > /dev/null || exit 1
+# The heap follows the memory limit of the container (1 GiB in compose.perf.yaml): 70 % heap, the rest for
+# metaspace, thread stacks and the JIT.
+ENTRYPOINT ["java", "-Duser.timezone=America/Bogota", "-XX:MaxRAMPercentage=70", "-jar", "/app/app.jar"]

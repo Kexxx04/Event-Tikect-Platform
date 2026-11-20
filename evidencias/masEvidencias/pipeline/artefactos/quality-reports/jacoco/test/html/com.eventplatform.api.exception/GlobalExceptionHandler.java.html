@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">event-platform</a> &gt; <a href="index.source.html" class="el_package">com.eventplatform.api.exception</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.eventplatform.api.exception;
+
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+@RestControllerAdvice
+<span class="fc" id="L18">public class GlobalExceptionHandler {</span>
+
+    @ExceptionHandler({
+            UserNotFoundException.class,
+            EventNotFoundException.class,
+            RegistrationNotFoundException.class
+    })
+    public ResponseEntity&lt;ApiError&gt; handleNotFound(
+            RuntimeException exception,
+            HttpServletRequest request
+    ) {
+<span class="fc" id="L29">        return buildError(HttpStatus.NOT_FOUND, exception.getMessage(), request, Map.of());</span>
+    }
+
+    @ExceptionHandler({
+            DuplicateUserException.class,
+            BusinessRuleViolationException.class,
+            DataIntegrityViolationException.class
+    })
+    public ResponseEntity&lt;ApiError&gt; handleConflict(
+            Exception exception,
+            HttpServletRequest request
+    ) {
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        String message = exception instanceof DataIntegrityViolationException</span>
+<span class="fc" id="L42">                ? &quot;Email or document is already registered&quot;</span>
+<span class="fc" id="L43">                : exception.getMessage();</span>
+<span class="fc" id="L44">        return buildError(HttpStatus.CONFLICT, message, request, Map.of());</span>
+    }
+
+    @ExceptionHandler({InvalidUserDataException.class, InvalidEventDataException.class})
+    public ResponseEntity&lt;ApiError&gt; handleInvalidData(
+            RuntimeException exception,
+            HttpServletRequest request
+    ) {
+<span class="fc" id="L52">        return buildError(HttpStatus.BAD_REQUEST, exception.getMessage(), request, Map.of());</span>
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity&lt;ApiError&gt; handleAuthentication(
+            AuthenticationException exception,
+            HttpServletRequest request
+    ) {
+        // Same message for unknown users and wrong passwords, so usernames cannot be probed.
+<span class="fc" id="L61">        return buildError(HttpStatus.UNAUTHORIZED, &quot;Invalid username or password&quot;, request, Map.of());</span>
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity&lt;ApiError&gt; handleUnreadableMessage(
+            HttpMessageNotReadableException exception,
+            HttpServletRequest request
+    ) {
+<span class="fc" id="L69">        return buildError(</span>
+                HttpStatus.BAD_REQUEST,
+                &quot;Malformed JSON request&quot;,
+                request,
+<span class="fc" id="L73">                Map.of()</span>
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity&lt;ApiError&gt; handleTypeMismatch(
+            MethodArgumentTypeMismatchException exception,
+            HttpServletRequest request
+    ) {
+<span class="fc" id="L82">        return buildError(</span>
+                HttpStatus.BAD_REQUEST,
+<span class="fc" id="L84">                &quot;Invalid value for parameter '&quot; + exception.getName() + &quot;'&quot;,</span>
+                request,
+<span class="fc" id="L86">                Map.of()</span>
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity&lt;ApiError&gt; handleValidation(
+            MethodArgumentNotValidException exception,
+            HttpServletRequest request
+    ) {
+<span class="fc" id="L95">        Map&lt;String, String&gt; details = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L96">        exception.getBindingResult().getFieldErrors().forEach(error -&gt;</span>
+<span class="fc" id="L97">                details.putIfAbsent(error.getField(), error.getDefaultMessage())</span>
+        );
+<span class="fc" id="L99">        return buildError(</span>
+                HttpStatus.BAD_REQUEST,
+                &quot;Request validation failed&quot;,
+                request,
+                details
+        );
+    }
+
+    private ResponseEntity&lt;ApiError&gt; buildError(
+            HttpStatus status,
+            String message,
+            HttpServletRequest request,
+            Map&lt;String, String&gt; details
+    ) {
+<span class="fc" id="L113">        ApiError error = new ApiError(</span>
+<span class="fc" id="L114">                Instant.now(),</span>
+<span class="fc" id="L115">                status.value(),</span>
+<span class="fc" id="L116">                status.getReasonPhrase(),</span>
+                message,
+<span class="fc" id="L118">                request.getRequestURI(),</span>
+                details
+        );
+<span class="fc" id="L121">        return ResponseEntity.status(status).body(error);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

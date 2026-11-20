@@ -6,6 +6,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.eventplatform.api.inmemory.InMemoryDatabase;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -28,6 +30,14 @@ class CorsIntegrationTests {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private InMemoryDatabase database;
+
+    @BeforeEach
+    void clearDatabase() {
+        database.clear();
+    }
 
     @ParameterizedTest
     @ValueSource(strings = {"GET", "POST", "PUT", "PATCH", "DELETE"})

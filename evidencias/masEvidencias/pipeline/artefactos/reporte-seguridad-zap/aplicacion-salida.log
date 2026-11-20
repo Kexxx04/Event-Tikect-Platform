@@ -1,0 +1,25 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.1)
+
+2026-11-20T14:18:02.546-05:00  INFO 31940 --- [event-platform] [           main] c.e.api.EventPlatformApplication         : Starting EventPlatformApplication v0.0.1-SNAPSHOT using Java 21.0.12.1 with PID 31940 (C:\agents\agente-keith\_work\1\s\event-platform\build\libs\event-platform-inmemory.jar started by MYCOMPUTER$ in C:\agents\agente-keith\_work\1\s)
+2026-11-20T14:18:02.553-05:00  INFO 31940 --- [event-platform] [           main] c.e.api.EventPlatformApplication         : The following 2 profiles are active: "inmemory", "zap"
+2026-11-20T14:18:02.635-05:00  INFO 31940 --- [event-platform] [           main] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-11-20T14:18:05.009-05:00  INFO 31940 --- [event-platform] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+2026-11-20T14:18:05.036-05:00  INFO 31940 --- [event-platform] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-11-20T14:18:05.037-05:00  INFO 31940 --- [event-platform] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
+2026-11-20T14:18:05.091-05:00  INFO 31940 --- [event-platform] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 2452 ms
+2026-11-20T14:18:06.210-05:00  INFO 31940 --- [event-platform] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2026-11-20T14:18:07.427-05:00  INFO 31940 --- [event-platform] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-11-20T14:18:07.530-05:00  INFO 31940 --- [event-platform] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8081 (http) with context path '/'
+2026-11-20T14:18:07.546-05:00  INFO 31940 --- [event-platform] [           main] c.e.api.EventPlatformApplication         : Started EventPlatformApplication in 5.63 seconds (process running for 6.341)
+2026-11-20T14:18:07.918-05:00  INFO 31940 --- [event-platform] [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-11-20T14:18:07.919-05:00  INFO 31940 --- [event-platform] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-11-20T14:18:07.921-05:00  INFO 31940 --- [event-platform] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2026-11-20T14:18:09.271-05:00  INFO 31940 --- [event-platform] [nio-8081-exec-5] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 490 ms

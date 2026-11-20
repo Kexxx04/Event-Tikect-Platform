@@ -7,7 +7,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static com.eventplatform.api.support.EventDates.daysFromNow;
+import static com.eventplatform.api.support.EventDates.iso;
 
+import com.eventplatform.api.inmemory.InMemoryDatabase;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -19,24 +23,34 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @WithMockUser(username = "admin")
-@Transactional
 class RegistrationControllerIntegrationTests {
 
+    // Relative to today, so the event always starts in the future.
+    private static final String START = iso(daysFromNow(30, 18));
+    private static final String END = iso(daysFromNow(30, 21));
+
     private static final String EVENT = """
-            {"name":"Java Conf", "description":"Talks", "startDate":"2030-05-10T18:00:00",
-             "endDate":"2030-05-10T21:00:00", "capacity":2}
-            """;
+            {"name":"Java Conf", "description":"Talks", "startDate":"%s",
+             "endDate":"%s", "capacity":2}
+            """.formatted(START, END);
 
     private static final long MISSING_ID = 9223372036854775807L;
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private InMemoryDatabase database;
+
+    @BeforeEach
+    void clearDatabase() {
+        database.clear();
+    }
 
     private long createEvent(String body) throws Exception {
         return idOf(mockMvc.perform(post("/api/events").contentType(MediaType.APPLICATION_JSON).content(body))
@@ -253,7 +267,7 @@ class RegistrationControllerIntegrationTests {
 
     @Test
     void rejectsRegistrationsAfterTheEventHasStarted() throws Exception {
-        long eventId = createEvent(EVENT.replace("2030-05-10T18:00:00", "2020-01-01T09:00:00"));
+        long eventId = createEvent(EVENT.replace(START, "2020-01-01T09:00:00"));
 
         register(eventId, createUser("1001"))
                 .andExpect(status().isConflict())
@@ -347,8 +361,8 @@ class RegistrationControllerIntegrationTests {
     @Test
     void listsTheEventsOfAUserByStartDate() throws Exception {
         long later = createEvent(EVENT.replace("Java Conf", "Later Conf")
-                .replace("2030-05-10T18:00:00", "2031-01-10T18:00:00")
-                .replace("2030-05-10T21:00:00", "2031-01-10T21:00:00"));
+                .replace(START, iso(daysFromNow(275, 18)))
+                .replace(END, iso(daysFromNow(275, 21))));
         long sooner = createEvent(EVENT.replace("Java Conf", "Sooner Conf"));
         long other = createEvent(EVENT.replace("Java Conf", "Other Conf"));
         long userId = createUser("1001");
@@ -361,8 +375,8 @@ class RegistrationControllerIntegrationTests {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].eventId").value(sooner))
                 .andExpect(jsonPath("$[0].eventName").value("Sooner Conf"))
-                .andExpect(jsonPath("$[0].startDate").value("2030-05-10T18:00:00"))
-                .andExpect(jsonPath("$[0].endDate").value("2030-05-10T21:00:00"))
+                .andExpect(jsonPath("$[0].startDate").value(START))
+                .andExpect(jsonPath("$[0].endDate").value(END))
                 .andExpect(jsonPath("$[0].eventStatus").value("SCHEDULED"))
                 .andExpect(jsonPath("$[0].registrationStatus").value("CONFIRMED"))
                 .andExpect(jsonPath("$[0].registrationDate").isNotEmpty())

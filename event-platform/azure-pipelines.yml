@@ -13,6 +13,10 @@ parameters:
     displayName: Ejecutar OWASP ZAP API Scan (DAST pasivo)
     type: boolean
     default: true
+  - name: runPerf
+    displayName: Ejecutar pruebas de rendimiento con JMeter (escenarios normal y aforo)
+    type: boolean
+    default: true
 
 pool:
   name: 'Nuevos agentes'
@@ -21,18 +25,18 @@ pool:
 
 variables:
   projectDir: 'event-platform'
+  perfDir: 'performance-tests'             # pruebas de rendimiento con JMeter (fuera de event-platform)
   system.debug: 'false'
   GRADLE_OPTS: '-Dfile.encoding=UTF-8 -Xmx3072m'
   # --- OWASP ZAP (ET0202) ---
   appPort: '8081'                          # puerto libre en el agente
-  loginPath: '/api/auth/login'             # unico endpoint publico: sirve de chequeo de salud y entrega el JWT
-  springProfile: 'zap'                     # perfil de laboratorio (application-zap.properties)
+  loginPath: '/api/auth/login'             # endpoint publico que entrega el JWT
+  healthPath: '/actuator/health'           # chequeo de salud publico (Actuator, sin detalles)
+  springProfile: 'inmemory,zap'            # repositorios en memoria (sin base de datos) + perfil de laboratorio
+  zapJar: 'event-platform-inmemory.jar'    # lo genera la tarea inMemoryBootJar (no es el bootJar de produccion)
   apiDocsPath: '/v3/api-docs'              # contrato OpenAPI (solo con el perfil zap) que ZAP importa
   zapSampleId: '10'                        # valor que ZAP pone en los parametros numericos de ruta
   zapImage: 'ghcr.io/zaproxy/zaproxy:stable'
-  dbImage: 'postgres:16-alpine'
-  dbName: 'eventplatform_zap'
-  dbUser: 'zap_lab'
   adminUser: 'zap_admin'
 
 steps:
@@ -115,6 +119,8 @@ steps:
   # autentica con un administrador de laboratorio creado en cada ejecucion.
   # Un spider no descubre las rutas de una API JSON: ZAP importa el contrato
   # OpenAPI de la API y llama a cada endpoint (GET, POST, PUT, PATCH, DELETE).
+  # Sin base de datos: la API corre desde event-platform-inmemory.jar (tarea
+  # inMemoryBootJar) con los perfiles inmemory,zap, asi que no hay variables DB_*.
   # =====================================================================
   - ${{ if eq(parameters.runZap, true) }}:
     - powershell: |
@@ -131,57 +137,24 @@ steps:
         if ($LASTEXITCODE -ne 0 -or "$tipo".Trim() -ne 'linux') {
           throw 'Docker Desktop debe ejecutar contenedores Linux.'
         }
-        $libs = Join-Path '$(Build.SourcesDirectory)' '$(projectDir)\build\libs'
-        if (-not (Test-Path $libs)) { throw "No existe $libs. El build no genero el bootJar." }
         docker pull '$(zapImage)'
         if ($LASTEXITCODE -ne 0) { throw 'No se pudo descargar la imagen de ZAP.' }
-        docker pull '$(dbImage)'
-        if ($LASTEXITCODE -ne 0) { throw 'No se pudo descargar la imagen de PostgreSQL.' }
-      displayName: 'ZAP 02 - Verificar Docker e imagenes'
 
-    - powershell: |
-        # Base de datos desechable SOLO para el laboratorio: contrasena aleatoria por ejecucion,
-        # puerto aleatorio enlazado a 127.0.0.1 y contenedor eliminado en ZAP 07.
-        $nombre = "ep-zap-db-$(Build.BuildId)"
-        $env:POSTGRES_PASSWORD = [guid]::NewGuid().ToString('N')
-        Write-Host "##vso[task.setvariable variable=ZapDbPassword;issecret=true]$($env:POSTGRES_PASSWORD)"
-        if (docker ps -aq --filter "name=^$nombre$") { docker rm -f $nombre | Out-Null }
-        docker run -d --name $nombre `
-          -e POSTGRES_DB='$(dbName)' -e POSTGRES_USER='$(dbUser)' -e POSTGRES_PASSWORD `
-          -p 127.0.0.1::5432 '$(dbImage)' | Out-Null
-        if ($LASTEXITCODE -ne 0) { throw 'No se pudo iniciar PostgreSQL en Docker.' }
-        Write-Host "##vso[task.setvariable variable=ZapDbContainer]$nombre"
-
-        $mapeo = (docker port $nombre 5432 | Select-Object -First 1)
-        if ("$mapeo" -notmatch ':(\d+)\s*$') { throw "No se pudo leer el puerto de PostgreSQL: $mapeo" }
-        $puerto = $Matches[1]
-        Write-Host "##vso[task.setvariable variable=ZapDbPort]$puerto"
-
-        $listo = $false
-        for ($i = 1; $i -le 30; $i++) {
-          docker exec $nombre pg_isready -h 127.0.0.1 -U '$(dbUser)' -d '$(dbName)' | Out-Null
-          if ($LASTEXITCODE -eq 0) { $listo = $true; break }
-          Start-Sleep -Seconds 2
-        }
-        $global:LASTEXITCODE = 0
-        if (-not $listo) { docker logs $nombre --tail 30; throw 'PostgreSQL no quedo listo.' }
-        Write-Host "PostgreSQL de laboratorio listo en 127.0.0.1:$puerto"
-      displayName: 'ZAP 03 - Iniciar PostgreSQL de laboratorio'
+        # JAR aparte con los repositorios en memoria; el bootJar de produccion no los contiene.
+        & .\gradlew.bat inMemoryBootJar --no-daemon --stacktrace
+        if ($LASTEXITCODE -ne 0) { throw 'No se pudo generar $(zapJar) (tarea inMemoryBootJar).' }
+        $jar = Join-Path (Get-Location) 'build\libs\$(zapJar)'
+        if (-not (Test-Path $jar)) { throw "No existe $jar." }
+        Write-Host "JAR para ZAP: $jar"
+      workingDirectory: '$(Build.SourcesDirectory)/$(projectDir)'
+      displayName: 'ZAP 02 - Verificar Docker, imagen de ZAP y JAR en memoria'
 
     - powershell: |
         $dir  = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'zap'
-        $libs = Join-Path $env:BUILD_SOURCESDIRECTORY '$(projectDir)\build\libs'
-        $jar = Get-ChildItem $libs -Filter '*.jar' |
-          Where-Object { $_.Name -notlike '*-plain.jar' } |
-          Sort-Object LastWriteTime -Descending |
-          Select-Object -First 1
-        if (-not $jar) { throw 'No se encontro el bootJar en build\libs.' }
+        $jar  = Get-Item (Join-Path $env:BUILD_SOURCESDIRECTORY '$(projectDir)\build\libs\$(zapJar)')
         Write-Host "JAR: $($jar.FullName)"
 
-        # Variables que lee application.properties (tienen prioridad sobre un .env).
-        $env:DB_URL      = 'jdbc:postgresql://127.0.0.1:$(ZapDbPort)/$(dbName)'
-        $env:DB_USERNAME = '$(dbUser)'
-        $env:DB_PASSWORD = $env:ZAP_DB_PASSWORD
+        # Sin base de datos: el perfil inmemory reemplaza PostgreSQL, Flyway y JPA, asi que no hay DB_*.
         # Administrador y clave JWT SOLO de laboratorio: aleatorios en cada ejecucion y ocultos en el log.
         $env:ADMIN_USERNAME = '$(adminUser)'
         $env:ADMIN_PASSWORD = [guid]::NewGuid().ToString('N')
@@ -202,29 +175,34 @@ steps:
                   -RedirectStandardOutput $out -RedirectStandardError $err
         Write-Host "##vso[task.setvariable variable=AppPid]$($proc.Id)"
 
-        # Chequeo de salud: el login es publico y su token es el que ZAP necesita.
+        # Chequeo de salud: /actuator/health es publico y no muestra detalles. Despues, el login entrega
+        # el token que ZAP necesita.
+        $healthUrl = 'http://127.0.0.1:$(appPort)$(healthPath)'
         $loginUrl = 'http://127.0.0.1:$(appPort)$(loginPath)'
-        $cuerpo = @{ username = $env:ADMIN_USERNAME; password = $env:ADMIN_PASSWORD } | ConvertTo-Json
-        $token = $null
+        $estado = $null
         for ($i = 1; $i -le 60; $i++) {
           $proc.Refresh()
           if ($proc.HasExited) { break }
           try {
-            $respuesta = Invoke-RestMethod -Method Post -Uri $loginUrl -ContentType 'application/json' `
-                           -Body $cuerpo -TimeoutSec 5
-            $token = $respuesta.token
-            if ($token) { break }
+            $estado = (Invoke-RestMethod -Uri $healthUrl -TimeoutSec 5).status
+            if ($estado -eq 'UP') { break }
           } catch { Start-Sleep -Seconds 3 }
+        }
+        $token = $null
+        if ($estado -eq 'UP') {
+          $cuerpo = @{ username = $env:ADMIN_USERNAME; password = $env:ADMIN_PASSWORD } | ConvertTo-Json
+          $token = (Invoke-RestMethod -Method Post -Uri $loginUrl -ContentType 'application/json' `
+                      -Body $cuerpo -TimeoutSec 10).token
         }
         if (-not $token) {
           Write-Host '--- Ultimas lineas del log de la aplicacion ---'
           Get-Content $out -Tail 40 -ErrorAction SilentlyContinue
           Get-Content $err -Tail 40 -ErrorAction SilentlyContinue
-          throw "La aplicacion no respondio el login en $loginUrl"
+          throw "La aplicacion no quedo UP en $healthUrl o no respondio el login en $loginUrl"
         }
         Write-Host "##vso[task.setvariable variable=ZapAuthToken;issecret=true]$token"
 
-        # Datos de prueba (de paso confirman que Flyway y JPA funcionan contra PostgreSQL).
+        # Datos de prueba en los repositorios en memoria (los ids empiezan en 1 en cada ejecucion).
         # ZAP rellena los parametros numericos de ruta ({id}, {eventId}, {userId}) con zapSampleId, asi que
         # se crean eventos y usuarios hasta ese id y se inscribe a ese usuario en ese evento. Sin esto,
         # casi todas las rutas responden 404 y ZAP solo analiza respuestas de error.
@@ -261,7 +239,7 @@ steps:
         $eventos = Invoke-RestMethod -Uri "$api/events" -Headers $cabeceras
         Write-Host ('Aplicacion lista. Eventos en /api/events: {0}' -f @($eventos).Count)
 
-        # Contrato OpenAPI con todas las rutas y metodos (tambien exige el JWT). ZAP 05 lo importa
+        # Contrato OpenAPI con todas las rutas y metodos (tambien exige el JWT). ZAP 04 lo importa
         # desde esta carpeta y queda publicado como evidencia del alcance del analisis.
         $contratoArchivo = Join-Path $dir 'openapi.json'
         Invoke-WebRequest -Uri 'http://127.0.0.1:$(appPort)$(apiDocsPath)' -Headers $cabeceras `
@@ -276,9 +254,7 @@ steps:
         if ($operaciones -eq 0) { throw 'El contrato OpenAPI ($(apiDocsPath)) no tiene operaciones.' }
         Write-Host "##vso[task.setvariable variable=ZapOperaciones]$operaciones"
         Write-Host ('Contrato OpenAPI: {0} rutas y {1} operaciones' -f $rutas.Count, $operaciones)
-      displayName: 'ZAP 04 - Iniciar aplicacion, autenticar y descargar contrato OpenAPI'
-      env:
-        ZAP_DB_PASSWORD: $(ZapDbPassword)
+      displayName: 'ZAP 03 - Iniciar aplicacion en memoria, autenticar y descargar contrato OpenAPI'
 
     - powershell: |
         $dir    = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'zap'
@@ -288,11 +264,11 @@ steps:
         $env:ZAP_AUTH_HEADER_VALUE = "Bearer $env:ZAP_TOKEN"
         $env:ZAP_AUTH_HEADER_SITE  = 'host.docker.internal'
         Write-Host "Objetivo ZAP: $target, $(ZapOperaciones) operaciones de openapi.json (autenticado como $(adminUser))"
-        # Las lineas que ya tiene el registro de acceso son de ZAP 04; las nuevas seran de ZAP.
+        # Las lineas que ya tiene el registro de acceso son de ZAP 03; las nuevas seran de ZAP.
         $acceso = Get-ChildItem $dir -Filter 'acceso-http*.log' | Select-Object -First 1
         $lineasPrevias = 0
         if ($acceso) { $lineasPrevias = @(Get-Content $acceso.FullName).Count }
-        # -t: contrato que ZAP 04 guardo en la carpeta montada.
+        # -t: contrato que ZAP 03 guardo en la carpeta montada.
         # -O: el contrato apunta a 127.0.0.1, pero desde Docker la API se alcanza por host.docker.internal.
         # -S: modo seguro, sin escaneo activo (solo analisis pasivo de las respuestas).
         docker run --rm -e ZAP_AUTH_HEADER_VALUE -e ZAP_AUTH_HEADER_SITE -v "$mount" '$(zapImage)' `
@@ -333,7 +309,7 @@ steps:
         Write-Host "Respuestas HTTP a ZAP: $resumen"
         "Build: $(Build.BuildNumber) | Id: $(Build.BuildId) | Rama: $(Build.SourceBranchName) | Commit: $(Build.SourceVersion) | Objetivo: $target | Contrato: openapi.json ($(ZapOperaciones) operaciones) | Autenticacion: JWT de $(adminUser) | Metodos HTTP de ZAP: $resumenMetodos | Respuestas HTTP a ZAP: $resumen | Fecha: $(Get-Date -Format o)" |
           Out-File (Join-Path $dir 'ejecucion.txt') -Encoding utf8
-      displayName: 'ZAP 05 - OWASP ZAP API Scan'
+      displayName: 'ZAP 04 - OWASP ZAP API Scan'
       env:
         ZAP_TOKEN: $(ZapAuthToken)
 
@@ -344,24 +320,77 @@ steps:
         if ($procesoId -match '^\d+$') {
           Stop-Process -Id ([int]$procesoId) -Force -ErrorAction SilentlyContinue
           Wait-Process -Id ([int]$procesoId) -Timeout 30 -ErrorAction SilentlyContinue
-          Write-Host "Aplicacion detenida (PID $procesoId)"
-        }
-        $db = '$(ZapDbContainer)'
-        if ($db -like 'ep-zap-db-*') {
-          docker rm -f $db | Out-Null
-          Write-Host "Contenedor $db eliminado"
+          Write-Host "Aplicacion detenida (PID $procesoId); sus datos en memoria se descartan"
         }
         $global:LASTEXITCODE = 0
       condition: always()
-      displayName: 'ZAP 06 - Detener aplicacion y base de laboratorio'
+      displayName: 'ZAP 05 - Detener aplicacion'
 
     - task: PublishPipelineArtifact@1
-      displayName: 'ZAP 07 - Publicar evidencias'
+      displayName: 'ZAP 06 - Publicar evidencias'
       condition: and(succeededOrFailed(), eq(variables['ZapDirReady'], 'true'))
       retryCountOnTaskFailure: 2
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/zap'
         artifact: 'reporte-seguridad-zap'
+        publishLocation: 'pipeline'
+
+  # =====================================================================
+  # Rendimiento con Apache JMeter 5.6.3 (performance-tests/run-perf.ps1)
+  # La API corre en Docker con el perfil inmemory (sin base de datos), limitada a 2 CPU y 1 GiB,
+  # y JMeter solo la alcanza por una red interna. Si el agente no tiene Docker con contenedores
+  # Linux, los pasos se omiten con una advertencia. Un sobrecupo en el escenario aforo hace fallar
+  # el pipeline; los demas criterios (errores y p95) solo dejan advertencias.
+  # =====================================================================
+  - ${{ if eq(parameters.runPerf, true) }}:
+    - powershell: |
+        # Sin Docker, docker escribe en stderr: solo se decide por el codigo de salida.
+        $ErrorActionPreference = 'Continue'
+        $listo = $false
+        $version = docker version --format '{{.Server.Version}}' 2>$null
+        if ($LASTEXITCODE -eq 0) {
+          $tipo = docker info --format '{{.OSType}}' 2>$null
+          $listo = ("$tipo".Trim() -eq 'linux')
+        }
+        $global:LASTEXITCODE = 0
+        if ($listo) {
+          Write-Host "Docker $version con contenedores Linux: se ejecutan los escenarios normal y aforo."
+          Write-Host "##vso[task.setvariable variable=PerfDockerReady]true"
+        } else {
+          Write-Host '##vso[task.logissue type=warning]Docker no esta disponible o no usa contenedores Linux: se omiten las pruebas de rendimiento.'
+        }
+      displayName: 'JMeter 01 - Verificar Docker'
+
+    # Descarga dependencias de Gradle, imagenes base y JMeter: se reintenta si la red falla un momento.
+    - powershell: |
+        & .\run-perf.ps1 -BuildOnly
+        exit $LASTEXITCODE
+      workingDirectory: '$(Build.SourcesDirectory)/$(perfDir)'
+      displayName: 'JMeter 02 - Construir jar en memoria e imagenes'
+      condition: and(succeeded(), eq(variables['PerfDockerReady'], 'true'))
+      retryCountOnTaskFailure: 2
+
+    - powershell: |
+        & .\run-perf.ps1 -Scenario normal -SkipBuild
+        exit $LASTEXITCODE
+      workingDirectory: '$(Build.SourcesDirectory)/$(perfDir)'
+      displayName: 'JMeter 03 - Escenario normal (50 usuarios, 5 min)'
+      condition: and(succeeded(), eq(variables['PerfDockerReady'], 'true'))
+
+    - powershell: |
+        & .\run-perf.ps1 -Scenario aforo -SkipBuild
+        exit $LASTEXITCODE
+      workingDirectory: '$(Build.SourcesDirectory)/$(perfDir)'
+      displayName: 'JMeter 04 - Escenario aforo (1000 inscripciones simultaneas, 100 cupos)'
+      condition: and(succeededOrFailed(), eq(variables['PerfDockerReady'], 'true'))
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'JMeter 05 - Publicar evidencias'
+      condition: and(succeededOrFailed(), eq(variables['PerfDockerReady'], 'true'))
+      retryCountOnTaskFailure: 2
+      inputs:
+        targetPath: '$(Build.SourcesDirectory)/$(perfDir)/results'
+        artifact: 'reporte-rendimiento-jmeter'
         publishLocation: 'pipeline'
 
   - task: PublishBuildArtifacts@1

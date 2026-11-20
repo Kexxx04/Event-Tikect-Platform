@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EventService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">event-platform</a> &gt; <a href="index.source.html" class="el_package">com.eventplatform.api.service</a> &gt; <span class="el_source">EventService.java</span></div><h1>EventService.java</h1><pre class="source lang-java linenums">package com.eventplatform.api.service;
+
+import com.eventplatform.api.dto.event.CreateEventRequest;
+import com.eventplatform.api.dto.event.EventAvailabilityResponse;
+import com.eventplatform.api.dto.event.EventResponse;
+import com.eventplatform.api.dto.event.UpdateEventRequest;
+import com.eventplatform.api.exception.BusinessRuleViolationException;
+import com.eventplatform.api.exception.EventNotFoundException;
+import com.eventplatform.api.exception.InvalidEventDataException;
+import com.eventplatform.api.model.Event;
+import com.eventplatform.api.model.enums.EventStatus;
+import com.eventplatform.api.model.enums.RegistrationStatus;
+import com.eventplatform.api.repository.EventRepository;
+import com.eventplatform.api.repository.RegistrationRepository;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@Transactional(readOnly = true)
+public class EventService {
+
+<span class="fc" id="L30">    private static final Map&lt;EventStatus, Set&lt;EventStatus&gt;&gt; ALLOWED_TRANSITIONS = new EnumMap&lt;&gt;(Map.of(</span>
+<span class="fc" id="L31">            EventStatus.SCHEDULED, EnumSet.of(EventStatus.ACTIVE, EventStatus.CANCELLED),</span>
+<span class="fc" id="L32">            EventStatus.ACTIVE, EnumSet.of(EventStatus.FINISHED, EventStatus.CANCELLED),</span>
+<span class="fc" id="L33">            EventStatus.FINISHED, EnumSet.noneOf(EventStatus.class),</span>
+<span class="fc" id="L34">            EventStatus.CANCELLED, EnumSet.noneOf(EventStatus.class)</span>
+    ));
+
+<span class="fc" id="L37">    private static final Set&lt;EventStatus&gt; OPEN_STATUSES = EnumSet.of(EventStatus.SCHEDULED, EventStatus.ACTIVE);</span>
+
+    private final EventRepository eventRepository;
+    private final RegistrationRepository registrationRepository;
+    private final WaitlistService waitlistService;
+    private final Clock clock;
+
+    public EventService(
+            EventRepository eventRepository,
+            RegistrationRepository registrationRepository,
+            WaitlistService waitlistService,
+            Clock clock
+<span class="fc" id="L49">    ) {</span>
+<span class="fc" id="L50">        this.eventRepository = eventRepository;</span>
+<span class="fc" id="L51">        this.registrationRepository = registrationRepository;</span>
+<span class="fc" id="L52">        this.waitlistService = waitlistService;</span>
+<span class="fc" id="L53">        this.clock = clock;</span>
+<span class="fc" id="L54">    }</span>
+
+    @Transactional
+    public EventResponse create(CreateEventRequest request) {
+<span class="fc" id="L58">        String name = normalizeName(request.name());</span>
+<span class="fc" id="L59">        validateDates(request.startDate(), request.endDate());</span>
+<span class="fc" id="L60">        validateCapacity(request.capacity());</span>
+
+<span class="fc" id="L62">        Event event = new Event(</span>
+                name,
+<span class="fc" id="L64">                normalizeDescription(request.description()),</span>
+<span class="fc" id="L65">                request.startDate(),</span>
+<span class="fc" id="L66">                request.endDate(),</span>
+<span class="fc" id="L67">                request.capacity(),</span>
+                EventStatus.SCHEDULED
+        );
+<span class="fc" id="L70">        return EventResponse.from(eventRepository.save(event));</span>
+    }
+
+    public List&lt;EventResponse&gt; findAll() {
+<span class="fc" id="L74">        return eventRepository.findAll(Sort.by(Sort.Direction.ASC, &quot;id&quot;))</span>
+<span class="fc" id="L75">                .stream()</span>
+<span class="fc" id="L76">                .map(EventResponse::from)</span>
+<span class="fc" id="L77">                .toList();</span>
+    }
+
+    public EventResponse findById(Long id) {
+<span class="fc" id="L81">        return EventResponse.from(getEvent(id));</span>
+    }
+
+    public EventAvailabilityResponse getAvailability(Long id) {
+<span class="fc" id="L85">        Event event = getEvent(id);</span>
+<span class="fc" id="L86">        long waitlistCount = registrationRepository.countByEventIdAndStatus(id, RegistrationStatus.WAITING_LIST);</span>
+<span class="fc" id="L87">        return EventAvailabilityResponse.from(event, waitlistCount, isAcceptingRegistrations(event));</span>
+    }
+
+    @Transactional
+    public EventResponse update(Long id, UpdateEventRequest request) {
+<span class="fc" id="L92">        Event event = getEventForUpdate(id);</span>
+<span class="fc" id="L93">        ensureModifiable(event);</span>
+<span class="fc" id="L94">        String name = normalizeName(request.name());</span>
+<span class="fc" id="L95">        validateDates(request.startDate(), request.endDate());</span>
+<span class="fc" id="L96">        validateCapacity(request.capacity());</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        if (request.capacity() &lt; event.getRegisteredCount()) {</span>
+<span class="fc" id="L98">            throw new BusinessRuleViolationException(</span>
+<span class="fc" id="L99">                    &quot;Capacity cannot be lower than the registered count (&quot; + event.getRegisteredCount() + &quot;)&quot;);</span>
+        }
+
+<span class="fc" id="L102">        event.setName(name);</span>
+<span class="fc" id="L103">        event.setDescription(normalizeDescription(request.description()));</span>
+<span class="fc" id="L104">        event.setStartDate(request.startDate());</span>
+<span class="fc" id="L105">        event.setEndDate(request.endDate());</span>
+<span class="fc" id="L106">        event.setCapacity(request.capacity());</span>
+        // Seats added by a larger capacity go to the waitlist, under the same row lock.
+<span class="fc" id="L108">        waitlistService.fillFreeSeats(event);</span>
+<span class="fc" id="L109">        return EventResponse.from(event);</span>
+    }
+
+    @Transactional
+    public EventResponse updateStatus(Long id, EventStatus status) {
+<span class="fc" id="L114">        Event event = getEventForUpdate(id);</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">        if (!ALLOWED_TRANSITIONS.get(event.getStatus()).contains(status)) {</span>
+<span class="fc" id="L116">            throw new BusinessRuleViolationException(</span>
+<span class="fc" id="L117">                    &quot;Cannot change event status from &quot; + event.getStatus() + &quot; to &quot; + status);</span>
+        }
+<span class="fc" id="L119">        event.setStatus(status);</span>
+<span class="fc" id="L120">        return EventResponse.from(event);</span>
+    }
+
+    private Event getEvent(Long id) {
+<span class="fc" id="L124">        return eventRepository.findById(id)</span>
+<span class="fc" id="L125">                .orElseThrow(() -&gt; new EventNotFoundException(id));</span>
+    }
+
+    private boolean isAcceptingRegistrations(Event event) {
+<span class="fc bfc" id="L129" title="All 2 branches covered.">        return OPEN_STATUSES.contains(event.getStatus())</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">                &amp;&amp; LocalDateTime.now(clock).isBefore(event.getStartDate());</span>
+    }
+
+    private Event getEventForUpdate(Long id) {
+<span class="fc" id="L134">        return eventRepository.findByIdForUpdate(id)</span>
+<span class="fc" id="L135">                .orElseThrow(() -&gt; new EventNotFoundException(id));</span>
+    }
+
+    private void ensureModifiable(Event event) {
+<span class="fc bfc" id="L139" title="All 4 branches covered.">        if (event.getStatus() == EventStatus.FINISHED || event.getStatus() == EventStatus.CANCELLED) {</span>
+<span class="fc" id="L140">            throw new BusinessRuleViolationException(</span>
+<span class="fc" id="L141">                    &quot;Event with status &quot; + event.getStatus() + &quot; cannot be modified&quot;);</span>
+        }
+<span class="fc" id="L143">    }</span>
+
+    private void validateDates(LocalDateTime startDate, LocalDateTime endDate) {
+<span class="fc bfc" id="L146" title="All 4 branches covered.">        if (startDate == null || endDate == null) {</span>
+<span class="fc" id="L147">            throw new InvalidEventDataException(&quot;Start date and end date are required&quot;);</span>
+        }
+<span class="fc bfc" id="L149" title="All 2 branches covered.">        if (!endDate.isAfter(startDate)) {</span>
+<span class="fc" id="L150">            throw new InvalidEventDataException(&quot;End date must be after start date&quot;);</span>
+        }
+<span class="fc" id="L152">    }</span>
+
+    private void validateCapacity(Integer capacity) {
+<span class="fc bfc" id="L155" title="All 4 branches covered.">        if (capacity == null || capacity &lt;= 0) {</span>
+<span class="fc" id="L156">            throw new InvalidEventDataException(&quot;Capacity must be greater than zero&quot;);</span>
+        }
+<span class="fc" id="L158">    }</span>
+
+    private String normalizeName(String name) {
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        String normalized = name == null ? &quot;&quot; : name.trim();</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        if (normalized.isEmpty()) {</span>
+<span class="fc" id="L163">            throw new InvalidEventDataException(&quot;Name must not be blank&quot;);</span>
+        }
+<span class="fc" id="L165">        return normalized;</span>
+    }
+
+    private String normalizeDescription(String description) {
+<span class="fc bfc" id="L169" title="All 4 branches covered.">        if (description == null || description.isBlank()) {</span>
+<span class="fc" id="L170">            return null;</span>
+        }
+<span class="fc" id="L172">        return description.trim();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

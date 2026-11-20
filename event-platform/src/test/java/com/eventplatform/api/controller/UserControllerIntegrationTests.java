@@ -7,10 +7,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.eventplatform.api.inmemory.InMemoryDatabase;
 import java.util.UUID;
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,20 +20,23 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @WithMockUser(username = "admin")
-@Transactional
 class UserControllerIntegrationTests {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private EntityManager entityManager;
+    private InMemoryDatabase database;
+
+    @BeforeEach
+    void clearDatabase() {
+        database.clear();
+    }
 
     private String createUser(String email, String document) throws Exception {
         return mockMvc.perform(post("/api/users").contentType(MediaType.APPLICATION_JSON)
@@ -50,8 +54,6 @@ class UserControllerIntegrationTests {
                                 {"name":"  Ada Byron  ", "email":"ADA@EXAMPLE.COM", "document":"12345"}
                                 """))
                 .andExpect(status().isOk());
-        entityManager.flush();
-        entityManager.clear();
         mockMvc.perform(get(location)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Ada Byron"))
                 .andExpect(jsonPath("$.email").value("ada@example.com"))
@@ -70,8 +72,6 @@ class UserControllerIntegrationTests {
             mockMvc.perform(patch(location + "/status").contentType(MediaType.APPLICATION_JSON)
                             .content("{\"status\":\"" + state + "\"}"))
                     .andExpect(status().isOk()).andExpect(jsonPath("$.status").value(state));
-            entityManager.flush();
-            entityManager.clear();
             mockMvc.perform(get(location)).andExpect(status().isOk())
                     .andExpect(jsonPath("$.status").value(state));
         }
