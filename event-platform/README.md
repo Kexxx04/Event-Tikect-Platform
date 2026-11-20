@@ -27,12 +27,13 @@ event-platform (1)/          raíz del repositorio Git
 12. [Endpoints](#endpoints)
 13. [Errores](#errores)
 14. [Pruebas automatizadas](#pruebas-automatizadas)
-15. [Calidad: JaCoCo, PIT, SonarQube y pipeline](#calidad-jacoco-pit-sonarqube-y-pipeline)
-16. [Construir la aplicación](#construir-la-aplicación)
-17. [Estructura del código](#estructura-del-código)
-18. [Flujo de trabajo con Git](#flujo-de-trabajo-con-git)
-19. [Problemas conocidos y limitaciones](#problemas-conocidos-y-limitaciones)
-20. [Próximos pasos sugeridos](#próximos-pasos-sugeridos)
+15. [Estrategia de pruebas sin base de datos](#estrategia-de-pruebas-sin-base-de-datos)
+16. [Calidad: JaCoCo, PIT, SonarQube y pipeline](#calidad-jacoco-pit-sonarqube-y-pipeline)
+17. [Construir la aplicación](#construir-la-aplicación)
+18. [Estructura del código](#estructura-del-código)
+19. [Flujo de trabajo con Git](#flujo-de-trabajo-con-git)
+20. [Problemas conocidos y limitaciones](#problemas-conocidos-y-limitaciones)
+21. [Próximos pasos sugeridos](#próximos-pasos-sugeridos)
 
 ## Estado del proyecto
 
@@ -50,7 +51,7 @@ Están implementadas todas las funcionalidades mínimas del enunciado:
 | Consultar inscritos | Hecho | `GET /api/events/{eventId}/registrations?status=CONFIRMED` |
 | Consultar eventos de un usuario | Hecho | `GET /api/users/{userId}/events` |
 | Administrar lista de espera | Hecho | `GET /api/events/{eventId}/waitlist` + promoción automática |
-| Escenario de estrés (100 cupos, 1000 usuarios) | Probado | `RegistrationConcurrencyIntegrationTests`, `PostgresRegistrationConcurrencyTests` |
+| Escenario de estrés (100 cupos, 1000 usuarios) | Probado sin base de datos | `RegistrationConcurrencyIntegrationTests` |
 
 Además del enunciado: login JWT para un administrador, CORS para el frontend, frontend React,
 imagen Docker y pipeline de Azure DevOps con JaCoCo, PIT y SonarQube opcional.
@@ -84,9 +85,13 @@ config/ClockConfig               -> bean java.time.Clock usado para "ahora" (per
 - Los DTO son `record` en `dto/user`, `dto/event`, `dto/registration` y `dto/auth`.
 - Las respuestas se construyen con métodos `from(...)` a partir de las entidades.
 - Todo "ahora" del negocio sale de `LocalDateTime.now(clock)`. En producción el `Clock` es
-  `Clock.systemDefaultZone()`; en las pruebas unitarias se usa un `Clock.fixed(...)`.
+  `Clock.systemDefaultZone()`; en las pruebas unitarias se usa un `Clock.fixed(...)`, y las de
+  integración y Cucumber crean eventos con fechas relativas al día actual, así que no vencen.
 - `spring.jpa.open-in-view=false`: las entidades no se cargan fuera de la transacción del servicio.
 - Hibernate valida el esquema (`ddl-auto=validate`); el esquema lo crea Flyway.
+- Ninguna prueba usa base de datos: el perfil `inmemory` (source set `src/inmemory`, fuera del JAR de
+  producción) reemplaza `repository/` y el gestor de transacciones por fakes en memoria. Ver
+  [Estrategia de pruebas sin base de datos](#estrategia-de-pruebas-sin-base-de-datos).
 
 ## Modelo de datos
 
@@ -206,16 +211,23 @@ real antes de decidir entre `CONFIRMED` y `WAITING_LIST`. La revisión de duplic
 dentro del bloqueo. Eventos distintos no se bloquean entre sí. `WaitlistService.fillFreeSeats` exige
 una transacción existente (`Propagation.MANDATORY`) para que nunca se promueva sin el bloqueo.
 
-Escenario de estrés del enunciado, automatizado:
+Escenario de estrés del enunciado, automatizado y sin base de datos:
 
-| Prueba | Base de datos | Escenario | Resultado esperado |
+| Prueba | Repositorios | Escenario | Resultado esperado |
 | --- | --- | --- | --- |
-| `RegistrationConcurrencyIntegrationTests` (tarea `test`) | H2 | 1000 usuarios, 32 hilos, 100 cupos | 100 `CONFIRMED`, 900 `WAITING_LIST`, `registeredCount = 100` |
-| `RegistrationConcurrencyIntegrationTests` (tarea `test`) | H2 | 20 cancelaciones simultáneas | 20 promociones de usuarios distintos, sigue en 100 |
-| `PostgresRegistrationConcurrencyTests` (tarea `postgresTest`) | PostgreSQL 16 real | 1000 usuarios, 64 hilos, 100 cupos | 100 `CONFIRMED`, 900 `WAITING_LIST`, 0 sobrecupos |
+| `RegistrationConcurrencyIntegrationTests` (tarea `test`) | Fakes en memoria (perfil `inmemory`) | 1000 usuarios, 32 hilos, 100 cupos | 100 `CONFIRMED`, 900 `WAITING_LIST`, `registeredCount = 100` |
+| `RegistrationConcurrencyIntegrationTests` (tarea `test`) | Fakes en memoria (perfil `inmemory`) | 20 cancelaciones simultáneas | 20 promociones de usuarios distintos, sigue en 100 |
 
-Como control, al quitar temporalmente el bloqueo, la prueba en H2 falla con 899 y 924 confirmados
-sobre 100 cupos. Es decir, la prueba sí detecta los sobrecupos.
+Cada inscripción corre en su propio hilo y en su propia transacción. `InMemoryEventRepository`
+emula el `SELECT ... FOR UPDATE` de `findByIdForUpdate` con un `ReentrantLock` por evento, que la
+transacción toma una sola vez y libera al terminar (commit o rollback).
+
+Como control (2026-11-20), al quitar temporalmente ese bloqueo del fake, las dos pruebas fallaron en
+las 7 ejecuciones: la de inscripciones con 107 a 111 `CONFIRMED` sobre 100 cupos, y la de
+cancelaciones con `DataIntegrityViolationException` por `chk_events_registered_count`, la misma
+restricción que rechaza PostgreSQL. Con el bloqueo pasan siempre. Es decir, la prueba sí detecta los
+sobrecupos. El bloqueo real de PostgreSQL queda para un ambiente staging (ver la
+[limitación](#limitaciones-del-fake)).
 
 ## Tecnologías
 
@@ -223,8 +235,8 @@ sobre 100 cupos. Es decir, la prueba sí detecta los sobrecupos.
 | --- | --- |
 | Lenguaje y build | Java 21 (toolchain), Gradle Wrapper 9.7.1 |
 | Framework | Spring Boot 4.1.1: Web MVC, Data JPA, Validation, Security, OAuth2 Resource Server (JWT) |
-| Base de datos | PostgreSQL 16, Flyway; H2 en memoria para pruebas |
-| Pruebas | JUnit 5, Mockito, MockMvc, Spring Security Test, Cucumber 7.34 (Gherkin), Testcontainers 2 |
+| Base de datos | PostgreSQL 16 y Flyway en producción; las pruebas no usan base de datos (fakes en memoria, perfil `inmemory`) |
+| Pruebas | JUnit 5, Mockito, MockMvc, Spring Security Test, Cucumber 7.34 (Gherkin), repositorios fake en memoria |
 | Calidad | JaCoCo 0.8.14, PIT 1.19, SonarQube (plugin 7.3), OWASP ZAP API Scan con el contrato de springdoc 3.2 |
 | Contenedores | Docker, Docker Compose |
 | CI | Azure DevOps (`azure-pipelines.yml`) |
@@ -236,6 +248,8 @@ sobre 100 cupos. Es decir, la prueba sí detecta los sobrecupos.
 | --- | --- | --- | --- |
 | Desarrollar con PostgreSQL | JDK 21 y Docker | `compose.dev.yaml` | `docker compose -f compose.dev.yaml up -d` y `.\gradlew.bat bootRun` |
 | Probar rápido sin PostgreSQL | JDK 21 | — | `.\gradlew.bat bootTestRun --args="--spring.profiles.active=test"` |
+| API sin base de datos con tus credenciales | JDK 21 y `ADMIN_PASSWORD`, `JWT_SECRET` | `.env` | `.\gradlew.bat bootRunInMemory` |
+| JAR sin base de datos (E2E, ZAP, JMeter) | JDK 21 y `ADMIN_PASSWORD`, `JWT_SECRET` | — | `.\gradlew.bat inMemoryBootJar` |
 | Ejecutar todo con Docker (API + BD) | Docker | `compose.yaml` | `docker compose up -d --wait` (ver [DOCKER.md](DOCKER.md)) |
 | Usar la interfaz web | Node.js 20+ y la API activa | `../frontend` | `npm install` y `npm run dev` |
 
@@ -323,7 +337,8 @@ IntelliJ con el directorio de trabajo en esta carpeta, para que lea el `.env`.
 
 ### Modo rápido sin PostgreSQL
 
-Para probar la API o el frontend sin Docker, se puede arrancar con el perfil `test` (H2 en memoria):
+Para probar la API o el frontend sin Docker ni base de datos, se puede arrancar con el perfil `test`,
+que activa el perfil `inmemory` (repositorios en memoria):
 
 ```powershell
 .\gradlew.bat bootTestRun --args="--spring.profiles.active=test"
@@ -331,7 +346,22 @@ Para probar la API o el frontend sin Docker, se puede arrancar con el perfil `te
 
 - Usuario `admin`, contraseña `test-admin-password` (valores de `src/test/resources/application-test.properties`).
 - Los datos se pierden al detener la API.
-- El esquema lo crea Hibernate, no Flyway, así que no reemplaza las pruebas con PostgreSQL.
+- No hay esquema ni Flyway: los repositorios en memoria emulan las restricciones de la V1, pero no
+  reemplazan una prueba con PostgreSQL (ver [Estrategia de pruebas sin base de datos](#estrategia-de-pruebas-sin-base-de-datos)).
+
+Otras formas de arrancar la API sin base de datos. No necesitan las variables `DB_*`, pero sí
+`ADMIN_PASSWORD` y `JWT_SECRET` (del `.env` o como variables de entorno):
+
+```powershell
+.\gradlew.bat bootRunInMemory      # perfil inmemory, con el código fuente
+.\gradlew.bat inMemoryBootJar      # genera build\libs\event-platform-inmemory.jar
+java -jar build\libs\event-platform-inmemory.jar --spring.profiles.active=inmemory       # E2E, JMeter
+java -jar build\libs\event-platform-inmemory.jar --spring.profiles.active=inmemory,zap   # como el escaneo ZAP
+```
+
+`event-platform-inmemory.jar` es un JAR aparte (código de `main` + `inmemory`). El bootJar de
+producción (`event-platform-0.0.1-SNAPSHOT.jar`) no contiene el paquete `inmemory` y sigue usando
+PostgreSQL.
 
 ## Autenticación
 
@@ -568,23 +598,24 @@ Todos los errores usan el mismo formato (`GlobalExceptionHandler` y `ApiAuthenti
 
 ## Pruebas automatizadas
 
-No se necesita PostgreSQL ni la API en ejecución: las pruebas usan Mockito o H2 en memoria.
+No se necesita PostgreSQL, Docker ni la API en ejecución: **ninguna prueba usa base de datos** (ni H2,
+ni PostgreSQL, ni Testcontainers). Las unitarias usan mocks y stubs; las demás, los fakes en memoria del
+perfil `inmemory` (ver [Estrategia de pruebas sin base de datos](#estrategia-de-pruebas-sin-base-de-datos)).
 
 | Tipo | Clases | Qué verifican |
 | --- | --- | --- |
 | Unitarias de servicio (Mockito) | `UserServiceTests`, `EventServiceTests`, `RegistrationServiceTests`, `WaitlistServiceTests`, `AuthServiceTests` | Reglas de negocio con repositorios simulados y `Clock` fijo |
-| Unitarias de configuración y modelo | `SecurityConfigTests`, `SecurityPropertiesTests`, `ClockConfigTests`, `EventTests` | Beans de seguridad, validación de variables, reloj, `Event.validateForPublication` |
-| Integración (MockMvc + H2, perfil `test`) | `UserControllerIntegrationTests`, `EventControllerIntegrationTests`, `RegistrationControllerIntegrationTests`, `AuthControllerIntegrationTests`, `CorsIntegrationTests`, `EventPlatformApplicationTests` | Endpoints completos, códigos HTTP, formato de errores, seguridad y CORS; cada prueba revierte su transacción |
-| Concurrencia (H2, transacciones reales) | `RegistrationConcurrencyIntegrationTests` | Estrés de 1000 usuarios por 100 cupos y cancelaciones simultáneas |
+| Unitarias de configuración y modelo | `SecurityConfigTests`, `SecurityPropertiesTests`, `ClockConfigTests`, `EventTests`, `JpaConstructorTests` | Beans de seguridad, validación de variables, reloj, `Event.validateForPublication` y valores iniciales de las entidades |
+| Contrato del fake (sin Spring) | `InMemoryUserRepositoryTests`, `InMemoryEventRepositoryTests`, `InMemoryRegistrationRepositoryTests`, `InMemoryDatabaseTests`, `InMemoryTransactionManagerTests` | Restricciones de la V1, orden de cada consulta, ids, `clear()`, bloqueo por evento y propagación de transacciones |
+| Integración (MockMvc + fakes, perfil `test`) | `UserControllerIntegrationTests`, `EventControllerIntegrationTests`, `RegistrationControllerIntegrationTests`, `AuthControllerIntegrationTests`, `UserUniqueConstraintIntegrationTests`, `CorsIntegrationTests`, `SecurityHeadersIntegrationTests`, `OpenApiDocsIntegrationTests`, `EventPlatformApplicationTests` | Endpoints completos, códigos HTTP, formato de errores, seguridad, CORS y OpenAPI; cada prueba empieza con `InMemoryDatabase.clear()` |
+| Concurrencia (fakes, transacciones reales en 32 hilos) | `RegistrationConcurrencyIntegrationTests` | Estrés de 1000 usuarios por 100 cupos y 20 cancelaciones simultáneas |
 | Aceptación (Cucumber, perfil `acceptance`) | `src/test/resources/features/*.feature` y `src/test/java/steps` | Escenarios Gherkin en inglés de las reglas de negocio |
-| PostgreSQL real (Testcontainers) | `PostgresIntegrationTests`, `PostgresRegistrationConcurrencyTests` | Migración Flyway, restricciones, arranque HTTP y estrés con bloqueos reales |
 
 ### Comandos
 
 ```powershell
 .\gradlew.bat test             # JUnit + Cucumber, genera también el reporte JaCoCo
 .\gradlew.bat acceptanceTest   # solo los escenarios Cucumber
-.\gradlew.bat postgresTest     # requiere Docker en ejecución
 .\gradlew.bat pitest           # pruebas de mutación
 
 # Una sola clase
@@ -597,7 +628,6 @@ No se necesita PostgreSQL ni la API en ejecución: las pruebas usan Mockito o H2
 | Cucumber | `build/reports/cucumber/user-registration.html` (incluye todos los features) |
 | JaCoCo | `build/reports/jacoco/test/html/index.html` y `build/reports/jacoco/test/jacocoTestReport.xml` |
 | PIT | `build/reports/pitest/index.html` |
-| PostgreSQL | `build/reports/tests/postgresTest/index.html` |
 
 ### Escenarios de aceptación (Gherkin)
 
@@ -608,42 +638,95 @@ No se necesita PostgreSQL ni la API en ejecución: las pruebas usan Mockito o H2
 | `event_registration.feature` | Inscripción confirmada; lista de espera; **ejemplo del enunciado** (100 cupos, el usuario 101 espera y queda confirmado cuando alguien cancela); orden de la lista de espera; liberar cupo; salir de la lista de espera; reinscripción; duplicados; usuario inactivo; evento cancelado, finalizado o iniciado |
 | `authentication.feature` | Login válido; credenciales inválidas; endpoints sin token o con token inválido |
 
-`runners/RunCucumberTest` ejecuta los features con JUnit Platform. Cada escenario se ejecuta dentro de
-una transacción que se revierte al final, autenticado como administrador (`SecurityHooks`), salvo los
-etiquetados `@authentication`, que usan el login real.
+`runners/RunCucumberTest` ejecuta los features con JUnit Platform. Cada escenario empieza con las tablas
+en memoria vacías (`DatabaseHooks` llama a `InMemoryDatabase.clear()`) y autenticado como administrador
+(`SecurityHooks`), salvo los etiquetados `@authentication`, que usan el login real. Las fechas de los
+eventos son relativas al día actual (`in 30 days at 18:00` en los features), así que no vencen.
 
 ### Perfiles de prueba
 
-| Perfil | Base | Usado por |
+| Perfil | Qué activa | Usado por |
 | --- | --- | --- |
-| `test` | H2 `jdbc:h2:mem:user-tests` (modo PostgreSQL) | Integración, concurrencia y `bootTestRun` |
-| `acceptance` | H2 `jdbc:h2:mem:user-acceptance` | Cucumber |
+| `test` | `inmemory` + credenciales de prueba | Integración, concurrencia y `bootTestRun` |
+| `acceptance` | `inmemory` + credenciales de prueba | Cucumber |
+| `inmemory` | Repositorios y gestor de transacciones en memoria; excluye la autoconfiguración de DataSource, JPA/Hibernate, repositorios JPA y Flyway | Lo activan `test` y `acceptance`; también `bootRunInMemory` y `event-platform-inmemory.jar` |
 
-En ambos perfiles Flyway está desactivado y Hibernate crea el esquema (`create-drop`), así que no
-validan la migración ni las particularidades de PostgreSQL; para eso existe `postgresTest`. Las
+`test` y `acceptance` activan `inmemory` con grupos de perfiles (`spring.profiles.group.test=inmemory`)
+declarados en `src/test/resources/config/application.properties`, porque Spring Boot no permite grupos
+en los archivos de un perfil. Ningún perfil de prueba tiene propiedades de base de datos. Las
 credenciales y la clave JWT de prueba están en `src/test/resources/application-*.properties` y solo
 sirven para las pruebas.
 
-### Pruebas con PostgreSQL aislado
+## Estrategia de pruebas sin base de datos
 
-`.\gradlew.bat postgresTest` necesita Docker en ejecución. Testcontainers crea un PostgreSQL 16
-desechable con un puerto aleatorio y lo elimina al terminar: no usa la base de desarrollo, el `.env` ni
-el volumen de Compose. Ejecuta la migración Flyway real, valida las entidades, comprueba las tablas, el
-índice parcial y las restricciones de eventos, arranca el servidor HTTP con login y creación de usuario,
-y repite el escenario de estrés con 64 hilos. Si Docker no está disponible la tarea falla; no se omite
-en silencio. Está separada de `build`, `test`, `acceptanceTest` y PIT, y su cobertura no se suma a JaCoCo.
+Requisito del curso: ninguna prueba usa base de datos (ni H2, ni PostgreSQL, ni Testcontainers). La
+aplicación de producción no cambia: sigue con PostgreSQL, Flyway y JPA, y el código de prueba no entra
+en su JAR. En cada nivel se usa el doble de prueba más simple que alcanza:
+
+| Nivel | Doble | Qué reemplaza | Dónde |
+| --- | --- | --- | --- |
+| Unitarias de servicio | **Mock** (Mockito) | Repositorios, `WaitlistService` y `AuthenticationManager`: la prueba programa respuestas y verifica las llamadas | `*ServiceTests` |
+| Unitarias de servicio | **Stub** | El "ahora": `Clock.fixed(...)` devuelve siempre la misma hora | `EventServiceTests`, `RegistrationServiceTests`, `AuthServiceTests` |
+| Contrato del fake | Ninguno: se prueba el fake mismo | — | `InMemory*Tests` |
+| Integración, concurrencia y Cucumber | **Fake** | La base de datos completa: repositorios en memoria que se comportan como PostgreSQL, más un gestor de transacciones | Perfil `inmemory` (`src/inmemory/java/com/eventplatform/api/inmemory`) |
+| E2E (Serenity), OWASP ZAP y JMeter | **Fake** | Lo mismo, dentro de la API en ejecución | `bootTestRun` o `event-platform-inmemory.jar` |
+
+El source set `inmemory` compila contra `main`; `test`, `acceptanceTest` y `bootTestRun` lo tienen en
+su classpath, y el bootJar de producción no. Todas sus clases llevan `@Profile("inmemory")`.
+
+### Qué emula el fake
+
+- **Tablas**: `InMemoryDatabase` tiene un `ConcurrentHashMap` por entidad y un `AtomicLong` por
+  secuencia. `clear()` borra las filas y reinicia los ids en 1.
+- **Ids `IDENTITY`**: `save` asigna el siguiente id cuando es `null`, con `ReflectionUtils` (sin setters
+  públicos nuevos en las entidades).
+- **Restricciones de la V1**, con `DataIntegrityViolationException` y el mismo mensaje de PostgreSQL:
+  `NOT NULL`; email único (sin distinguir mayúsculas) y documento único; `(user_id, event_id)` único;
+  llaves foráneas de `registrations` (al insertar y al borrar usuarios o eventos); `capacity > 0`;
+  `end_date > start_date`; `0 <= registered_count <= capacity`. Se revisan en `save` y, para las
+  entidades que leyó o guardó una transacción de escritura, otra vez antes del commit, que es cuando
+  Hibernate hace el *flush*.
+- **Consultas**: los métodos de `JpaRepository` que usan los servicios y las pruebas (`save`, `saveAll`,
+  `findById`, `findAll`, `existsById`, `count`, `deleteById`, `deleteAllInBatch`, `deleteAllByIdInBatch`)
+  y todas las consultas derivadas, con el mismo filtro y orden que su nombre (incluida la de `Limit`).
+  Los métodos que la aplicación no usa lanzan `UnsupportedOperationException`.
+- **Bloqueo pesimista**: `findByIdForUpdate` toma un `ReentrantLock` por evento una sola vez por
+  transacción y lo libera en `afterCompletion` de una `TransactionSynchronization`. Dos transacciones
+  sobre el mismo evento se ejecutan una después de la otra; eventos distintos no se bloquean.
+- **Transacciones**: `InMemoryTransactionManager` (extiende `AbstractPlatformTransactionManager`)
+  detecta la transacción existente y maneja sincronizaciones, solo lectura y *rollback-only*, así que
+  `@Transactional` y el `Propagation.MANDATORY` de `WaitlistService` funcionan igual.
+
+### Limitaciones del fake
+
+- **No valida Flyway ni la migración V1, el SQL que genera Hibernate (ni los tipos y longitudes de
+  columna) ni el bloqueo real de PostgreSQL** (`SELECT ... FOR UPDATE`, aislamiento, *deadlocks*). Eso
+  queda para un ambiente **staging** con PostgreSQL 16 (por ejemplo, el `compose.yaml`) antes de
+  producción.
+- Un rollback **no deshace cambios**: los repositorios escriben al instante y devuelven las instancias
+  guardadas. Los servicios validan todo antes de modificar y cada prueba empieza con `clear()`, así que
+  ninguna depende del rollback.
+- Las entidades leídas fuera de una transacción también son las guardadas (con JPA serían copias
+  separadas).
+- PostgreSQL compara el email con mayúsculas; el fake, sin ellas. El resultado es el mismo porque
+  `UserService` siempre guarda el email en minúsculas.
+- El fake no cuenta para JaCoCo ni PIT (miden solo `src/main`); su comportamiento lo cubren las pruebas
+  de contrato `InMemory*Tests`.
 
 ## Calidad: JaCoCo, PIT, SonarQube y pipeline
 
-Mediciones del 2026-10-16 en la rama `feature/event-registrations`:
+Mediciones del 2026-11-20 en la rama `feature/tests-without-database`, sin ninguna base de datos:
 
 | Métrica | Valor |
 | --- | --- |
-| Pruebas en `test` | 269 ejecuciones, 0 fallos |
+| Pruebas en `test` | 390 ejecuciones, 0 fallos (incluye los 37 escenarios Cucumber y 90 pruebas de contrato del fake) |
 | Escenarios en `acceptanceTest` | 37, 0 fallos |
-| Cobertura de líneas (JaCoCo) | 99.1 % (573/578) |
-| Cobertura de ramas (JaCoCo) | 98.4 % (120/122) |
+| Cobertura de líneas (JaCoCo) | 99.7 % (578/580) |
+| Cobertura de ramas (JaCoCo) | 99.2 % (121/122) |
 | Mutantes eliminados (PIT) | 94 % (217/230) |
+
+Los 13 mutantes que sobreviven son 12 `println` eliminados en `Event.validateForPublication` (código
+heredado, problema 7) y el `return null` de `SecurityConfig.securityFilterChain`.
 
 ### JaCoCo
 
@@ -652,8 +735,9 @@ sin exclusiones. La tarea `acceptanceTest` no suma cobertura a ese reporte.
 
 ### PIT
 
-`.\gradlew.bat pitest` muta las clases de `com.eventplatform.api.*` y ejecuta las pruebas de ese
-paquete con 4 hilos. El reporte HTML queda en `build/reports/pitest/index.html`.
+`.\gradlew.bat pitest` muta las clases de `com.eventplatform.api.*` de `src/main` (no las del fake
+`inmemory`) y ejecuta las pruebas de ese paquete con 4 hilos. El reporte HTML queda en
+`build/reports/pitest/index.html`.
 
 ### SonarQube
 
@@ -688,15 +772,17 @@ pruebas no se reintenta: falla a propósito si hay pruebas fallidas y repetirla 
 
 SonarQube es opcional: crea `SONAR_TOKEN` como variable secreta y `SONAR_HOST_URL` como variable, y
 marca `runSonar` al ejecutar el pipeline manualmente. `localhost` apunta al agente, no a tu equipo.
-El pipeline no ejecuta `postgresTest`.
+Ningún paso usa base de datos ni variables `DB_*`.
 
 ### Análisis de seguridad con OWASP ZAP
 
-Los pasos `ZAP 01` a `ZAP 07` hacen un análisis pasivo (DAST) de la API en ejecución:
+Los pasos `ZAP 01` a `ZAP 06` hacen un análisis pasivo (DAST) de la API en ejecución, sin base de datos:
 
-1. Levantan un PostgreSQL desechable en Docker (contraseña aleatoria, puerto aleatorio en `127.0.0.1`).
-2. Arrancan el bootJar con el perfil `zap` (`application-zap.properties`) en el puerto `8081`, con un
-   administrador `zap_admin` y un `JWT_SECRET` aleatorios en cada ejecución (ocultos en el log).
+1. Generan `build/libs/event-platform-inmemory.jar` con la tarea `inMemoryBootJar` (el bootJar de
+   producción no tiene los repositorios en memoria).
+2. Lo arrancan con los perfiles `inmemory,zap` (`application-zap.properties`) en el puerto `8081`, sin
+   variables `DB_*` y con un administrador `zap_admin` y un `JWT_SECRET` aleatorios en cada ejecución
+   (ocultos en el log).
 3. Usan `POST /api/auth/login` como chequeo de salud (es el único endpoint público), crean datos de
    prueba, descargan con el token el contrato OpenAPI (`/v3/api-docs`, con las 19 operaciones de la API)
    y pasan el token a ZAP con `ZAP_AUTH_HEADER_VALUE`, limitado al host `host.docker.internal`. ZAP
@@ -707,12 +793,12 @@ Los pasos `ZAP 01` a `ZAP 07` hacen un análisis pasivo (DAST) de la API en ejec
    PATCH y DELETE) y analiza las respuestas. `-S` (modo seguro) omite el escaneo activo, así que el
    análisis sigue siendo pasivo; `-O` cambia el servidor del contrato (`127.0.0.1`) por
    `host.docker.internal`, y las advertencias no fallan el pipeline por `-I`.
-5. Siempre detienen la API y borran el contenedor, y después publican el artefacto
+5. Siempre detienen la API (sus datos en memoria se descartan) y después publican el artefacto
    `reporte-seguridad-zap` (con la API corriendo, sus logs siguen abiertos y no se pueden subir).
 
 El artefacto contiene `reporte-zap.html`, `reporte-zap.json`, `openapi.json` (el contrato que usó ZAP),
 `ejecucion.txt` (build, commit, fecha, métodos HTTP que envió ZAP y códigos que recibió),
-`acceso-http.log` (cada petición y su código) y los logs de la API. El paso 05 deja una advertencia si
+`acceso-http.log` (cada petición y su código) y los logs de la API. El paso 04 deja una advertencia si
 ZAP solo recibe `401` (el token no llegó) o si solo envía `GET` (no usó el contrato): en ambos casos el
 análisis no es válido.
 
@@ -722,7 +808,7 @@ el JWT y se genera en OpenAPI 3.0 porque ZAP solo tiene soporte inicial para 3.1
 
 Requisitos del agente: Docker Desktop abierto con contenedores Linux y el agente ejecutándose con un
 usuario que tenga acceso a Docker. Si Windows pide permiso de firewall para Java en el puerto `8081`,
-permite redes privadas. Desmarca `runZap` para ejecutar el pipeline sin Docker. En el paso 04 puede
+permite redes privadas. Desmarca `runZap` para ejecutar el pipeline sin Docker. En el paso 03 puede
 aparecer `The STDIO streams did not close within 10 seconds`: es normal, la API sigue en segundo plano.
 
 Alcance: antes se usaba `zap-baseline.py`, pero su spider sigue enlaces HTML y la API solo responde
@@ -735,17 +821,22 @@ falsas) y `409` (inscripción duplicada o cambio no permitido). Así encontró q
 `same-origin`, y el resultado final fue 0 advertencias y 120 reglas `PASS`, más alertas informativas
 (códigos 4xx, petición de login detectada y respuestas que no se guardan en caché). Spring Security
 también envía `X-Content-Type-Options`, `X-Frame-Options` y `Cache-Control`, y la regla de CSP solo
-aplica a respuestas HTML. Las escrituras de ZAP solo afectan a la base desechable.
+aplica a respuestas HTML. Esas mediciones se hicieron cuando el escaneo usaba un PostgreSQL desechable;
+ahora las escrituras de ZAP solo afectan a la memoria de la API de laboratorio.
 
 ## Construir la aplicación
 
 ```powershell
 .\gradlew.bat clean build
 java -jar build\libs\event-platform-0.0.1-SNAPSHOT.jar   # con PostgreSQL y el .env disponibles
+
+.\gradlew.bat inMemoryBootJar                            # JAR aparte, sin base de datos
+java -jar build\libs\event-platform-inmemory.jar --spring.profiles.active=inmemory
 ```
 
-`build` compila y ejecuta las pruebas de `test`. Para construir la imagen Docker y compartirla con el
-grupo, consulta [DOCKER.md](DOCKER.md).
+`build` compila y ejecuta las pruebas de `test`. El bootJar de producción solo contiene `src/main`;
+`inMemoryBootJar` genera `event-platform-inmemory.jar` con `main` + `inmemory` para E2E, OWASP ZAP y
+JMeter. Para construir la imagen Docker y compartirla con el grupo, consulta [DOCKER.md](DOCKER.md).
 
 ## Estructura del código
 
@@ -766,16 +857,23 @@ event-platform/
     |   |-- repository/   UserRepository, EventRepository (bloqueo), RegistrationRepository
     |   `-- service/      UserService, EventService, RegistrationService, WaitlistService, AuthService
     |-- main/resources/
-    |   |-- application.properties
+    |   |-- application.properties, application-zap.properties
     |   `-- db/migration/V1__create_initial_schema.sql
+    |-- inmemory/java/com/eventplatform/api/inmemory/   Fake de la base (perfil inmemory, fuera del JAR de producción)
+    |   |-- InMemoryDatabase           Tablas (ConcurrentHashMap) y secuencias (AtomicLong); clear()
+    |   |-- AbstractInMemoryRepository JpaRepository genérico sobre una tabla
+    |   |-- InMemoryUserRepository, InMemoryEventRepository (bloqueo), InMemoryRegistrationRepository
+    |   |-- InMemoryTransactionManager, SchemaConstraints
+    |-- inmemory/resources/application-inmemory.properties   Excluye DataSource, JPA y Flyway
     |-- test/java/
-    |   |-- com/eventplatform/api/   Pruebas unitarias, de integración y de concurrencia
-    |   |-- steps/                   Pasos de Cucumber y configuración Spring/seguridad
+    |   |-- com/eventplatform/api/   Pruebas unitarias, de integración, de concurrencia y del fake (inmemory/)
+    |   |-- com/eventplatform/api/support/EventDates   Fechas relativas al día actual
+    |   |-- steps/                   Pasos de Cucumber, DatabaseHooks y configuración Spring/seguridad
     |   `-- runners/                 RunCucumberTest
-    |-- test/resources/
-    |   |-- features/                Escenarios Gherkin
-    |   `-- application-test.properties, application-acceptance.properties, junit-platform.properties
-    `-- postgresTest/java/           Pruebas con PostgreSQL real (Testcontainers)
+    `-- test/resources/
+        |-- features/                Escenarios Gherkin
+        |-- config/application.properties   Grupos de perfiles: test y acceptance activan inmemory
+        `-- application-test.properties, application-acceptance.properties, junit-platform.properties
 ```
 
 ## Flujo de trabajo con Git
@@ -800,14 +898,14 @@ event-platform/
 | 4 | El estado del evento no cambia con el tiempo | Un evento pasado sigue `SCHEDULED` hasta que se cambie a mano (igual no acepta inscripciones) | Tarea programada o cálculo del estado, si se requiere |
 | 5 | Cancelar un evento no cancela sus inscripciones | Las inscripciones de un evento `CANCELLED` quedan como estaban | Cancelarlas en cascada, si se requiere |
 | 6 | Todo `DataIntegrityViolationException` responde `Email or document is already registered` | Mensaje engañoso si la BD rechaza otro dato | Mensaje genérico o por restricción |
-| 7 | Las pruebas de integración y Cucumber usan eventos del 2030-05-10 con el reloj real | Empezarán a fallar en esa fecha | Usar fechas relativas o un `Clock` fijo en los perfiles de prueba |
-| 8 | `Event.validateForPublication` no lo usa ningún servicio; imprime con `System.out` y usa `LocalDateTime.now()` sin `Clock` | Deuda técnica (código heredado del ejercicio de SonarQube) | Eliminarlo o integrarlo a `EventService` |
-| 9 | Un solo administrador, sin revocación de tokens ni paginación en los listados | Suficiente para el alcance del proyecto | Usuarios administradores en BD, *refresh tokens* y `Pageable` si crece |
+| 7 | `Event.validateForPublication` no lo usa ningún servicio; imprime con `System.out` y usa `LocalDateTime.now()` sin `Clock` | Deuda técnica (código heredado del ejercicio de SonarQube) | Eliminarlo o integrarlo a `EventService` |
+| 8 | Un solo administrador, sin revocación de tokens ni paginación en los listados | Suficiente para el alcance del proyecto | Usuarios administradores en BD, *refresh tokens* y `Pageable` si crece |
 
 ## Próximos pasos sugeridos
 
 1. Corregir el healthcheck de Docker y la zona horaria del contenedor (problemas 1 y 2).
 2. Integrar `develop` en `main` antes de la entrega.
-3. Ejecutar `postgresTest` en un equipo o agente con Docker.
+3. Validar en un ambiente staging con PostgreSQL 16 lo que el fake no cubre: Flyway, el SQL de
+   Hibernate y el bloqueo real del escenario de estrés.
 4. Publicar Swagger UI para el equipo (el contrato OpenAPI ya existe, pero solo lo activa el perfil `zap`).
 5. Ejecutar el escenario de estrés contra la API desplegada con una herramienta de carga (JMeter, k6 o Gatling).

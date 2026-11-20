@@ -5,6 +5,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.eventplatform.api.inmemory.InMemoryDatabase;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,20 +17,26 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 /** Security headers that OWASP ZAP checks on every API response. */
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @WithMockUser(username = "admin")
-@Transactional
 class SecurityHeadersIntegrationTests {
 
     private static final String CROSS_ORIGIN_RESOURCE_POLICY = "Cross-Origin-Resource-Policy";
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private InMemoryDatabase database;
+
+    @BeforeEach
+    void clearDatabase() {
+        database.clear();
+    }
 
     @Test
     void addsCrossOriginResourcePolicyAndKeepsTheDefaultHeaders() throws Exception {

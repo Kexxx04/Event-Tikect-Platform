@@ -1,3 +1,6 @@
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+import org.springframework.boot.gradle.tasks.run.BootRun
+
 plugins {
 	id 'java'
 	id 'jacoco'
@@ -21,15 +24,22 @@ repositories {
 }
 
 sourceSets {
-	postgresTest {
+	// In-memory repositories and transaction manager (profile inmemory): every test runs without a database.
+	// Only test, acceptanceTest, bootTestRun, bootRunInMemory and inMemoryBootJar use them;
+	// the production bootJar keeps PostgreSQL + Flyway + JPA and does not contain this source set.
+	inmemory {
 		compileClasspath += sourceSets.main.output
 		runtimeClasspath += sourceSets.main.output
+	}
+	test {
+		compileClasspath += sourceSets.inmemory.output
+		runtimeClasspath += sourceSets.inmemory.output
 	}
 }
 
 configurations {
-	postgresTestImplementation.extendsFrom testImplementation
-	postgresTestRuntimeOnly.extendsFrom testRuntimeOnly
+	inmemoryImplementation.extendsFrom implementation
+	inmemoryRuntimeOnly.extendsFrom runtimeOnly
 }
 
 dependencies {
@@ -44,7 +54,6 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'org.postgresql:postgresql'
 	runtimeOnly 'org.flywaydb:flyway-database-postgresql'
-	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -55,18 +64,25 @@ dependencies {
 	testImplementation("io.cucumber:cucumber-junit-platform-engine:7.34.3")
 	testImplementation("io.cucumber:cucumber-spring:7.34.3")
 	testImplementation 'org.junit.platform:junit-platform-suite'
-	testRuntimeOnly 'com.h2database:h2'
-	postgresTestImplementation 'org.testcontainers:testcontainers-postgresql:2.0.5'
-	postgresTestImplementation 'org.testcontainers:testcontainers-junit-jupiter:2.0.5'
 }
 
-tasks.register('postgresTest', Test) {
-	description = 'Verifies Flyway, schema constraints and HTTP startup using disposable PostgreSQL.'
-	group = 'verification'
-	testClassesDirs = sourceSets.postgresTest.output.classesDirs
-	classpath = sourceSets.postgresTest.runtimeClasspath
-	useJUnitPlatform { includeEngines 'junit-jupiter' }
-	shouldRunAfter test
+// API without a database (profile inmemory). It still needs ADMIN_PASSWORD and JWT_SECRET (.env or variables).
+tasks.register('bootRunInMemory', BootRun) {
+	description = 'Runs the API with the in-memory repositories (profile inmemory), without a database.'
+	group = 'application'
+	mainClass = 'com.eventplatform.api.EventPlatformApplication'
+	classpath = sourceSets.main.runtimeClasspath + sourceSets.inmemory.output
+	systemProperty 'spring.profiles.active', 'inmemory'
+}
+
+// Separate executable jar (main + inmemory) for E2E, OWASP ZAP and JMeter. The production bootJar does not change.
+tasks.register('inMemoryBootJar', BootJar) {
+	description = 'Assembles build/libs/event-platform-inmemory.jar: the API with the in-memory repositories.'
+	group = 'build'
+	archiveFileName = 'event-platform-inmemory.jar'
+	mainClass = 'com.eventplatform.api.EventPlatformApplication'
+	targetJavaVersion = JavaVersion.VERSION_21
+	classpath = sourceSets.main.runtimeClasspath + sourceSets.inmemory.output
 }
 
 jacoco {

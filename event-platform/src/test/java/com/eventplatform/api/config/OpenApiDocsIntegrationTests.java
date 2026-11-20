@@ -6,7 +6,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.eventplatform.api.inmemory.InMemoryDatabase;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -48,6 +50,14 @@ class OpenApiDocsIntegrationTests {
         @Autowired
         private ObjectMapper objectMapper;
 
+        @Autowired
+        private InMemoryDatabase database;
+
+        @BeforeEach
+        void clearDatabase() {
+            database.clear();
+        }
+
         @Test
         void doesNotPublishTheDefinition() throws Exception {
             mockMvc.perform(get(API_DOCS_PATH)
@@ -58,7 +68,7 @@ class OpenApiDocsIntegrationTests {
 
     @Nested
     @SpringBootTest
-    // zap first, so the H2 settings of the test profile win over the PostgreSQL/Flyway settings of zap.
+    // Same profiles as the pipeline scan (inmemory,zap); test adds inmemory and the test credentials.
     @ActiveProfiles({"zap", "test"})
     @AutoConfigureMockMvc
     class ZapProfile {
@@ -68,6 +78,14 @@ class OpenApiDocsIntegrationTests {
 
         @Autowired
         private ObjectMapper objectMapper;
+
+        @Autowired
+        private InMemoryDatabase database;
+
+        @BeforeEach
+        void clearDatabase() {
+            database.clear();
+        }
 
         @Test
         void requiresAuthentication() throws Exception {

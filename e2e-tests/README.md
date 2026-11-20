@@ -35,14 +35,15 @@ Event-Tikect-Platform/       raíz del repositorio Git
 | Node.js | 20 o superior | Para el frontend (`npm`) |
 | Navegador | Google Chrome (por defecto) o Microsoft Edge | Si Chrome no está instalado, Selenium Manager descarga **Chrome for Testing** automáticamente la primera vez (requiere internet). El driver (chromedriver/msedgedriver) también se descarga solo |
 
-No se necesita Docker ni PostgreSQL: la API corre con H2 en memoria.
+No se necesita Docker ni base de datos: el perfil `test` activa el perfil `inmemory` y la API guarda los
+datos en repositorios en memoria (ver "Estrategia de pruebas sin base de datos" en `../event-platform/README.md`).
 
 ## 1. Levantar la aplicación
 
 Usa **dos terminales** de PowerShell, desde la raíz del repositorio:
 
 ```powershell
-# Terminal 1 – API con H2 en memoria (perfil test) en http://localhost:8080
+# Terminal 1 – API sin base de datos (perfil test, repositorios en memoria) en http://localhost:8080
 cd event-platform
 .\gradlew.bat bootTestRun --args="--spring.profiles.active=test"
 ```
@@ -184,7 +185,7 @@ e2e-tests/
 
 ## Datos de prueba y fechas
 
-- La API conserva sus datos en H2 mientras está encendida y rechaza correos y documentos repetidos (409).
+- La API conserva sus datos en memoria mientras está encendida y rechaza correos y documentos repetidos (409).
   Por eso `UniqueData` agrega a cada nombre de evento, correo y documento un sufijo único por ejecución
   (base 36 del timestamp + secuencia), por ejemplo `ada.lovelace.mhb3x0k27@example.com` y
   `E2E-MHB3X0K27`. Las pruebas se pueden repetir sin reiniciar la API.
