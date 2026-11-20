@@ -28,7 +28,8 @@ en README.md.
 
 ## Pruebas (obligatorias en cada tarea)
 - Unitarias de servicio con Mockito (*ServiceTests).
-- Integración con MockMvc y perfil test/H2 (*ControllerIntegrationTests).
+- Integración con MockMvc y perfil test (*ControllerIntegrationTests). Ninguna prueba usa base de datos:
+  el perfil test activa inmemory (fakes de src/inmemory); cada prueba llama InMemoryDatabase.clear().
 - Escenarios Cucumber en inglés en src/test/resources/features cuando la tarea toque reglas de negocio.
 - Al terminar: ejecutar `.\gradlew.bat test` (y `acceptanceTest` si hay features nuevas) y que todo pase.
 - No bajar la cobertura JaCoCo ni romper PIT.
