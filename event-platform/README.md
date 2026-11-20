@@ -8,7 +8,8 @@ PostgreSQL 16 y Flyway. El repositorio también incluye un frontend en React que
 event-platform (1)/          raíz del repositorio Git
 |-- event-platform/          API Spring Boot (este README)
 |-- frontend/                Interfaz web Vite + React + TypeScript (ver frontend/README.md)
-`-- e2e-tests/               Pruebas end-to-end de la interfaz con Serenity BDD (ver e2e-tests/README.md)
+|-- e2e-tests/               Pruebas end-to-end de la interfaz con Serenity BDD (ver e2e-tests/README.md)
+`-- performance-tests/       Pruebas de rendimiento con JMeter en Docker (ver performance-tests/README.md)
 ```
 
 ## Contenido
@@ -28,12 +29,13 @@ event-platform (1)/          raíz del repositorio Git
 13. [Errores](#errores)
 14. [Pruebas automatizadas](#pruebas-automatizadas)
 15. [Estrategia de pruebas sin base de datos](#estrategia-de-pruebas-sin-base-de-datos)
-16. [Calidad: JaCoCo, PIT, SonarQube y pipeline](#calidad-jacoco-pit-sonarqube-y-pipeline)
-17. [Construir la aplicación](#construir-la-aplicación)
-18. [Estructura del código](#estructura-del-código)
-19. [Flujo de trabajo con Git](#flujo-de-trabajo-con-git)
-20. [Problemas conocidos y limitaciones](#problemas-conocidos-y-limitaciones)
-21. [Próximos pasos sugeridos](#próximos-pasos-sugeridos)
+16. [Pruebas de rendimiento (JMeter)](#pruebas-de-rendimiento-jmeter)
+17. [Calidad: JaCoCo, PIT, SonarQube y pipeline](#calidad-jacoco-pit-sonarqube-y-pipeline)
+18. [Construir la aplicación](#construir-la-aplicación)
+19. [Estructura del código](#estructura-del-código)
+20. [Flujo de trabajo con Git](#flujo-de-trabajo-con-git)
+21. [Problemas conocidos y limitaciones](#problemas-conocidos-y-limitaciones)
+22. [Próximos pasos sugeridos](#próximos-pasos-sugeridos)
 
 ## Estado del proyecto
 
@@ -234,9 +236,10 @@ sobrecupos. El bloqueo real de PostgreSQL queda para un ambiente staging (ver la
 | Área | Herramienta |
 | --- | --- |
 | Lenguaje y build | Java 21 (toolchain), Gradle Wrapper 9.7.1 |
-| Framework | Spring Boot 4.1.1: Web MVC, Data JPA, Validation, Security, OAuth2 Resource Server (JWT) |
+| Framework | Spring Boot 4.1.1: Web MVC, Data JPA, Validation, Security, OAuth2 Resource Server (JWT), Actuator (solo `/actuator/health`) |
 | Base de datos | PostgreSQL 16 y Flyway en producción; las pruebas no usan base de datos (fakes en memoria, perfil `inmemory`) |
 | Pruebas | JUnit 5, Mockito, MockMvc, Spring Security Test, Cucumber 7.34 (Gherkin), repositorios fake en memoria |
+| Rendimiento | Apache JMeter 5.6.3 (non-GUI) en Docker, contra la API con el perfil `inmemory` limitada a 2 CPU y 1 GiB |
 | Calidad | JaCoCo 0.8.14, PIT 1.19, SonarQube (plugin 7.3), OWASP ZAP API Scan con el contrato de springdoc 3.2 |
 | Contenedores | Docker, Docker Compose |
 | CI | Azure DevOps (`azure-pipelines.yml`) |
@@ -251,6 +254,7 @@ sobrecupos. El bloqueo real de PostgreSQL queda para un ambiente staging (ver la
 | API sin base de datos con tus credenciales | JDK 21 y `ADMIN_PASSWORD`, `JWT_SECRET` | `.env` | `.\gradlew.bat bootRunInMemory` |
 | JAR sin base de datos (E2E, ZAP, JMeter) | JDK 21 y `ADMIN_PASSWORD`, `JWT_SECRET` | — | `.\gradlew.bat inMemoryBootJar` |
 | Ejecutar todo con Docker (API + BD) | Docker | `compose.yaml` | `docker compose up -d --wait` (ver [DOCKER.md](DOCKER.md)) |
+| Prueba de rendimiento (JMeter) | JDK 21 y Docker | `../performance-tests/compose.perf.yaml` | `..\performance-tests\run-perf.ps1 -Scenario normal` (ver [Pruebas de rendimiento](#pruebas-de-rendimiento-jmeter)) |
 | Usar la interfaz web | Node.js 20+ y la API activa | `../frontend` | `npm install` y `npm run dev` |
 
 No es necesario instalar Gradle: el repositorio incluye Gradle Wrapper. Los dos archivos Compose son
@@ -365,12 +369,16 @@ PostgreSQL.
 
 ## Autenticación
 
-Todos los endpoints de `/api/**` requieren un token JWT, excepto `POST /api/auth/login`.
+Todos los endpoints requieren un token JWT, excepto `POST /api/auth/login` y `GET /actuator/health`.
 
 | Método | Ruta | Función | Respuesta |
 | --- | --- | --- | --- |
 | `POST` | `/api/auth/login` | Inicia sesión con `{"username","password"}` | `200` con `token`, `tokenType`, `expiresAt`, `username`; `401` si las credenciales no son válidas; `400` si faltan |
 | `GET` | `/api/auth/me` | Devuelve el usuario del token | `200` con `{"username":"admin"}`; `401` sin token |
+| `GET` | `/actuator/health` | Chequeo de salud (Spring Boot Actuator) para el `HEALTHCHECK` de Docker | `200` con `{"status":"UP"}`; `503` con `{"status":"DOWN"}` si la base de datos no responde |
+
+- `/actuator/health` no muestra detalles ni componentes. Es el único endpoint de Actuator expuesto: el resto
+  de `/actuator/**` responde `401` sin token y `404` con token.
 
 - Hay una única cuenta de administrador, definida con `ADMIN_USERNAME` y `ADMIN_PASSWORD`. La
   contraseña se guarda en memoria cifrada con BCrypt al arrancar.
@@ -606,8 +614,8 @@ perfil `inmemory` (ver [Estrategia de pruebas sin base de datos](#estrategia-de-
 | --- | --- | --- |
 | Unitarias de servicio (Mockito) | `UserServiceTests`, `EventServiceTests`, `RegistrationServiceTests`, `WaitlistServiceTests`, `AuthServiceTests` | Reglas de negocio con repositorios simulados y `Clock` fijo |
 | Unitarias de configuración y modelo | `SecurityConfigTests`, `SecurityPropertiesTests`, `ClockConfigTests`, `EventTests`, `JpaConstructorTests` | Beans de seguridad (la cadena de filtros, en un contexto mínimo nuevo en cada ejecución), validación de variables, reloj y valores iniciales de las entidades |
-| Contrato del fake (sin Spring) | `InMemoryUserRepositoryTests`, `InMemoryEventRepositoryTests`, `InMemoryRegistrationRepositoryTests`, `InMemoryDatabaseTests`, `InMemoryTransactionManagerTests` | Restricciones de la V1, orden de cada consulta, ids, `clear()`, bloqueo por evento y propagación de transacciones |
-| Integración (MockMvc + fakes, perfil `test`) | `UserControllerIntegrationTests`, `EventControllerIntegrationTests`, `RegistrationControllerIntegrationTests`, `AuthControllerIntegrationTests`, `UserUniqueConstraintIntegrationTests`, `CorsIntegrationTests`, `SecurityHeadersIntegrationTests`, `OpenApiDocsIntegrationTests`, `EventPlatformApplicationTests` | Endpoints completos, códigos HTTP, formato de errores, seguridad, CORS y OpenAPI; cada prueba empieza con `InMemoryDatabase.clear()` |
+| Contrato del fake (sin Spring) | `InMemoryUserRepositoryTests`, `InMemoryEventRepositoryTests`, `InMemoryRegistrationRepositoryTests`, `InMemoryDatabaseTests`, `InMemoryTransactionManagerTests` | Restricciones de la V1, orden de cada consulta, índices, ids, `clear()`, bloqueo por evento, *dirty checking* y propagación de transacciones |
+| Integración (MockMvc + fakes, perfil `test`) | `UserControllerIntegrationTests`, `EventControllerIntegrationTests`, `RegistrationControllerIntegrationTests`, `AuthControllerIntegrationTests`, `UserUniqueConstraintIntegrationTests`, `CorsIntegrationTests`, `SecurityHeadersIntegrationTests`, `OpenApiDocsIntegrationTests`, `ActuatorIntegrationTests`, `EventPlatformApplicationTests` | Endpoints completos, códigos HTTP, formato de errores, seguridad, CORS, OpenAPI y `/actuator/health`; cada prueba empieza con `InMemoryDatabase.clear()` |
 | Concurrencia (fakes, transacciones reales en 32 hilos) | `RegistrationConcurrencyIntegrationTests` | Estrés de 1000 usuarios por 100 cupos y 20 cancelaciones simultáneas |
 | Aceptación (Cucumber, perfil `acceptance`) | `src/test/resources/features/*.feature` y `src/test/java/steps` | Escenarios Gherkin en inglés de las reglas de negocio |
 
@@ -683,13 +691,18 @@ su classpath, y el bootJar de producción no. Todas sus clases llevan `@Profile(
 - **Restricciones de la V1**, con `DataIntegrityViolationException` y el mismo mensaje de PostgreSQL:
   `NOT NULL`; email único (sin distinguir mayúsculas) y documento único; `(user_id, event_id)` único;
   llaves foráneas de `registrations` (al insertar y al borrar usuarios o eventos); `capacity > 0`;
-  `end_date > start_date`; `0 <= registered_count <= capacity`. Se revisan en `save` y, para las
-  entidades que leyó o guardó una transacción de escritura, otra vez antes del commit, que es cuando
-  Hibernate hace el *flush*.
+  `end_date > start_date`; `0 <= registered_count <= capacity`. Se revisan en `save` y otra vez antes
+  del commit, que es cuando Hibernate hace el *flush*, pero como Hibernate (*dirty checking*) solo para
+  las entidades que la transacción cambió: leer una fila nunca toma el candado de escritura de su tabla.
 - **Consultas**: los métodos de `JpaRepository` que usan los servicios y las pruebas (`save`, `saveAll`,
   `findById`, `findAll`, `existsById`, `count`, `deleteById`, `deleteAllInBatch`, `deleteAllByIdInBatch`)
   y todas las consultas derivadas, con el mismo filtro y orden que su nombre (incluida la de `Limit`).
   Los métodos que la aplicación no usa lanzan `UnsupportedOperationException`.
+- **Índices**: las inscripciones tienen índices por evento, por usuario y por (usuario, evento), como
+  `idx_registrations_event`, `idx_registrations_user` y `uk_registrations_user_event`. Las consultas por
+  evento cuestan O(k log k) con k inscripciones del evento, las de un usuario O(m log m), y la búsqueda
+  por (usuario, evento), la unicidad y las llaves foráneas O(1); ninguna recorre toda la tabla. Las de
+  usuarios por correo o documento sí la recorren (O(n)), pero solo al crear o editar un usuario.
 - **Bloqueo pesimista**: `findByIdForUpdate` toma un `ReentrantLock` por evento una sola vez por
   transacción y lo libera en `afterCompletion` de una `TransactionSynchronization`. Dos transacciones
   sobre el mismo evento se ejecutan una después de la otra; eventos distintos no se bloquean.
@@ -712,6 +725,53 @@ su classpath, y el bootJar de producción no. Todas sus clases llevan `@Profile(
   `UserService` siempre guarda el email en minúsculas.
 - El fake no cuenta para JaCoCo ni PIT (miden solo `src/main`); su comportamiento lo cubren las pruebas
   de contrato `InMemory*Tests`.
+
+## Pruebas de rendimiento (JMeter)
+
+La carpeta `../performance-tests` tiene la prueba de carga con **Apache JMeter 5.6.3** (detalle completo en
+[performance-tests/README.md](../performance-tests/README.md)). No se ejecuta "suelta" en el equipo:
+`run-perf.ps1` levanta en Docker la API con el perfil `inmemory` (sin base de datos), limitada a **2 CPU y
+1 GiB**, y un contenedor de JMeter que solo la alcanza por una red interna; genera secretos aleatorios para
+cada ejecución y siempre baja los contenedores al final.
+
+```powershell
+cd ..\performance-tests
+powershell -ExecutionPolicy Bypass -File .\run-perf.ps1 -Scenario normal   # 50 usuarios, 5 min
+powershell -ExecutionPolicy Bypass -File .\run-perf.ps1 -Scenario pico     # 200 usuarios, 5 min
+powershell -ExecutionPolicy Bypass -File .\run-perf.ps1 -Scenario aforo    # 1000 inscripciones a la vez
+```
+
+Cada usuario virtual crea su usuario, se inscribe una vez en uno de 20 eventos y luego consulta eventos,
+disponibilidad, lista de espera y sus eventos con 0,5 a 1,5 s de *think time*. El escenario `aforo` repite
+el escenario de estrés del enunciado por HTTP: 1000 inscripciones simultáneas (Synchronizing Timer) a un
+evento de 100 cupos. Cada ejecución deja en `performance-tests/results/<escenario>-<fecha>/` el `.jtl`, el
+dashboard HTML de JMeter, `docker-stats.csv` (CPU y memoria cada 5 s) y `resumen.md` con CUMPLE / NO CUMPLE
+por petición.
+
+Criterios: errores < 1 %; p95 < 500 ms en consultas y < 1000 ms en creación de usuario e inscripción;
+0 sobrecupos en `aforo`.
+
+Resultados de referencia del 2026-11-20 (Docker Desktop en Windows; la API con su límite de 2 CPU y 1 GiB).
+La CPU de `docker stats` es relativa a un núcleo, así que el máximo posible es 200 %:
+
+| Escenario | Peticiones | Errores | p95 consultas | p95 crear usuario / inscribir | Throughput | CPU máx. API | Memoria máx. API | Resultado |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| `normal` (50 usuarios, 5 min) | 14302 | 0 % | 3 ms | 10 ms / 11 ms | 47.6 req/s | 71 % | 244 MiB | CUMPLE |
+| `pico` (200 usuarios, 5 min) | 54038 | 0 % | 2 ms | 6 ms / 6 ms | 179.6 req/s | 101 % | 224 MiB | CUMPLE |
+| `aforo` (1000 inscripciones a la vez) | 2003 | 0 % | — | 7 ms / 1894 ms | 430 inscripciones/s | 112 % | 272 MiB | 0 sobrecupos (100 `CONFIRMED`, 900 `WAITING_LIST`); el p95 de la inscripción NO CUMPLE |
+
+Lectura de los resultados:
+- En `normal` y `pico` no hay cuello de botella: la API usa en promedio 12 % y 18 % de CPU y menos de
+  250 MiB. El *think time* limita la carga a cerca de una petición por segundo por usuario.
+- En `aforo`, el cuello de botella es el bloqueo por evento, y es intencional: las 1000 inscripciones al
+  mismo evento se atienden de una en una (unos 2,3 ms cada una, 430 por segundo). Por eso la última espera
+  unos 2 s y el p95 queda en 1,9 s. No falta CPU ni memoria; esa espera es la que garantiza 0 sobrecupos.
+  Bajar ese p95 exigiría otro diseño (por ejemplo, una cola de inscripciones), no más recursos. Con
+  PostgreSQL el bloqueo de fila también atiende de a una, así que en staging el p95 será mayor.
+
+**Limitación:** mide la API (Spring MVC, JWT, JSON, reglas de negocio y el bloqueo por evento) con el fake
+en memoria. No mide PostgreSQL (pool de conexiones, SQL, E/S ni el bloqueo real de fila); eso queda para
+un ambiente staging con los mismos planes.
 
 ## Calidad: JaCoCo, PIT, SonarQube y pipeline
 
@@ -770,10 +830,11 @@ Maven y .NET.
 
 Pasos: verificar Java y Gradle → `clean build jacocoTestReport` → `acceptanceTest` → publicar
 resultados JUnit/Cucumber → publicar cobertura → `pitest` → SonarQube (opcional) → OWASP ZAP
-API Scan (activado por defecto) → publicar el artefacto `quality-reports` con todos los reportes.
+API Scan (activado por defecto) → pruebas de rendimiento con JMeter (activadas por defecto) → publicar
+el artefacto `quality-reports` con todos los reportes.
 
-Los pasos que descargan o suben a Azure (SDK de .NET, cobertura, evidencias de ZAP y reportes) se
-reintentan hasta 2 veces (`retryCountOnTaskFailure`) si la red del agente falla un momento, por ejemplo
+Los pasos que descargan o suben a Azure (SDK de .NET, cobertura, evidencias de ZAP y de JMeter, imágenes
+de rendimiento y reportes) se reintentan hasta 2 veces (`retryCountOnTaskFailure`) si la red del agente falla un momento, por ejemplo
 con `No such host is known`; sin eso, un corte breve se salta PIT, SonarQube y ZAP. La publicación de
 pruebas no se reintenta: falla a propósito si hay pruebas fallidas y repetirla duplicaría los resultados.
 
@@ -790,9 +851,10 @@ Los pasos `ZAP 01` a `ZAP 06` hacen un análisis pasivo (DAST) de la API en ejec
 2. Lo arrancan con los perfiles `inmemory,zap` (`application-zap.properties`) en el puerto `8081`, sin
    variables `DB_*` y con un administrador `zap_admin` y un `JWT_SECRET` aleatorios en cada ejecución
    (ocultos en el log).
-3. Usan `POST /api/auth/login` como chequeo de salud (es el único endpoint público), crean datos de
-   prueba, descargan con el token el contrato OpenAPI (`/v3/api-docs`, con las 19 operaciones de la API)
-   y pasan el token a ZAP con `ZAP_AUTH_HEADER_VALUE`, limitado al host `host.docker.internal`. ZAP
+3. Esperan a que `GET /actuator/health` responda `UP`, inician sesión con `POST /api/auth/login`, crean
+   datos de prueba, descargan con el token el contrato OpenAPI (`/v3/api-docs`, con las 19 operaciones de
+   la API más `GET /actuator/health`, que el perfil `zap` agrega con `springdoc.show-actuator=true` para
+   que también se escanee) y pasan el token a ZAP con `ZAP_AUTH_HEADER_VALUE`, limitado al host `host.docker.internal`. ZAP
    rellena los ids de ruta (`{id}`, `{eventId}`, `{userId}`) con `10` (variable `zapSampleId`), así que
    se crean eventos y usuarios hasta el id 10 y se inscribe al usuario 10 en el evento 10; sin esos
    datos casi todas las rutas responden `404`. Si no se logran esos ids, el paso deja una advertencia.
@@ -830,6 +892,23 @@ falsas) y `409` (inscripción duplicada o cambio no permitido). Así encontró q
 también envía `X-Content-Type-Options`, `X-Frame-Options` y `Cache-Control`, y la regla de CSP solo
 aplica a respuestas HTML. Esas mediciones se hicieron cuando el escaneo usaba un PostgreSQL desechable;
 ahora las escrituras de ZAP solo afectan a la memoria de la API de laboratorio.
+
+### Rendimiento con JMeter en el pipeline
+
+Con `runPerf` (activado por defecto), los pasos `JMeter 01` a `JMeter 05` ejecutan
+`performance-tests/run-perf.ps1` en el agente:
+
+1. `JMeter 01` comprueba que Docker esté disponible con contenedores Linux; si no, deja una advertencia y
+   los demás pasos se omiten.
+2. `JMeter 02` construye el jar en memoria y las imágenes de la API y de JMeter (`-BuildOnly`). Es el único
+   paso que descarga (Gradle, imágenes base y JMeter), así que se reintenta hasta 2 veces.
+3. `JMeter 03` ejecuta el escenario `normal` (50 usuarios, 5 minutos) y `JMeter 04` el escenario `aforo`
+   (1000 inscripciones simultáneas), ambos con `-SkipBuild` y sin red.
+4. `JMeter 05` publica `performance-tests/results` como el artefacto `reporte-rendimiento-jmeter`.
+
+Un sobrecupo en `aforo` hace fallar el pipeline (el script termina con código 1). Los demás criterios
+(errores y p95) solo dejan advertencias, porque dependen de la carga del agente. El escenario `pico` no se
+ejecuta en el pipeline para no alargarlo; se ejecuta a mano con `-Scenario pico`.
 
 ## Construir la aplicación
 
@@ -899,19 +978,18 @@ event-platform/
 
 | # | Problema | Impacto | Solución propuesta |
 | --- | --- | --- | --- |
-| 1 | El `HEALTHCHECK` del `Dockerfile` consulta `GET /api/users` sin token; desde que existe el login la API responde `401` y `curl --fail` falla (verificado: código de salida 22) | En Docker la API nunca queda `healthy` y `docker compose up --wait` falla o espera hasta el timeout, aunque la API funcione | Aceptar el `401` como señal de vida o exponer un endpoint de salud público (por ejemplo Spring Boot Actuator `/actuator/health`) |
-| 2 | La imagen Docker no define zona horaria: la JVM usa UTC, mientras que las fechas de los eventos se escriben en hora local (Colombia, UTC-5) | En Docker las inscripciones se cerrarían 5 horas antes del inicio real | Definir `TZ=America/Bogota` (o `-Duser.timezone`) en `compose.yaml` |
-| 3 | La promoción de la lista de espera no revisa el estado del usuario | Un usuario inactivado mientras esperaba puede quedar `CONFIRMED` | Decidir si se debe saltar a los usuarios `INACTIVE` |
-| 4 | El estado del evento no cambia con el tiempo | Un evento pasado sigue `SCHEDULED` hasta que se cambie a mano (igual no acepta inscripciones) | Tarea programada o cálculo del estado, si se requiere |
-| 5 | Cancelar un evento no cancela sus inscripciones | Las inscripciones de un evento `CANCELLED` quedan como estaban | Cancelarlas en cascada, si se requiere |
-| 6 | Todo `DataIntegrityViolationException` responde `Email or document is already registered` | Mensaje engañoso si la BD rechaza otro dato | Mensaje genérico o por restricción |
-| 7 | Un solo administrador, sin revocación de tokens ni paginación en los listados | Suficiente para el alcance del proyecto | Usuarios administradores en BD, *refresh tokens* y `Pageable` si crece |
+| 1 | La promoción de la lista de espera no revisa el estado del usuario | Un usuario inactivado mientras esperaba puede quedar `CONFIRMED` | Decidir si se debe saltar a los usuarios `INACTIVE` |
+| 2 | El estado del evento no cambia con el tiempo | Un evento pasado sigue `SCHEDULED` hasta que se cambie a mano (igual no acepta inscripciones) | Tarea programada o cálculo del estado, si se requiere |
+| 3 | Cancelar un evento no cancela sus inscripciones | Las inscripciones de un evento `CANCELLED` quedan como estaban | Cancelarlas en cascada, si se requiere |
+| 4 | Todo `DataIntegrityViolationException` responde `Email or document is already registered` | Mensaje engañoso si la BD rechaza otro dato | Mensaje genérico o por restricción |
+| 5 | Un solo administrador, sin revocación de tokens ni paginación en los listados | Suficiente para el alcance del proyecto | Usuarios administradores en BD, *refresh tokens* y `Pageable` si crece |
+
+El `HEALTHCHECK` de Docker (que consultaba `/api/users` y recibía `401`) y la zona horaria del contenedor
+(UTC en vez de `America/Bogota`) ya están corregidos: ver [DOCKER.md](DOCKER.md).
 
 ## Próximos pasos sugeridos
 
-1. Corregir el healthcheck de Docker y la zona horaria del contenedor (problemas 1 y 2).
-2. Integrar `develop` en `main` antes de la entrega.
-3. Validar en un ambiente staging con PostgreSQL 16 lo que el fake no cubre: Flyway, el SQL de
-   Hibernate y el bloqueo real del escenario de estrés.
-4. Publicar Swagger UI para el equipo (el contrato OpenAPI ya existe, pero solo lo activa el perfil `zap`).
-5. Ejecutar el escenario de estrés contra la API desplegada con una herramienta de carga (JMeter, k6 o Gatling).
+1. Integrar `develop` en `main` antes de la entrega.
+2. Validar en un ambiente staging con PostgreSQL 16 lo que el fake no cubre: Flyway, el SQL de
+   Hibernate y el bloqueo real del escenario de estrés, con los mismos planes de JMeter.
+3. Publicar Swagger UI para el equipo (el contrato OpenAPI ya existe, pero solo lo activa el perfil `zap`).
