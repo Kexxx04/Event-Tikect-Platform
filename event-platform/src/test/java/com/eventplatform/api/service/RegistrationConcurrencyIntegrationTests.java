@@ -3,6 +3,7 @@ package com.eventplatform.api.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.eventplatform.api.dto.registration.RegistrationResponse;
+import com.eventplatform.api.inmemory.InMemoryDatabase;
 import com.eventplatform.api.model.Event;
 import com.eventplatform.api.model.User;
 import com.eventplatform.api.model.enums.EventStatus;
@@ -10,6 +11,7 @@ import com.eventplatform.api.model.enums.RegistrationStatus;
 import com.eventplatform.api.repository.EventRepository;
 import com.eventplatform.api.repository.RegistrationRepository;
 import com.eventplatform.api.repository.UserRepository;
+import com.eventplatform.api.support.EventDates;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +23,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +30,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
- * Stress scenario of the specification: 1000 users race for 100 seats. Each registration runs in
- * its own committed transaction, so the PESSIMISTIC_WRITE lock on the event row is really exercised.
+ * Stress scenario of the specification: 1000 users race for 100 seats. Each registration runs in its own
+ * committed transaction on its own thread, so the row lock that findByIdForUpdate takes (emulated by
+ * InMemoryEventRepository) is really exercised: without it, this test fails with overbooking.
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -52,12 +54,16 @@ class RegistrationConcurrencyIntegrationTests {
     @Autowired
     private RegistrationRepository registrationRepository;
 
+    @Autowired
+    private InMemoryDatabase database;
+
     private Long eventId;
     private List<Long> userIds;
 
     @BeforeEach
     void setUp() {
-        LocalDateTime start = LocalDateTime.of(2030, 5, 10, 18, 0);
+        database.clear();
+        LocalDateTime start = EventDates.daysFromNow(30, 18);
         eventId = eventRepository.save(
                 new Event("Stress Conf", null, start, start.plusHours(3), CAPACITY, EventStatus.SCHEDULED)).getId();
         userIds = userRepository.saveAll(IntStream.range(0, USERS)
@@ -67,13 +73,6 @@ class RegistrationConcurrencyIntegrationTests {
                 .stream()
                 .map(User::getId)
                 .toList();
-    }
-
-    @AfterEach
-    void cleanUp() {
-        registrationRepository.deleteAllInBatch(registrationRepository.findByEventIdOrderByRegistrationDateAscIdAsc(eventId));
-        userRepository.deleteAllByIdInBatch(userIds);
-        eventRepository.deleteById(eventId);
     }
 
     @Test

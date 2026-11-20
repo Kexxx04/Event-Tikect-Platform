@@ -9,8 +9,8 @@ Feature: Event management
     Given the following event data:
       | name        | Java Conf           |
       | description | Talks and workshops |
-      | startDate   | 2030-05-10T18:00:00 |
-      | endDate     | 2030-05-10T21:00:00 |
+      | startDate   | in 30 days at 18:00 |
+      | endDate     | in 30 days at 21:00 |
       | capacity    | 100                 |
 
   @acceptance @create_event

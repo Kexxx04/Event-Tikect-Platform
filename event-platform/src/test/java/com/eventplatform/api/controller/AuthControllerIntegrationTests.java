@@ -8,12 +8,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static com.eventplatform.api.support.EventDates.daysFromNow;
+import static com.eventplatform.api.support.EventDates.iso;
 
+import com.eventplatform.api.inmemory.InMemoryDatabase;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Map;
 import javax.crypto.spec.SecretKeySpec;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -31,13 +35,11 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-@Transactional
 class AuthControllerIntegrationTests {
 
     // Values from application-test.properties.
@@ -48,10 +50,18 @@ class AuthControllerIntegrationTests {
     private MockMvc mockMvc;
 
     @Autowired
+    private InMemoryDatabase database;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
     private JwtEncoder jwtEncoder;
+
+    @BeforeEach
+    void clearDatabase() {
+        database.clear();
+    }
 
     private String loginBody(String username, String password) {
         return objectMapper.writeValueAsString(Map.of("username", username, "password", password));
@@ -94,9 +104,9 @@ class AuthControllerIntegrationTests {
         mockMvc.perform(post("/api/events").header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"name":"Java Conf","startDate":"2030-05-10T18:00:00",
-                                 "endDate":"2030-05-10T21:00:00","capacity":10}
-                                """))
+                                {"name":"Java Conf","startDate":"%s",
+                                 "endDate":"%s","capacity":10}
+                                """.formatted(iso(daysFromNow(30, 18)), iso(daysFromNow(30, 21)))))
                 .andExpect(status().isCreated());
     }
 

@@ -10,8 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.eventplatform.api.repository.EventRepository;
+import com.eventplatform.api.support.EventDates;
 import io.cucumber.datatable.DataTable;
-import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -23,9 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import tools.jackson.databind.ObjectMapper;
 
 public class EventManagementSteps {
@@ -41,30 +38,23 @@ public class EventManagementSteps {
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private EventRepository eventRepository;
-    @Autowired private PlatformTransactionManager transactionManager;
 
-    private TransactionStatus transaction;
     private ResultActions response;
     private Map<String, Object> eventData;
     private String eventLocation;
     private long initialEventCount;
 
+    // Runs after DatabaseHooks (order 0), so it always counts an empty table.
     @Before
     public void beginScenario() {
-        transaction = transactionManager.getTransaction(new DefaultTransactionDefinition());
         initialEventCount = eventRepository.count();
-    }
-
-    @After
-    public void rollbackScenario() {
-        if (transaction != null && !transaction.isCompleted()) {
-            transactionManager.rollback(transaction);
-        }
     }
 
     @Given("the following event data:")
     public void theFollowingEventData(DataTable table) {
         eventData = new LinkedHashMap<>(table.asMap(String.class, String.class));
+        eventData.put("startDate", EventDates.resolve((String) eventData.get("startDate")));
+        eventData.put("endDate", EventDates.resolve((String) eventData.get("endDate")));
         eventData.put("capacity", Integer.valueOf((String) eventData.get("capacity")));
     }
 
@@ -75,7 +65,7 @@ public class EventManagementSteps {
 
     @Given("the event starts at {string}")
     public void theEventStartsAt(String startDate) {
-        eventData.put("startDate", startDate);
+        eventData.put("startDate", EventDates.resolve(startDate));
     }
 
     @Given("an existing event with status {word}")
