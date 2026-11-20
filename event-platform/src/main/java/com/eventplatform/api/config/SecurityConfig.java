@@ -41,9 +41,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             ApiAuthenticationEntryPoint authenticationEntryPoint
-    ) throws Exception {
+    ) {
         http
-                // Stateless API authenticated with bearer tokens (no cookies), so CSRF does not apply.
+                // Safe to disable (Sonar java:S4502 reviewed): the API is stateless, the JWT travels in the
+                // Authorization header and there are no cookies or session, so a forged cross-site request
+                // from a browser never carries the credentials.
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
