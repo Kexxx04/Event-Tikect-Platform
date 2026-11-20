@@ -9,6 +9,10 @@ parameters:
     displayName: Ejecutar SonarQube
     type: boolean
     default: false
+  - name: runZap
+    displayName: Ejecutar OWASP ZAP API Scan (DAST pasivo)
+    type: boolean
+    default: true
 
 pool:
   name: 'Nuevos agentes'
@@ -19,6 +23,17 @@ variables:
   projectDir: 'event-platform'
   system.debug: 'false'
   GRADLE_OPTS: '-Dfile.encoding=UTF-8 -Xmx3072m'
+  # --- OWASP ZAP (ET0202) ---
+  appPort: '8081'                          # puerto libre en el agente
+  loginPath: '/api/auth/login'             # unico endpoint publico: sirve de chequeo de salud y entrega el JWT
+  springProfile: 'zap'                     # perfil de laboratorio (application-zap.properties)
+  apiDocsPath: '/v3/api-docs'              # contrato OpenAPI (solo con el perfil zap) que ZAP importa
+  zapSampleId: '10'                        # valor que ZAP pone en los parametros numericos de ruta
+  zapImage: 'ghcr.io/zaproxy/zaproxy:stable'
+  dbImage: 'postgres:16-alpine'
+  dbName: 'eventplatform_zap'
+  dbUser: 'zap_lab'
+  adminUser: 'zap_admin'
 
 steps:
   - checkout: self
@@ -53,14 +68,19 @@ steps:
       failTaskOnMissingResultsFile: true
       testRunTitle: JUnit y Cucumber
 
+  # retryCountOnTaskFailure: los pasos que descargan o suben a Azure se reintentan si la red falla un
+  # momento (por ejemplo "No such host is known"), en vez de saltarse PIT, SonarQube y ZAP.
+  # PublishTestResults no se reintenta: falla a proposito si hay pruebas fallidas y duplicaria los resultados.
   - task: UseDotNet@2
     displayName: Preparar publicacion de cobertura
+    retryCountOnTaskFailure: 2
     inputs:
       packageType: sdk
       version: '8.x'
 
   - task: PublishCodeCoverageResults@2
     displayName: Publicar cobertura de lineas y ramas
+    retryCountOnTaskFailure: 2
     inputs:
       summaryFileLocation: '$(Build.SourcesDirectory)/$(projectDir)/build/reports/jacoco/test/jacocoTestReport.xml'
       pathToSources: '$(Build.SourcesDirectory)/$(projectDir)/src/main/java'
@@ -88,9 +108,266 @@ steps:
         SONAR_TOKEN: $(SONAR_TOKEN)
         SONAR_HOST_URL: $(SONAR_HOST_URL)
 
+  # =====================================================================
+  # ET0202 - Analisis pasivo de seguridad con OWASP ZAP API Scan
+  # Requiere Docker Desktop abierto (contenedores Linux) en el agente.
+  # La API exige JWT en todas las rutas menos el login, asi que ZAP se
+  # autentica con un administrador de laboratorio creado en cada ejecucion.
+  # Un spider no descubre las rutas de una API JSON: ZAP importa el contrato
+  # OpenAPI de la API y llama a cada endpoint (GET, POST, PUT, PATCH, DELETE).
+  # =====================================================================
+  - ${{ if eq(parameters.runZap, true) }}:
+    - powershell: |
+        $dir = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'zap'
+        New-Item -Path $dir -ItemType Directory -Force | Out-Null
+        Write-Host "##vso[task.setvariable variable=ZapDirReady]true"
+        Write-Host "Reportes: $dir"
+      displayName: 'ZAP 01 - Crear carpeta de reportes'
+
+    - powershell: |
+        docker version
+        if ($LASTEXITCODE -ne 0) { throw 'Docker no disponible. Abre Docker Desktop en el equipo del agente.' }
+        $tipo = docker info --format '{{.OSType}}'
+        if ($LASTEXITCODE -ne 0 -or "$tipo".Trim() -ne 'linux') {
+          throw 'Docker Desktop debe ejecutar contenedores Linux.'
+        }
+        $libs = Join-Path '$(Build.SourcesDirectory)' '$(projectDir)\build\libs'
+        if (-not (Test-Path $libs)) { throw "No existe $libs. El build no genero el bootJar." }
+        docker pull '$(zapImage)'
+        if ($LASTEXITCODE -ne 0) { throw 'No se pudo descargar la imagen de ZAP.' }
+        docker pull '$(dbImage)'
+        if ($LASTEXITCODE -ne 0) { throw 'No se pudo descargar la imagen de PostgreSQL.' }
+      displayName: 'ZAP 02 - Verificar Docker e imagenes'
+
+    - powershell: |
+        # Base de datos desechable SOLO para el laboratorio: contrasena aleatoria por ejecucion,
+        # puerto aleatorio enlazado a 127.0.0.1 y contenedor eliminado en ZAP 07.
+        $nombre = "ep-zap-db-$(Build.BuildId)"
+        $env:POSTGRES_PASSWORD = [guid]::NewGuid().ToString('N')
+        Write-Host "##vso[task.setvariable variable=ZapDbPassword;issecret=true]$($env:POSTGRES_PASSWORD)"
+        if (docker ps -aq --filter "name=^$nombre$") { docker rm -f $nombre | Out-Null }
+        docker run -d --name $nombre `
+          -e POSTGRES_DB='$(dbName)' -e POSTGRES_USER='$(dbUser)' -e POSTGRES_PASSWORD `
+          -p 127.0.0.1::5432 '$(dbImage)' | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw 'No se pudo iniciar PostgreSQL en Docker.' }
+        Write-Host "##vso[task.setvariable variable=ZapDbContainer]$nombre"
+
+        $mapeo = (docker port $nombre 5432 | Select-Object -First 1)
+        if ("$mapeo" -notmatch ':(\d+)\s*$') { throw "No se pudo leer el puerto de PostgreSQL: $mapeo" }
+        $puerto = $Matches[1]
+        Write-Host "##vso[task.setvariable variable=ZapDbPort]$puerto"
+
+        $listo = $false
+        for ($i = 1; $i -le 30; $i++) {
+          docker exec $nombre pg_isready -h 127.0.0.1 -U '$(dbUser)' -d '$(dbName)' | Out-Null
+          if ($LASTEXITCODE -eq 0) { $listo = $true; break }
+          Start-Sleep -Seconds 2
+        }
+        $global:LASTEXITCODE = 0
+        if (-not $listo) { docker logs $nombre --tail 30; throw 'PostgreSQL no quedo listo.' }
+        Write-Host "PostgreSQL de laboratorio listo en 127.0.0.1:$puerto"
+      displayName: 'ZAP 03 - Iniciar PostgreSQL de laboratorio'
+
+    - powershell: |
+        $dir  = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'zap'
+        $libs = Join-Path $env:BUILD_SOURCESDIRECTORY '$(projectDir)\build\libs'
+        $jar = Get-ChildItem $libs -Filter '*.jar' |
+          Where-Object { $_.Name -notlike '*-plain.jar' } |
+          Sort-Object LastWriteTime -Descending |
+          Select-Object -First 1
+        if (-not $jar) { throw 'No se encontro el bootJar en build\libs.' }
+        Write-Host "JAR: $($jar.FullName)"
+
+        # Variables que lee application.properties (tienen prioridad sobre un .env).
+        $env:DB_URL      = 'jdbc:postgresql://127.0.0.1:$(ZapDbPort)/$(dbName)'
+        $env:DB_USERNAME = '$(dbUser)'
+        $env:DB_PASSWORD = $env:ZAP_DB_PASSWORD
+        # Administrador y clave JWT SOLO de laboratorio: aleatorios en cada ejecucion y ocultos en el log.
+        $env:ADMIN_USERNAME = '$(adminUser)'
+        $env:ADMIN_PASSWORD = [guid]::NewGuid().ToString('N')
+        $env:JWT_SECRET     = [guid]::NewGuid().ToString('N') + [guid]::NewGuid().ToString('N')
+        $env:JWT_EXPIRATION = 'PT1H'
+        Write-Host "##vso[task.setsecret]$($env:ADMIN_PASSWORD)"
+        Write-Host "##vso[task.setsecret]$($env:JWT_SECRET)"
+
+        $java = Join-Path $env:JAVA_HOME 'bin\java.exe'
+        $out  = Join-Path $dir 'aplicacion-salida.log'
+        $err  = Join-Path $dir 'aplicacion-error.log'
+        # El registro de acceso HTTP (acceso-http.log) muestra cada peticion de ZAP y su codigo.
+        $javaArgs = '-jar "' + $jar.FullName + '"' +
+                    ' --server.port=$(appPort)' +
+                    ' --spring.profiles.active=$(springProfile)' +
+                    ' --server.tomcat.accesslog.directory="' + $dir + '"'
+        $proc = Start-Process -FilePath $java -ArgumentList $javaArgs -PassThru `
+                  -RedirectStandardOutput $out -RedirectStandardError $err
+        Write-Host "##vso[task.setvariable variable=AppPid]$($proc.Id)"
+
+        # Chequeo de salud: el login es publico y su token es el que ZAP necesita.
+        $loginUrl = 'http://127.0.0.1:$(appPort)$(loginPath)'
+        $cuerpo = @{ username = $env:ADMIN_USERNAME; password = $env:ADMIN_PASSWORD } | ConvertTo-Json
+        $token = $null
+        for ($i = 1; $i -le 60; $i++) {
+          $proc.Refresh()
+          if ($proc.HasExited) { break }
+          try {
+            $respuesta = Invoke-RestMethod -Method Post -Uri $loginUrl -ContentType 'application/json' `
+                           -Body $cuerpo -TimeoutSec 5
+            $token = $respuesta.token
+            if ($token) { break }
+          } catch { Start-Sleep -Seconds 3 }
+        }
+        if (-not $token) {
+          Write-Host '--- Ultimas lineas del log de la aplicacion ---'
+          Get-Content $out -Tail 40 -ErrorAction SilentlyContinue
+          Get-Content $err -Tail 40 -ErrorAction SilentlyContinue
+          throw "La aplicacion no respondio el login en $loginUrl"
+        }
+        Write-Host "##vso[task.setvariable variable=ZapAuthToken;issecret=true]$token"
+
+        # Datos de prueba (de paso confirman que Flyway y JPA funcionan contra PostgreSQL).
+        # ZAP rellena los parametros numericos de ruta ({id}, {eventId}, {userId}) con zapSampleId, asi que
+        # se crean eventos y usuarios hasta ese id y se inscribe a ese usuario en ese evento. Sin esto,
+        # casi todas las rutas responden 404 y ZAP solo analiza respuestas de error.
+        $cabeceras = @{ Authorization = "Bearer $token" }
+        $api = 'http://127.0.0.1:$(appPort)/api'
+        $idZap = [long]'$(zapSampleId)'
+        $inicio = (Get-Date).AddDays(30)
+        $evento = $null
+        for ($n = 1; $n -le $idZap -and $evento.id -ne $idZap; $n++) {
+          $datosEvento = @{
+            name        = "ZAP lab event $n"
+            description = 'Created by the pipeline for the OWASP ZAP API scan'
+            startDate   = $inicio.ToString("yyyy-MM-dd'T'HH:mm:ss")
+            endDate     = $inicio.AddHours(2).ToString("yyyy-MM-dd'T'HH:mm:ss")
+            capacity    = 10
+          } | ConvertTo-Json
+          $evento = Invoke-RestMethod -Method Post -Uri "$api/events" -Headers $cabeceras `
+            -ContentType 'application/json' -Body $datosEvento
+        }
+        $usuario = $null
+        for ($n = 1; $n -le $idZap -and $usuario.id -ne $idZap; $n++) {
+          $datosUsuario = @{ name = "ZAP lab user $n"; email = "zap-user-$n@example.com"; document = "ZAP-$n" } |
+            ConvertTo-Json
+          $usuario = Invoke-RestMethod -Method Post -Uri "$api/users" -Headers $cabeceras `
+            -ContentType 'application/json' -Body $datosUsuario
+        }
+        if ($evento.id -eq $idZap -and $usuario.id -eq $idZap) {
+          $registro = Invoke-RestMethod -Method Post -Uri "$api/events/$idZap/registrations" -Headers $cabeceras `
+            -ContentType 'application/json' -Body (@{ userId = $idZap } | ConvertTo-Json)
+          Write-Host ('Datos de prueba: evento {0}, usuario {0} e inscripcion {1}' -f $idZap, $registro.status)
+        } else {
+          Write-Host ('##vso[task.logissue type=warning]No hay evento y usuario con id {0} (ultimos ids: {1} y {2}): ZAP recibira 404 en las rutas con id.' -f $idZap, $evento.id, $usuario.id)
+        }
+        $eventos = Invoke-RestMethod -Uri "$api/events" -Headers $cabeceras
+        Write-Host ('Aplicacion lista. Eventos en /api/events: {0}' -f @($eventos).Count)
+
+        # Contrato OpenAPI con todas las rutas y metodos (tambien exige el JWT). ZAP 05 lo importa
+        # desde esta carpeta y queda publicado como evidencia del alcance del analisis.
+        $contratoArchivo = Join-Path $dir 'openapi.json'
+        Invoke-WebRequest -Uri 'http://127.0.0.1:$(appPort)$(apiDocsPath)' -Headers $cabeceras `
+          -UseBasicParsing -OutFile $contratoArchivo
+        $contrato = Get-Content $contratoArchivo -Raw -Encoding UTF8 | ConvertFrom-Json
+        $metodosHttp = 'get', 'post', 'put', 'patch', 'delete'
+        $rutas = @($contrato.paths.PSObject.Properties)
+        $operaciones = 0
+        foreach ($ruta in $rutas) {
+          $operaciones += @($ruta.Value.PSObject.Properties | Where-Object { $metodosHttp -contains $_.Name }).Count
+        }
+        if ($operaciones -eq 0) { throw 'El contrato OpenAPI ($(apiDocsPath)) no tiene operaciones.' }
+        Write-Host "##vso[task.setvariable variable=ZapOperaciones]$operaciones"
+        Write-Host ('Contrato OpenAPI: {0} rutas y {1} operaciones' -f $rutas.Count, $operaciones)
+      displayName: 'ZAP 04 - Iniciar aplicacion, autenticar y descargar contrato OpenAPI'
+      env:
+        ZAP_DB_PASSWORD: $(ZapDbPassword)
+
+    - powershell: |
+        $dir    = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'zap'
+        $mount  = "${dir}:/zap/wrk:rw"
+        $target = 'http://host.docker.internal:$(appPort)'
+        # ZAP agrega "Authorization: Bearer <token>" a cada peticion enviada a ese host.
+        $env:ZAP_AUTH_HEADER_VALUE = "Bearer $env:ZAP_TOKEN"
+        $env:ZAP_AUTH_HEADER_SITE  = 'host.docker.internal'
+        Write-Host "Objetivo ZAP: $target, $(ZapOperaciones) operaciones de openapi.json (autenticado como $(adminUser))"
+        # Las lineas que ya tiene el registro de acceso son de ZAP 04; las nuevas seran de ZAP.
+        $acceso = Get-ChildItem $dir -Filter 'acceso-http*.log' | Select-Object -First 1
+        $lineasPrevias = 0
+        if ($acceso) { $lineasPrevias = @(Get-Content $acceso.FullName).Count }
+        # -t: contrato que ZAP 04 guardo en la carpeta montada.
+        # -O: el contrato apunta a 127.0.0.1, pero desde Docker la API se alcanza por host.docker.internal.
+        # -S: modo seguro, sin escaneo activo (solo analisis pasivo de las respuestas).
+        docker run --rm -e ZAP_AUTH_HEADER_VALUE -e ZAP_AUTH_HEADER_SITE -v "$mount" '$(zapImage)' `
+          zap-api-scan.py -t /zap/wrk/openapi.json -f openapi -O $target -S `
+          -r reporte-zap.html -J reporte-zap.json -I
+        $codigo = $LASTEXITCODE
+        $global:LASTEXITCODE = 0
+        Write-Host "Codigo ZAP: $codigo"
+        # 0 = sin alertas o solo advertencias (-I), 1 = alertas FAIL, 2 = advertencias. Otro codigo = fallo operativo.
+        if ($codigo -notin @(0, 1, 2)) { throw "Fallo operativo de ZAP: $codigo" }
+        if (-not (Test-Path (Join-Path $dir 'reporte-zap.html'))) { throw 'No existe reporte-zap.html' }
+        if (-not (Test-Path (Join-Path $dir 'reporte-zap.json'))) { throw 'No existe reporte-zap.json' }
+
+        # Resumen de lo que envio y recibio ZAP, segun el registro de acceso de Tomcat.
+        $acceso = Get-ChildItem $dir -Filter 'acceso-http*.log' | Select-Object -First 1
+        $resumen = 'sin registro de acceso'
+        $resumenMetodos = 'sin registro de acceso'
+        if ($acceso) {
+          $lineasZap = @(Get-Content $acceso.FullName) | Select-Object -Skip $lineasPrevias
+          # Formato: %t %a "%r" %s %b -> el codigo HTTP es el penultimo campo y el metodo abre "%r".
+          $codigos = $lineasZap | ForEach-Object { ($_ -split ' ')[-2] } | Group-Object | Sort-Object Name
+          $metodos = $lineasZap | ForEach-Object { if ($_ -match '"([A-Z]+) ') { $Matches[1] } } |
+            Group-Object | Sort-Object Name
+          $resumen = ($codigos | ForEach-Object { "$($_.Name)=$($_.Count)" }) -join ', '
+          $resumenMetodos = ($metodos | ForEach-Object { "$($_.Name)=$($_.Count)" }) -join ', '
+          $total = ($codigos | Measure-Object -Property Count -Sum).Sum
+          $no401 = ($codigos | Where-Object { $_.Name -ne '401' } | Measure-Object -Property Count -Sum).Sum
+          if ($total -gt 0 -and -not $no401) {
+            Write-Host '##vso[task.logissue type=warning]ZAP solo recibio 401: la autenticacion no funciono y el analisis cubrio solo respuestas de error.'
+          }
+          if ($total -gt 0 -and -not ($metodos | Where-Object { $_.Name -ne 'GET' })) {
+            Write-Host '##vso[task.logissue type=warning]ZAP solo envio GET: no uso el contrato OpenAPI y el analisis no cubre las rutas de escritura.'
+          }
+        }
+        if (-not $resumen) { $resumen = 'ninguna' }
+        if (-not $resumenMetodos) { $resumenMetodos = 'ninguno' }
+        Write-Host "Metodos HTTP enviados por ZAP: $resumenMetodos"
+        Write-Host "Respuestas HTTP a ZAP: $resumen"
+        "Build: $(Build.BuildNumber) | Id: $(Build.BuildId) | Rama: $(Build.SourceBranchName) | Commit: $(Build.SourceVersion) | Objetivo: $target | Contrato: openapi.json ($(ZapOperaciones) operaciones) | Autenticacion: JWT de $(adminUser) | Metodos HTTP de ZAP: $resumenMetodos | Respuestas HTTP a ZAP: $resumen | Fecha: $(Get-Date -Format o)" |
+          Out-File (Join-Path $dir 'ejecucion.txt') -Encoding utf8
+      displayName: 'ZAP 05 - OWASP ZAP API Scan'
+      env:
+        ZAP_TOKEN: $(ZapAuthToken)
+
+    # Detener la API ANTES de publicar: mientras Java corre, sus logs siguen abiertos
+    # y PublishPipelineArtifact no puede leerlos.
+    - powershell: |
+        $procesoId = '$(AppPid)'
+        if ($procesoId -match '^\d+$') {
+          Stop-Process -Id ([int]$procesoId) -Force -ErrorAction SilentlyContinue
+          Wait-Process -Id ([int]$procesoId) -Timeout 30 -ErrorAction SilentlyContinue
+          Write-Host "Aplicacion detenida (PID $procesoId)"
+        }
+        $db = '$(ZapDbContainer)'
+        if ($db -like 'ep-zap-db-*') {
+          docker rm -f $db | Out-Null
+          Write-Host "Contenedor $db eliminado"
+        }
+        $global:LASTEXITCODE = 0
+      condition: always()
+      displayName: 'ZAP 06 - Detener aplicacion y base de laboratorio'
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'ZAP 07 - Publicar evidencias'
+      condition: and(succeededOrFailed(), eq(variables['ZapDirReady'], 'true'))
+      retryCountOnTaskFailure: 2
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/zap'
+        artifact: 'reporte-seguridad-zap'
+        publishLocation: 'pipeline'
+
   - task: PublishBuildArtifacts@1
     condition: succeededOrFailed()
     displayName: Guardar reportes HTML y XML
+    retryCountOnTaskFailure: 2
     inputs:
       PathtoPublish: '$(Build.SourcesDirectory)/$(projectDir)/build/reports'
       ArtifactName: quality-reports

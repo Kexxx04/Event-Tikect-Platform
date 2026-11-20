@@ -1,0 +1,90 @@
+plugins {
+    id 'java'
+    // Adds the "aggregate" task that builds the Serenity HTML report in target/site/serenity.
+    id 'net.serenity-bdd.serenity-gradle-plugin' version '5.4.1'
+}
+
+group = 'com.eventplatform'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    serenityVersion = '5.4.1'
+    cucumberVersion = '8.0.4'
+    junitVersion = '6.1.3'
+}
+
+dependencies {
+    testImplementation "net.serenity-bdd:serenity-core:${serenityVersion}"
+    testImplementation "net.serenity-bdd:serenity-cucumber:${serenityVersion}"
+    testImplementation "net.serenity-bdd:serenity-screenplay:${serenityVersion}"
+    testImplementation "net.serenity-bdd:serenity-screenplay-webdriver:${serenityVersion}"
+
+    testImplementation "io.cucumber:cucumber-java:${cucumberVersion}"
+    testImplementation "io.cucumber:cucumber-junit-platform-engine:${cucumberVersion}"
+
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation 'org.junit.platform:junit-platform-suite'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    testImplementation 'org.hamcrest:hamcrest:3.0'
+    testRuntimeOnly 'org.slf4j:slf4j-simple:2.0.17'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+// Overrides of serenity.conf. Serenity only reads Java system properties, so each value is taken from
+// a Gradle property (-Pname=value) or, if absent, from an environment variable, and passed to the test JVM.
+//   Gradle property   Environment variable   System property        Default (serenity.conf)
+//   -Ptags            E2E_TAGS               cucumber.filter.tags   all scenarios
+//   -Pbrowser         E2E_BROWSER            environment            chrome (edge is also defined)
+//   -Pheadless        E2E_HEADLESS           headless.mode          false
+//   -PbaseUrl         E2E_BASE_URL           webdriver.base.url     http://localhost:5173
+//   (none)            E2E_ADMIN_USERNAME     e2e.admin.username     admin
+//   (none)            E2E_ADMIN_PASSWORD     e2e.admin.password     test-admin-password
+//   (none)            E2E_TIMEZONE           e2e.timezone           America/Bogota
+// The credentials are only read from environment variables, so they never appear in the command line.
+def overrides = [
+        [gradle: 'tags', env: 'E2E_TAGS', jvm: 'cucumber.filter.tags'],
+        [gradle: 'browser', env: 'E2E_BROWSER', jvm: 'environment'],
+        [gradle: 'headless', env: 'E2E_HEADLESS', jvm: 'headless.mode'],
+        [gradle: 'baseUrl', env: 'E2E_BASE_URL', jvm: 'webdriver.base.url'],
+        [gradle: null, env: 'E2E_ADMIN_USERNAME', jvm: 'e2e.admin.username'],
+        [gradle: null, env: 'E2E_ADMIN_PASSWORD', jvm: 'e2e.admin.password'],
+        [gradle: null, env: 'E2E_TIMEZONE', jvm: 'e2e.timezone'],
+]
+
+test {
+    useJUnitPlatform()
+    overrides.each { override ->
+        def value = override.gradle && project.hasProperty(override.gradle)
+                ? project.property(override.gradle)
+                : System.getenv(override.env)
+        // "chrome" is the default environment of serenity.conf, so it needs no override.
+        if (value && !(override.jvm == 'environment' && value == 'chrome')) {
+            systemProperty override.jvm, value
+        }
+    }
+    systemProperty 'file.encoding', 'UTF-8'
+    testLogging {
+        showStandardStreams = true
+        events 'passed', 'skipped', 'failed'
+    }
+    // E2E results depend on the running application, so the tests never count as up to date.
+    outputs.upToDateWhen { false }
+    finalizedBy 'aggregate'
+}
+
+// Build the Serenity report even when a scenario fails.
+gradle.startParameter.continueOnFailure = true

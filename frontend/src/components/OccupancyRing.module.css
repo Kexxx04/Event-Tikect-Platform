@@ -1,0 +1,16 @@
+.ring {
+  display: block;
+  flex-shrink: 0;
+}
+
+.track {
+  stroke: var(--color-border);
+}
+
+.value {
+  stroke: var(--color-accent);
+}
+
+.full .value {
+  stroke: var(--status-waitlist-bar);
+}

@@ -1,0 +1,47 @@
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-5);
+  border-radius: var(--radius-lg);
+  font-size: 15px;
+}
+
+.icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.body {
+  min-width: 0;
+}
+
+.body p,
+.body ul {
+  margin: 0;
+}
+
+.body ul {
+  margin-top: var(--space-1);
+  padding-left: var(--space-5);
+}
+
+.title {
+  font-weight: 600;
+}
+
+.error {
+  background: var(--status-cancelled-bg);
+  color: var(--status-cancelled-fg);
+}
+
+.warning {
+  background: var(--status-waitlist-bg);
+  color: var(--status-waitlist-fg);
+}
+
+.success {
+  background: var(--status-active-bg);
+  color: var(--status-active-fg);
+}

@@ -7,38 +7,84 @@ import java.util.Map;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(UserNotFoundException.class)
+    @ExceptionHandler({
+            UserNotFoundException.class,
+            EventNotFoundException.class,
+            RegistrationNotFoundException.class
+    })
     public ResponseEntity<ApiError> handleNotFound(
-            UserNotFoundException exception,
+            RuntimeException exception,
             HttpServletRequest request
     ) {
         return buildError(HttpStatus.NOT_FOUND, exception.getMessage(), request, Map.of());
     }
 
-    @ExceptionHandler({DuplicateUserException.class, DataIntegrityViolationException.class})
+    @ExceptionHandler({
+            DuplicateUserException.class,
+            BusinessRuleViolationException.class,
+            DataIntegrityViolationException.class
+    })
     public ResponseEntity<ApiError> handleConflict(
             Exception exception,
             HttpServletRequest request
     ) {
-        String message = exception instanceof DuplicateUserException
-                ? exception.getMessage()
-                : "Email or document is already registered";
+        String message = exception instanceof DataIntegrityViolationException
+                ? "Email or document is already registered"
+                : exception.getMessage();
         return buildError(HttpStatus.CONFLICT, message, request, Map.of());
     }
 
-    @ExceptionHandler(InvalidUserDataException.class)
+    @ExceptionHandler({InvalidUserDataException.class, InvalidEventDataException.class})
     public ResponseEntity<ApiError> handleInvalidData(
-            InvalidUserDataException exception,
+            RuntimeException exception,
             HttpServletRequest request
     ) {
         return buildError(HttpStatus.BAD_REQUEST, exception.getMessage(), request, Map.of());
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiError> handleAuthentication(
+            AuthenticationException exception,
+            HttpServletRequest request
+    ) {
+        // Same message for unknown users and wrong passwords, so usernames cannot be probed.
+        return buildError(HttpStatus.UNAUTHORIZED, "Invalid username or password", request, Map.of());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> handleUnreadableMessage(
+            HttpMessageNotReadableException exception,
+            HttpServletRequest request
+    ) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "Malformed JSON request",
+                request,
+                Map.of()
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> handleTypeMismatch(
+            MethodArgumentTypeMismatchException exception,
+            HttpServletRequest request
+    ) {
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                "Invalid value for parameter '" + exception.getName() + "'",
+                request,
+                Map.of()
+        );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -3,8 +3,11 @@
 ## Proyecto
 API REST (Java 21, Spring Boot 4, Spring Web MVC, Spring Data JPA, PostgreSQL 16, Flyway, Gradle Wrapper)
 para administrar eventos e inscripciones garantizando que NUNCA se supere el aforo.
-Estado actual: la gestión de usuarios (/api/users) está completa. Las entidades y tablas de
-events y registrations ya existen (migración V1), pero no tienen repositorio/servicio/controlador.
+Estado actual: usuarios (/api/users), eventos (/api/events), inscripciones y lista de espera
+(/api/events/{eventId}/registrations, /api/events/{eventId}/waitlist, /api/users/{userId}/events)
+y login JWT del administrador (/api/auth) están completos, con pruebas unitarias, de integración,
+Cucumber y de concurrencia. El frontend React está en ../frontend. Detalle y problemas conocidos
+en README.md.
 
 ## Idioma
 - Todo el código, nombres de clases, métodos, variables, endpoints, mensajes de error,

@@ -1,0 +1,67 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+  min-width: 0;
+}
+
+.field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.required {
+  color: var(--color-danger);
+}
+
+.field :is(input, textarea, select) {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 15px;
+}
+
+.field textarea {
+  min-height: 120px;
+  padding: var(--space-3) var(--space-4);
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.field :is(input, textarea)::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.75;
+}
+
+.field :is(input, textarea, select):focus {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 0;
+  border-color: var(--color-accent);
+  background: var(--color-surface);
+}
+
+.invalid :is(input, textarea, select) {
+  border: 1.5px solid var(--color-danger);
+}
+
+.hint,
+.error {
+  margin: 0;
+  font-size: 14px;
+}
+
+.hint {
+  color: var(--color-text-muted);
+}
+
+.error {
+  color: var(--color-danger);
+  font-weight: 500;
+}

@@ -1,0 +1,69 @@
+/* position: relative keeps visually hidden header text inside the scroll box on narrow screens. */
+.scroll {
+  position: relative;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 var(--space-2);
+}
+
+.table th {
+  padding: var(--space-2) var(--space-4) 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.headerHidden th {
+  padding: 0;
+  font-size: 0;
+  line-height: 0;
+}
+
+.table td {
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  background: var(--color-surface-alt);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.table td:first-child {
+  border-radius: var(--radius-row) 0 0 var(--radius-row);
+}
+
+.table td:last-child {
+  border-radius: 0 var(--radius-row) var(--radius-row) 0;
+}
+
+.table td:only-child {
+  border-radius: var(--radius-row);
+}
+
+.table tbody tr:hover {
+  background: transparent;
+}
+
+.table :is(th, td)[data-align='end'] {
+  text-align: right;
+}
+
+.table a {
+  color: var(--color-text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.table a:hover {
+  color: var(--color-accent-text);
+  text-decoration: underline;
+}

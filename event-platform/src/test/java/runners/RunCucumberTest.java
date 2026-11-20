@@ -6,6 +6,6 @@ import org.junit.platform.suite.api.Suite;
 
 @Suite
 @IncludeEngines("cucumber")
-@SelectClasspathResource("features/user_registration.feature")
+@SelectClasspathResource("features")
 public class RunCucumberTest {
 }

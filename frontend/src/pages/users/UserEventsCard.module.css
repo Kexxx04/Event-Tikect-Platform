@@ -1,0 +1,7 @@
+.dateCell {
+  width: 1%;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}

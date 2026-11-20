@@ -1,0 +1,18 @@
+.card {
+  max-width: 640px;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+
+@media (max-width: 600px) {
+  .footer > * {
+    flex: 1 1 auto;
+  }
+}
