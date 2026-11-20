@@ -1,0 +1,3 @@
+# The build context of Dockerfile.inmemory is the repository root: only the in-memory jar goes in.
+**
+!event-platform/build/libs/event-platform-inmemory.jar

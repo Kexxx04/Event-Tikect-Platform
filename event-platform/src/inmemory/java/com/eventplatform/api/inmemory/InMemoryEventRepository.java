@@ -20,7 +20,13 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-/** Fake of {@link EventRepository} over the events table of {@link InMemoryDatabase}. */
+/**
+ * Fake of {@link EventRepository} over the events table of {@link InMemoryDatabase}.
+ *
+ * <p>Cost: {@code findById}, {@code findByIdForUpdate} (plus the wait for the row lock) and the constraint
+ * checks are O(1); {@code findAll} is O(n log n) with n events. Deleting an event checks its registrations
+ * through an index, O(1).
+ */
 @Repository
 @Profile("inmemory")
 public class InMemoryEventRepository extends AbstractInMemoryRepository<Event> implements EventRepository {
@@ -77,8 +83,7 @@ public class InMemoryEventRepository extends AbstractInMemoryRepository<Event> i
 
     @Override
     protected void checkNotReferenced(Long id) {
-        boolean registered = database.registrations().rows().values().stream()
-                .anyMatch(registration -> id.equals(registration.getEvent().getId()));
+        boolean registered = !database.registrationsByEvent().ids(id).isEmpty();
         notReferenced(registered, "events", "fk_registrations_event", "registrations");
     }
 

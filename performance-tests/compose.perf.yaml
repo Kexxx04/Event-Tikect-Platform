@@ -1,0 +1,55 @@
+# Performance tests with Apache JMeter against the API with the in-memory repositories (profile inmemory,
+# no database). Use run-perf.ps1: it builds the jar, generates the secrets, runs one scenario and always
+# removes the containers. JMeter only reaches the API through the internal network "perf".
+name: event-platform-perf
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: performance-tests/Dockerfile.inmemory
+    image: event-platform-perf-api:local
+    environment:
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-perf_admin}
+      # No defaults on purpose: run-perf.ps1 generates random values for each run.
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD (run-perf.ps1 generates it)}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET (run-perf.ps1 generates it)}
+    # Same limits on every machine, so the results are comparable and the test cannot take the host over.
+    cpus: "2"
+    mem_limit: 1g
+    memswap_limit: 1g
+    networks:
+      - perf
+      - host-access
+    # Only for run-perf.ps1 (health check and diagnostics); never published outside 127.0.0.1.
+    ports:
+      - "127.0.0.1:${PERF_API_PORT:-18080}:8080"
+
+  jmeter:
+    build:
+      context: .
+      dockerfile: Dockerfile.jmeter
+    image: event-platform-perf-jmeter:5.6.3
+    # Started only with "docker compose run jmeter ...".
+    profiles: ["jmeter"]
+    environment:
+      # The plans read the credentials from here when -JadminUser / -JadminPassword are not given,
+      # so the password never appears in the command line or in jmeter.log.
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-perf_admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD (run-perf.ps1 generates it)}
+    cpus: "2"
+    mem_limit: 2g
+    volumes:
+      - ./plans:/plans:ro
+      - ./results:/results
+    networks:
+      - perf
+    depends_on:
+      api:
+        condition: service_healthy
+
+networks:
+  # No route outside Docker: JMeter can only call the API.
+  perf:
+    internal: true
+  host-access: {}

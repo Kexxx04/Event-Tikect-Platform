@@ -115,6 +115,16 @@ class InMemoryEventRepositoryTests {
     }
 
     @Test
+    void doesNotCheckTheRowsThatATransactionOnlyReadBecauseHibernateOnlyFlushesChanges() {
+        Event event = events.save(event(2));
+        // Changed outside any transaction: nothing flushes it, so the row keeps the invalid value.
+        event.setRegisteredCount(3);
+
+        assertDoesNotThrow(() -> transaction.executeWithoutResult(status ->
+                events.findByIdForUpdate(event.getId()).orElseThrow().getName()));
+    }
+
+    @Test
     void doesNotCheckReadOnlyTransactionsBecauseHibernateDoesNotFlushThem() {
         long id = events.save(event(2)).getId();
         transaction.setReadOnly(true);

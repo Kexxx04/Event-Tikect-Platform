@@ -13,6 +13,10 @@ parameters:
     displayName: Ejecutar OWASP ZAP API Scan (DAST pasivo)
     type: boolean
     default: true
+  - name: runPerf
+    displayName: Ejecutar pruebas de rendimiento con JMeter (escenarios normal y aforo)
+    type: boolean
+    default: true
 
 pool:
   name: 'Nuevos agentes'
@@ -21,11 +25,13 @@ pool:
 
 variables:
   projectDir: 'event-platform'
+  perfDir: 'performance-tests'             # pruebas de rendimiento con JMeter (fuera de event-platform)
   system.debug: 'false'
   GRADLE_OPTS: '-Dfile.encoding=UTF-8 -Xmx3072m'
   # --- OWASP ZAP (ET0202) ---
   appPort: '8081'                          # puerto libre en el agente
-  loginPath: '/api/auth/login'             # unico endpoint publico: sirve de chequeo de salud y entrega el JWT
+  loginPath: '/api/auth/login'             # endpoint publico que entrega el JWT
+  healthPath: '/actuator/health'           # chequeo de salud publico (Actuator, sin detalles)
   springProfile: 'inmemory,zap'            # repositorios en memoria (sin base de datos) + perfil de laboratorio
   zapJar: 'event-platform-inmemory.jar'    # lo genera la tarea inMemoryBootJar (no es el bootJar de produccion)
   apiDocsPath: '/v3/api-docs'              # contrato OpenAPI (solo con el perfil zap) que ZAP importa
@@ -169,25 +175,30 @@ steps:
                   -RedirectStandardOutput $out -RedirectStandardError $err
         Write-Host "##vso[task.setvariable variable=AppPid]$($proc.Id)"
 
-        # Chequeo de salud: el login es publico y su token es el que ZAP necesita.
+        # Chequeo de salud: /actuator/health es publico y no muestra detalles. Despues, el login entrega
+        # el token que ZAP necesita.
+        $healthUrl = 'http://127.0.0.1:$(appPort)$(healthPath)'
         $loginUrl = 'http://127.0.0.1:$(appPort)$(loginPath)'
-        $cuerpo = @{ username = $env:ADMIN_USERNAME; password = $env:ADMIN_PASSWORD } | ConvertTo-Json
-        $token = $null
+        $estado = $null
         for ($i = 1; $i -le 60; $i++) {
           $proc.Refresh()
           if ($proc.HasExited) { break }
           try {
-            $respuesta = Invoke-RestMethod -Method Post -Uri $loginUrl -ContentType 'application/json' `
-                           -Body $cuerpo -TimeoutSec 5
-            $token = $respuesta.token
-            if ($token) { break }
+            $estado = (Invoke-RestMethod -Uri $healthUrl -TimeoutSec 5).status
+            if ($estado -eq 'UP') { break }
           } catch { Start-Sleep -Seconds 3 }
+        }
+        $token = $null
+        if ($estado -eq 'UP') {
+          $cuerpo = @{ username = $env:ADMIN_USERNAME; password = $env:ADMIN_PASSWORD } | ConvertTo-Json
+          $token = (Invoke-RestMethod -Method Post -Uri $loginUrl -ContentType 'application/json' `
+                      -Body $cuerpo -TimeoutSec 10).token
         }
         if (-not $token) {
           Write-Host '--- Ultimas lineas del log de la aplicacion ---'
           Get-Content $out -Tail 40 -ErrorAction SilentlyContinue
           Get-Content $err -Tail 40 -ErrorAction SilentlyContinue
-          throw "La aplicacion no respondio el login en $loginUrl"
+          throw "La aplicacion no quedo UP en $healthUrl o no respondio el login en $loginUrl"
         }
         Write-Host "##vso[task.setvariable variable=ZapAuthToken;issecret=true]$token"
 
@@ -322,6 +333,64 @@ steps:
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/zap'
         artifact: 'reporte-seguridad-zap'
+        publishLocation: 'pipeline'
+
+  # =====================================================================
+  # Rendimiento con Apache JMeter 5.6.3 (performance-tests/run-perf.ps1)
+  # La API corre en Docker con el perfil inmemory (sin base de datos), limitada a 2 CPU y 1 GiB,
+  # y JMeter solo la alcanza por una red interna. Si el agente no tiene Docker con contenedores
+  # Linux, los pasos se omiten con una advertencia. Un sobrecupo en el escenario aforo hace fallar
+  # el pipeline; los demas criterios (errores y p95) solo dejan advertencias.
+  # =====================================================================
+  - ${{ if eq(parameters.runPerf, true) }}:
+    - powershell: |
+        # Sin Docker, docker escribe en stderr: solo se decide por el codigo de salida.
+        $ErrorActionPreference = 'Continue'
+        $listo = $false
+        $version = docker version --format '{{.Server.Version}}' 2>$null
+        if ($LASTEXITCODE -eq 0) {
+          $tipo = docker info --format '{{.OSType}}' 2>$null
+          $listo = ("$tipo".Trim() -eq 'linux')
+        }
+        $global:LASTEXITCODE = 0
+        if ($listo) {
+          Write-Host "Docker $version con contenedores Linux: se ejecutan los escenarios normal y aforo."
+          Write-Host "##vso[task.setvariable variable=PerfDockerReady]true"
+        } else {
+          Write-Host '##vso[task.logissue type=warning]Docker no esta disponible o no usa contenedores Linux: se omiten las pruebas de rendimiento.'
+        }
+      displayName: 'JMeter 01 - Verificar Docker'
+
+    # Descarga dependencias de Gradle, imagenes base y JMeter: se reintenta si la red falla un momento.
+    - powershell: |
+        & .\run-perf.ps1 -BuildOnly
+        exit $LASTEXITCODE
+      workingDirectory: '$(Build.SourcesDirectory)/$(perfDir)'
+      displayName: 'JMeter 02 - Construir jar en memoria e imagenes'
+      condition: and(succeeded(), eq(variables['PerfDockerReady'], 'true'))
+      retryCountOnTaskFailure: 2
+
+    - powershell: |
+        & .\run-perf.ps1 -Scenario normal -SkipBuild
+        exit $LASTEXITCODE
+      workingDirectory: '$(Build.SourcesDirectory)/$(perfDir)'
+      displayName: 'JMeter 03 - Escenario normal (50 usuarios, 5 min)'
+      condition: and(succeeded(), eq(variables['PerfDockerReady'], 'true'))
+
+    - powershell: |
+        & .\run-perf.ps1 -Scenario aforo -SkipBuild
+        exit $LASTEXITCODE
+      workingDirectory: '$(Build.SourcesDirectory)/$(perfDir)'
+      displayName: 'JMeter 04 - Escenario aforo (1000 inscripciones simultaneas, 100 cupos)'
+      condition: and(succeededOrFailed(), eq(variables['PerfDockerReady'], 'true'))
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'JMeter 05 - Publicar evidencias'
+      condition: and(succeededOrFailed(), eq(variables['PerfDockerReady'], 'true'))
+      retryCountOnTaskFailure: 2
+      inputs:
+        targetPath: '$(Build.SourcesDirectory)/$(perfDir)/results'
+        artifact: 'reporte-rendimiento-jmeter'
         publishLocation: 'pipeline'
 
   - task: PublishBuildArtifacts@1
