@@ -54,9 +54,10 @@ class InMemoryRegistrationRepositoryTests {
     @Test
     void rejectsASecondRegistrationOfTheSameUserForTheSameEvent() {
         register(ana, event, START, CANCELLED);
+        LocalDateTime nextDay = START.plusDays(1);
 
         DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class,
-                () -> register(ana, event, START.plusDays(1), CONFIRMED));
+                () -> register(ana, event, nextDay, CONFIRMED));
 
         assertEquals("duplicate key value violates unique constraint \"uk_registrations_user_event\"",
                 exception.getMessage());
