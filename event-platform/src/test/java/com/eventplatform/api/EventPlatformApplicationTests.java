@@ -55,9 +55,10 @@ class EventPlatformApplicationTests {
 	@Test
 	void transactionalServicesKeepTheirPropagationOnTheInMemoryTransactionManager() {
 		WaitlistService waitlistService = context.getBean(WaitlistService.class);
+		Event event = new Event();
 
 		// Propagation.MANDATORY: promoting the waitlist without the transaction of the event lock fails.
-		assertThrows(IllegalTransactionStateException.class, () -> waitlistService.fillFreeSeats(new Event()));
+		assertThrows(IllegalTransactionStateException.class, () -> waitlistService.fillFreeSeats(event));
 	}
 
 }

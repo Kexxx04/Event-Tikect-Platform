@@ -176,9 +176,10 @@ class InMemoryUserRepositoryTests {
     @Test
     void rejectsADuplicateDocument() {
         users.save(user("ada"));
+        User sameDocument = new User("Other", "other@example.com", "DOC-ada");
 
-        DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class,
-                () -> users.save(new User("Other", "other@example.com", "DOC-ada")));
+        DataIntegrityViolationException exception =
+                assertThrows(DataIntegrityViolationException.class, () -> users.save(sameDocument));
 
         assertTrue(exception.getMessage().contains("users_document_key"), exception.getMessage());
         assertEquals(1, users.count());
@@ -221,9 +222,10 @@ class InMemoryUserRepositoryTests {
         User registered = users.save(user("ada"));
         users.save(user("bob"));
         registrations.save(registration(registered, events.save(event(10)), START, RegistrationStatus.CONFIRMED));
+        List<Long> bobAndAda = List.of(2L, 1L);
 
-        DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class,
-                () -> users.deleteAllByIdInBatch(List.of(2L, 1L)));
+        DataIntegrityViolationException exception =
+                assertThrows(DataIntegrityViolationException.class, () -> users.deleteAllByIdInBatch(bobAndAda));
 
         assertTrue(exception.getMessage().contains("fk_registrations_user"), exception.getMessage());
         // One statement: nothing was deleted.
