@@ -605,7 +605,7 @@ perfil `inmemory` (ver [Estrategia de pruebas sin base de datos](#estrategia-de-
 | Tipo | Clases | Qué verifican |
 | --- | --- | --- |
 | Unitarias de servicio (Mockito) | `UserServiceTests`, `EventServiceTests`, `RegistrationServiceTests`, `WaitlistServiceTests`, `AuthServiceTests` | Reglas de negocio con repositorios simulados y `Clock` fijo |
-| Unitarias de configuración y modelo | `SecurityConfigTests`, `SecurityPropertiesTests`, `ClockConfigTests`, `EventTests`, `JpaConstructorTests` | Beans de seguridad, validación de variables, reloj, `Event.validateForPublication` y valores iniciales de las entidades |
+| Unitarias de configuración y modelo | `SecurityConfigTests`, `SecurityPropertiesTests`, `ClockConfigTests`, `EventTests`, `JpaConstructorTests` | Beans de seguridad (la cadena de filtros, en un contexto mínimo nuevo en cada ejecución), validación de variables, reloj y valores iniciales de las entidades |
 | Contrato del fake (sin Spring) | `InMemoryUserRepositoryTests`, `InMemoryEventRepositoryTests`, `InMemoryRegistrationRepositoryTests`, `InMemoryDatabaseTests`, `InMemoryTransactionManagerTests` | Restricciones de la V1, orden de cada consulta, ids, `clear()`, bloqueo por evento y propagación de transacciones |
 | Integración (MockMvc + fakes, perfil `test`) | `UserControllerIntegrationTests`, `EventControllerIntegrationTests`, `RegistrationControllerIntegrationTests`, `AuthControllerIntegrationTests`, `UserUniqueConstraintIntegrationTests`, `CorsIntegrationTests`, `SecurityHeadersIntegrationTests`, `OpenApiDocsIntegrationTests`, `EventPlatformApplicationTests` | Endpoints completos, códigos HTTP, formato de errores, seguridad, CORS y OpenAPI; cada prueba empieza con `InMemoryDatabase.clear()` |
 | Concurrencia (fakes, transacciones reales en 32 hilos) | `RegistrationConcurrencyIntegrationTests` | Estrés de 1000 usuarios por 100 cupos y 20 cancelaciones simultáneas |
@@ -715,18 +715,19 @@ su classpath, y el bootJar de producción no. Todas sus clases llevan `@Profile(
 
 ## Calidad: JaCoCo, PIT, SonarQube y pipeline
 
-Mediciones del 2026-11-20 en la rama `feature/tests-without-database`, sin ninguna base de datos:
+Mediciones del 2026-11-20 en la rama `fix/pit-surviving-mutants`, sin ninguna base de datos:
 
 | Métrica | Valor |
 | --- | --- |
-| Pruebas en `test` | 390 ejecuciones, 0 fallos (incluye los 37 escenarios Cucumber y 90 pruebas de contrato del fake) |
+| Pruebas en `test` | 374 ejecuciones, 0 fallos (incluye los 37 escenarios Cucumber y 90 pruebas de contrato del fake) |
 | Escenarios en `acceptanceTest` | 37, 0 fallos |
-| Cobertura de líneas (JaCoCo) | 99.7 % (578/580) |
-| Cobertura de ramas (JaCoCo) | 99.2 % (121/122) |
-| Mutantes eliminados (PIT) | 94 % (217/230) |
+| Cobertura de líneas (JaCoCo) | 99.6 % (533/535) |
+| Cobertura de ramas (JaCoCo) | 100 % (86/86) |
+| Mutantes eliminados (PIT) | 100 % (194/194) |
 
-Los 13 mutantes que sobreviven son 12 `println` eliminados en `Event.validateForPublication` (código
-heredado, problema 7) y el `return null` de `SecurityConfig.securityFilterChain`.
+Las dos líneas sin cubrir son el `main` de `EventPlatformApplication`. Ya no sobrevive ningún mutante:
+se eliminó `Event.validateForPublication` (código heredado sin uso, con 12 de los 13 sobrevivientes) y
+`SecurityConfigTests` prueba `securityFilterChain` en un contexto nuevo (ver [PIT](#pit)).
 
 ### JaCoCo
 
@@ -738,6 +739,12 @@ sin exclusiones. La tarea `acceptanceTest` no suma cobertura a ese reporte.
 `.\gradlew.bat pitest` muta las clases de `com.eventplatform.api.*` de `src/main` (no las del fake
 `inmemory`) y ejecuta las pruebas de ese paquete con 4 hilos. El reporte HTML queda en
 `build/reports/pitest/index.html`.
+
+Los métodos `@Bean` solo se ejecutan cuando se crea un contexto. PIT primero corre las pruebas sin
+mutar y después inserta cada mutante en la misma JVM, donde Spring reutiliza los contextos que ya tiene
+en caché, así que una prueba `@SpringBootTest` nunca ve un `@Bean` mutado. Por eso esos métodos se
+prueban llamándolos directamente o, como `securityFilterChain`, en un contexto mínimo nuevo en cada
+ejecución (`WebApplicationContextRunner` en `SecurityConfigTests`).
 
 ### SonarQube
 
@@ -898,8 +905,7 @@ event-platform/
 | 4 | El estado del evento no cambia con el tiempo | Un evento pasado sigue `SCHEDULED` hasta que se cambie a mano (igual no acepta inscripciones) | Tarea programada o cálculo del estado, si se requiere |
 | 5 | Cancelar un evento no cancela sus inscripciones | Las inscripciones de un evento `CANCELLED` quedan como estaban | Cancelarlas en cascada, si se requiere |
 | 6 | Todo `DataIntegrityViolationException` responde `Email or document is already registered` | Mensaje engañoso si la BD rechaza otro dato | Mensaje genérico o por restricción |
-| 7 | `Event.validateForPublication` no lo usa ningún servicio; imprime con `System.out` y usa `LocalDateTime.now()` sin `Clock` | Deuda técnica (código heredado del ejercicio de SonarQube) | Eliminarlo o integrarlo a `EventService` |
-| 8 | Un solo administrador, sin revocación de tokens ni paginación en los listados | Suficiente para el alcance del proyecto | Usuarios administradores en BD, *refresh tokens* y `Pageable` si crece |
+| 7 | Un solo administrador, sin revocación de tokens ni paginación en los listados | Suficiente para el alcance del proyecto | Usuarios administradores en BD, *refresh tokens* y `Pageable` si crece |
 
 ## Próximos pasos sugeridos
 
