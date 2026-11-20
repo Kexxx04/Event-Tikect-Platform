@@ -25,7 +25,7 @@ En JMeter la API corre con el perfil en memoria, limitada a 2 CPU y 1 GiB. En el
 
 | Carpeta | Herramienta | Contenido |
 | --- | --- | --- |
-| [`docs/`](docs/) | Entrega | [`plan-de-pruebas.pdf`](docs/plan-de-pruebas.pdf) y [`conclusion-tecnica.pdf`](docs/conclusion-tecnica.pdf) |
+| [`docs/`](docs/) | Entrega | [`Plan de pruebas — Event Platform.pdf`](<docs/Plan de pruebas — Event Platform.pdf>) y [`Conclusión técnica — Event Platform.pdf`](<docs/Conclusión técnica — Event Platform.pdf>) |
 | [`pit-antes/`](pit-antes/index.html), [`pit-despues/`](pit-despues/index.html) | PIT | Reporte HTML antes y después de las correcciones |
 | [`jmeter/normal-20261120-123918/`](jmeter/normal-20261120-123918/resumen.md), [`jmeter/pico-20261120-124446/`](jmeter/pico-20261120-124446/resumen.md), [`jmeter/aforo-20261120-125016/`](jmeter/aforo-20261120-125016/resumen.md) | JMeter | Escenarios oficiales ejecutados en local: `resumen.md`, `dashboard/index.html`, `resultados.jtl`, `docker-stats.csv` y `jmeter.log`. Aforo incluye también `aforo-resultado.json` |
 | [`jmeter/capturas/`](jmeter/capturas/) | JMeter | Tabla de resultados de los tres escenarios y análisis del cuello de botella |
