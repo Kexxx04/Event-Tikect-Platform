@@ -1,0 +1,514 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Screenshots</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="57x57" href="apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff"><link rel="stylesheet" href="bootstrap-icons/bootstrap-icons.css">
+<!-- JQuery -->
+<script type="text/javascript" src="scripts/jquery-3.7.1.min.js"></script><!-- Required Stylesheets -->
+<link href="bootstrap-treeview/dist/bootstrap-treeview.min.css" rel="stylesheet">
+
+<!-- Required Javascript -->
+<script src="bootstrap-treeview/dist/bootstrap-treeview.min.js"></script><!-- DataTables -->
+<link type="text/css" href="datatables/2.3.1/datatables.min.css" rel="stylesheet" />
+<script type="text/javascript" src="datatables/2.3.1/datatables.min.js"></script>
+<script type="text/javascript" src="datatables/2.3.1/time-elapsed-dhms.js"></script>
+
+<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<script src="bootstrap/js/bootstrap.min.js"></script>
+
+
+<script>
+    jQuery.fn.dataTable.ext.type.order['time-elapsed-dhms-pre'] = function(data) {
+
+        var matches = data.match(/^(\d+(?:\.\d+)?)\s*([a-z]+)/i);
+        var multipliers = {
+            ms: 1,
+            s: 1000,
+            m: 60000,
+            h: 3600000,
+            d: 86400000
+        };
+
+        if (matches) {
+            var multiplier = multipliers[matches[2].toLowerCase()];
+            return parseFloat(matches[1]) * multiplier;
+        } else {
+            return -1;
+        };
+    };
+</script>
+<link rel="stylesheet" href="css/core.css"/>
+<link rel="stylesheet" href="css/link.css"/>
+<link type="text/css" media="screen" href="css/screen.css" rel="Stylesheet"/>
+<!--CHART.JS-->
+<script src="chartjs/chart.js"></script>
+<script src="chartjs/chartjs-plugin-datalabels@2.0.0.min.js"></script>
+<script src="chartjs/patternomaly.min.js"></script>
+<script>
+    // Register the plugin to all charts:
+    Chart.register(ChartDataLabels);
+</script>
+
+    <!-- Swiper.js local styles and script -->
+    <link rel="stylesheet" href="swiper/swiper-bundle.min.css" />
+    <script src="swiper/swiper-bundle.min.js"></script>
+
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const startIndex = parseInt(urlParams.get("screenshot")) || 0;
+
+            new Swiper('.swiper', {
+                initialSlide: startIndex,
+                effect: 'fade',
+                speed: 200,
+                pagination: {
+                    el: ".swiper-pagination",
+                    clickable: true,
+                    renderBullet: function (index, className) {
+                        return '<span class="' + className + '">' + (index + 1) + "</span>";
+                    },
+                    dynamicBullets: true,
+                    dynamicMainBullets: 3  // Shows 3 main bullets + 2 smaller ones on sides
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev'
+                },
+                keyboard: {
+                    enabled: true,
+                    onlyInViewport: true
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .swiper {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        .swiper-slide img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .swiper-slide img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .swiper-pagination-bullet {
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+            font-size: 12px;
+            color: #000;
+            opacity: 1;
+            background: lightgrey;
+        }
+
+        .swiper-pagination-bullet-active {
+            color: #fff;
+            background: #007aff;
+        }
+    </style>
+</head>
+
+<body>
+<div id="topheader">
+    <div id="topbanner">
+        <div id="logo"><a href="index.html"><img src="images/serenity-logo.png" border="0"/></a></div>
+        <div id="projectname-banner" style="float:right">
+            <span class="projectname">
+                <span class="projecttitle">Serenity BDD Report</span>
+                <span class="projectsubtitle"></span>
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="middlecontent">
+    <div id="contenttop">
+        <div class="middlebg">
+            <span class="breadcrumbs">
+                <a href="index.html">Home</a>
+                > <span class="truncate-40"><a
+                    href="d9857065b6ae03dc695d4d91fbbbd206067ba81e2c3d93af9d81cedd45b9769f.html">Event Registrations</a></span>
+                > <span class="truncate-60"><a
+                    href="aae98290269c6ef2f9c6b62dc8f18c06e8952b6dbb02c0b333c50051008e4117.html">The capacity cannot be lowered below the confirmed registrations </a></span>
+                > Screenshots
+            </span>
+        </div>
+        <div class="rightbg"></div>
+    </div>
+
+    <div class="clr"></div>
+
+    <!--/* starts second table*/-->
+<div>
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="active">
+            <a href="#"><i class="bi bi-journal-check"></i> Overall Test Results</a>
+        </li>
+        <li >
+            <a href="capabilities.html"><i class="bi bi-journal-text"></i> Requirements</a>
+        </li>
+        <li >
+            <a href="576946480b52ad056d6f5bddf874399c83582ecf90963cc074a14c70580e7d9f.html"><i class="bi bi-chat-text"></i> Features</a>
+        </li>
+    </ul>
+    <span class="date-and-time"><a href="build-info.html"><i class="bi bi-info-circle"></i></a> Report generated 20-11-2026 15:16</span>
+    <br style="clear:left"/>
+</div>
+
+    <div class="clr"></div>
+
+
+    <div id="contentbody">
+        <div class="titlebar">
+            <div class="story-title">
+                <table class="outcome-header">
+                    <tr>
+                        <td>
+                            <div>
+                                <h3 class="discreet-story-header">
+                                    <i class="fs-2 bi bi-chat-left-quote large-icon"></i>
+                                    <span class="story-header-title">Event Management With Registrations And Waitlist </span>
+                                    <span class="badge tag-badge" style="">Feature</span>
+                                </h3>
+
+                                <div class="discreet-requirement-narrative-title">
+                                As the Event Platform administrator<br />
+I want to register users to events with a limited capacity<br />
+So that an event is never overbooked and freed seats go to the waitlist automatically
+                                </div>
+                            </div>
+
+                        </td>
+                        <td valign="top" align="right">
+                            <p class="tag">
+                                <span class="badge tag-badge" style="background:default;"
+                                    <i class="bi bi-tag-fill"></i>&nbsp;<a class="tagLink" style="background:default;" href="41f5205d6d58c0b87620866aba63cb6e3d1be42b6c5018f18cc7c680fcccb866.html">E2e
+                                </a>
+                                </span>
+                            </p>
+                            <p class="tag">
+                                <span class="badge tag-badge" style="background:default;"
+                                    <i class="bi bi-tag-fill"></i>&nbsp;<a class="tagLink" style="background:default;" href="6c5512236937b92cd7a296b24edb966c2bd94be46b8910f8b129a42d6150eb25.html">1 To 10 Seconds
+                                        (Duration)
+                                </a>
+                                </span>
+                            </p>
+                            <p class="tag">
+                                <span class="badge tag-badge" style="background:default;"
+                                    <i class="bi bi-tag-fill"></i>&nbsp;<a class="tagLink" style="background:default;" href="422d40e12289a60e53e41d06fc49c1f78fcde56a4f374b20e3f50f550bf46939.html">Registrations
+                                </a>
+                                </span>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="story-title">
+                <table class="outcome-header">
+                    <tr>
+                        <td colspan="2" class="test-title-bar">
+                            <span class="outcome-icon"><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon fa-2x' title='SUCCESS'></i></a></span>
+                            <span class="test-case-title">
+                                <span class="success-color">The capacity cannot be lowered below the confirmed registrations
+                                    <span class="related-issue-title"></span>
+                                </span>
+                            </span>
+
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="clr"></div>
+
+
+    <div id="beforetable"></div>
+    <div id="contenttilttle">
+    <!-- Swiper Carousel -->
+    <div class="swiper">
+        <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                    <img src="c1895ac0730df73e02a5a5cbf9e81befadc012cc558369b6c6154fba4fbb52ba.png" title=" Given the administrator has signed in" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="c1895ac0730df73e02a5a5cbf9e81befadc012cc558369b6c6154fba4fbb52ba.png" title=" Administrator opens the login page" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="c1895ac0730df73e02a5a5cbf9e81befadc012cc558369b6c6154fba4fbb52ba.png" title=" Administrator opens the /login" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="ac90991ae43f270bdd8f3c4427885267207ac6cd172f2fcc19ce36c5414fa98d.png" title=" Administrator opens the login page (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="bfdf9188384fa4b743a11369d7e500a4bf5916d0b13c39aa28e8fded64efc018.png" title=" Administrator signs in with the username &#39;admin&#39;" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="bfdf9188384fa4b743a11369d7e500a4bf5916d0b13c39aa28e8fded64efc018.png" title=" Administrator enters &#39;admin&#39; into username field" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="ba2107090179c209b573ad75b0c341f660cbcd9026dbf3546b728418d65d189f.png" title=" Administrator enters a password into the password field" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="f607f75a162e08dff54e32509b1dc9c6d5bfcd070df224c0edb822dc36a0cbc5.png" title=" Administrator clicks on sign in button" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="f607f75a162e08dff54e32509b1dc9c6d5bfcd070df224c0edb822dc36a0cbc5.png" title=" Administrator signs in with the username &#39;admin&#39; (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="f607f75a162e08dff54e32509b1dc9c6d5bfcd070df224c0edb822dc36a0cbc5.png" title=" Given the administrator has signed in (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="f607f75a162e08dff54e32509b1dc9c6d5bfcd070df224c0edb822dc36a0cbc5.png" title=" Given the administrator has created the event &amp;quot;Data Workshop&amp;quot; with capacity 2 starting in 15 days" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="f607f75a162e08dff54e32509b1dc9c6d5bfcd070df224c0edb822dc36a0cbc5.png" title=" Administrator creates the event &#39;Data Workshop mwpf5qrv12&#39; with capacity 2" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="f607f75a162e08dff54e32509b1dc9c6d5bfcd070df224c0edb822dc36a0cbc5.png" title=" Administrator submits the new event form for &#39;Data Workshop mwpf5qrv12&#39;" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="f607f75a162e08dff54e32509b1dc9c6d5bfcd070df224c0edb822dc36a0cbc5.png" title=" Administrator clicks on Events menu option" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="b3a784820f799d2ea0861bbffb6c34990a327af80a5f41e73e1ac4ccb39a82c4.png" title=" Administrator clicks on New event button" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="bf0f51baa942229a7c00a91b40581d172797ee928bd108791f90efc82f32153e.png" title=" Administrator enters &#39;Data Workshop mwpf5qrv12&#39; into event name field" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="8946b860f78d2e0ebffa3ad5582cf96fcf39546bee40528ba90c40f2f772758b.png" title=" Administrator enters &#39;Created by the Serenity end-to-end tests&#39; into event description field" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="8946b860f78d2e0ebffa3ad5582cf96fcf39546bee40528ba90c40f2f772758b.png" title=" Administrator enters &#39;2026-12-05T18:00&#39; into the start date field" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="695296ca61ae914a3150d149d6ee29bc53d2b3270b8eebe657c4450b657ef2dd.png" title=" Administrator enters &#39;2026-12-05T21:00&#39; into the end date field" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="4895eb2e2c79386920213e5cd0a00e706d2c124c0518848f8b79678297d06822.png" title=" Administrator enters &#39;2&#39; into capacity field" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="3c1038126152dbef74e5f1978f1b4f417e2ae050f51d0affd86d45681e6a80c2.png" title=" Administrator clicks on save event button" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="3c1038126152dbef74e5f1978f1b4f417e2ae050f51d0affd86d45681e6a80c2.png" title=" Administrator submits the new event form for &#39;Data Workshop mwpf5qrv12&#39; (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="3c1038126152dbef74e5f1978f1b4f417e2ae050f51d0affd86d45681e6a80c2.png" title=" Administrator creates the event &#39;Data Workshop mwpf5qrv12&#39; with capacity 2 (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="3c1038126152dbef74e5f1978f1b4f417e2ae050f51d0affd86d45681e6a80c2.png" title=" Given the administrator has created the event &amp;quot;Data Workshop&amp;quot; with capacity 2 starting in 15 days (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="215265b5f69faaa5c87fb31636886b12bccd671068638ec7df9182164793dca9.png" title=" And the administrator has created the users:
+| name |
+| Linus Torvalds |
+| Margaret Hamilton |" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="215265b5f69faaa5c87fb31636886b12bccd671068638ec7df9182164793dca9.png" title=" Administrator creates the user &#39;Linus Torvalds&#39;" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="215265b5f69faaa5c87fb31636886b12bccd671068638ec7df9182164793dca9.png" title=" Administrator submits the new user form for &#39;Linus Torvalds&#39; (linus.torvalds.mwpf5qrv13@example.com)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="215265b5f69faaa5c87fb31636886b12bccd671068638ec7df9182164793dca9.png" title=" Administrator clicks on Users menu option" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="b1b17cdf78aaa28fabaa5800f1efb37673927efba20e01f39b588b5397a69fa3.png" title=" Administrator clicks on New user button" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="8540ae851ea59324a0f244d4a2d9e3d0d137ae937ced4d7e3ebcf9c50bbcd8c5.png" title=" Administrator enters &#39;Linus Torvalds&#39; into full name field" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="a51405584087419f8b1886d86157bc995c3ce10bbe004612bf187f597d923488.png" title=" Administrator enters &#39;linus.torvalds.mwpf5qrv13@example.com&#39; into email field" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="1e99b4279d035cfe735ea2bdcc4a1104abc01862e6e46341f075ce82797f580e.png" title=" Administrator enters &#39;E2E-MWPF5QRV13&#39; into document number field" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="9e17084a6b18c06bf0aba9f7e1d76344409c9c54d8435bccbe6df882f7eb3786.png" title=" Administrator clicks on create user button" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="9e17084a6b18c06bf0aba9f7e1d76344409c9c54d8435bccbe6df882f7eb3786.png" title=" Administrator submits the new user form for &#39;Linus Torvalds&#39; (linus.torvalds.mwpf5qrv13@example.com) (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="9e17084a6b18c06bf0aba9f7e1d76344409c9c54d8435bccbe6df882f7eb3786.png" title=" Administrator creates the user &#39;Linus Torvalds&#39; (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="9e17084a6b18c06bf0aba9f7e1d76344409c9c54d8435bccbe6df882f7eb3786.png" title=" Administrator creates the user &#39;Margaret Hamilton&#39;" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="9e17084a6b18c06bf0aba9f7e1d76344409c9c54d8435bccbe6df882f7eb3786.png" title=" Administrator submits the new user form for &#39;Margaret Hamilton&#39; (margaret.hamilton.mwpf5qrv14@example.com)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="9e17084a6b18c06bf0aba9f7e1d76344409c9c54d8435bccbe6df882f7eb3786.png" title=" Administrator clicks on Users menu option" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="b1b17cdf78aaa28fabaa5800f1efb37673927efba20e01f39b588b5397a69fa3.png" title=" Administrator clicks on New user button" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="4fc5fcdcc06c25c0749ecc8f3c9562c7963baf057731747c2baa9d70791b18a7.png" title=" Administrator enters &#39;Margaret Hamilton&#39; into full name field" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="58ed56a65b4e575b977737c815177852c75845372b9e235b5c3585706bb79af7.png" title=" Administrator enters &#39;margaret.hamilton.mwpf5qrv14@example.com&#39; into email field" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="17f8c7c9dbe8e952879ad01b6721c49b1a9427bdbdbd439848fdecde47941bbc.png" title=" Administrator enters &#39;E2E-MWPF5QRV14&#39; into document number field" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="b04f446cf8ed6051bd4792ce6dbccc76846c55d88dd144646f892807e3b8130e.png" title=" Administrator clicks on create user button" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="b04f446cf8ed6051bd4792ce6dbccc76846c55d88dd144646f892807e3b8130e.png" title=" Administrator submits the new user form for &#39;Margaret Hamilton&#39; (margaret.hamilton.mwpf5qrv14@example.com) (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="b04f446cf8ed6051bd4792ce6dbccc76846c55d88dd144646f892807e3b8130e.png" title=" Administrator creates the user &#39;Margaret Hamilton&#39; (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="b04f446cf8ed6051bd4792ce6dbccc76846c55d88dd144646f892807e3b8130e.png" title=" And the administrator has created the users:
+| name |
+| Linus Torvalds |
+| Margaret Hamilton | (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="3c1038126152dbef74e5f1978f1b4f417e2ae050f51d0affd86d45681e6a80c2.png" title=" And the administrator has registered these users to the event:
+| user |
+| Linus Torvalds |
+| Margaret Hamilton |" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="3c1038126152dbef74e5f1978f1b4f417e2ae050f51d0affd86d45681e6a80c2.png" title=" Administrator opens the page of the event Data Workshop mwpf5qrv12" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="3c1038126152dbef74e5f1978f1b4f417e2ae050f51d0affd86d45681e6a80c2.png" title=" Administrator opens the /events/4" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="3c1038126152dbef74e5f1978f1b4f417e2ae050f51d0affd86d45681e6a80c2.png" title=" Administrator opens the page of the event Data Workshop mwpf5qrv12 (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="6721bdbcd9c6fe3b2979754e1c2f14ce59b2b003a0e4e70490f92243a7398a34.png" title=" Administrator registers &#39;Linus Torvalds&#39; to the event" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="6721bdbcd9c6fe3b2979754e1c2f14ce59b2b003a0e4e70490f92243a7398a34.png" title=" Administrator opens the registration form of the event" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="6721bdbcd9c6fe3b2979754e1c2f14ce59b2b003a0e4e70490f92243a7398a34.png" title=" Administrator clicks on Register user button" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="6721bdbcd9c6fe3b2979754e1c2f14ce59b2b003a0e4e70490f92243a7398a34.png" title=" Administrator opens the registration form of the event (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="7193aacd65a19eb7f61b3ce8907897acd597be0b8f3421149ffdc482c6c093a7.png" title=" Administrator selects Linus Torvalds (linus.torvalds.mwpf5qrv13@example.com) on user to register list" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="0a6284776225faf33ec02206c7cf31beb02dbb3d16896b100fc7e1ce0c7b67a8.png" title=" Administrator clicks on Register button" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="22917626431620bbdf4c44239651cadcfd78516192e7ca6c32f2c43d0668422b.png" title=" Administrator registers &#39;Linus Torvalds&#39; to the event (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="09e2d003b390e60a8325bbc033cd31f40daa00d6ca186bd4c947b46b199d7654.png" title=" Administrator registers &#39;Margaret Hamilton&#39; to the event" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="09e2d003b390e60a8325bbc033cd31f40daa00d6ca186bd4c947b46b199d7654.png" title=" Administrator opens the registration form of the event" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="09e2d003b390e60a8325bbc033cd31f40daa00d6ca186bd4c947b46b199d7654.png" title=" Administrator clicks on Register user button" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="603bc972ef11d39b64e3aca6b36e84300b36bb26836414c6561632571567c64a.png" title=" Administrator opens the registration form of the event (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="67b542e53fe59bf2de81678807cd1fb54091fa956027f9e32f0aa3077944807f.png" title=" Administrator selects Margaret Hamilton (margaret.hamilton.mwpf5qrv14@example.com) on user to register list" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="e9c5c98d32e5e14740e374e070e1c62573e14c45d65ac4fa2f3af146b73edc90.png" title=" Administrator clicks on Register button" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="e9c5c98d32e5e14740e374e070e1c62573e14c45d65ac4fa2f3af146b73edc90.png" title=" Administrator registers &#39;Margaret Hamilton&#39; to the event (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="898d918ea6bbb48a111f109888b1369a5355e9f409d60d6fae1872880a6c0c63.png" title=" And the administrator has registered these users to the event:
+| user |
+| Linus Torvalds |
+| Margaret Hamilton | (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="553f5c24e858417976696d40f76ea0a6291cf9afde879421c86da680e2aaef93.png" title=" When the administrator changes the capacity of the event to 1" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="553f5c24e858417976696d40f76ea0a6291cf9afde879421c86da680e2aaef93.png" title=" Administrator opens the page of the event Data Workshop mwpf5qrv12" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="553f5c24e858417976696d40f76ea0a6291cf9afde879421c86da680e2aaef93.png" title=" Administrator opens the /events/4" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="553f5c24e858417976696d40f76ea0a6291cf9afde879421c86da680e2aaef93.png" title=" Administrator opens the page of the event Data Workshop mwpf5qrv12 (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="2209ece12fa016a3a6ab0b02a2b4b27de9fd61dba778482ed0c3225cb345408e.png" title=" Administrator changes the capacity of the event to 1" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="2209ece12fa016a3a6ab0b02a2b4b27de9fd61dba778482ed0c3225cb345408e.png" title=" Administrator clicks on Edit event button" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="7458b29dd9cdda1978ed72881c762257ed3f1f382ac257a3de36e4ba92237e4f.png" title=" Administrator enters &#39;1&#39; into capacity field" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="d7ce976b60d19879d318ee9bc8c516a84a0b0a9af5925cf0bef9f8edc4cd1926.png" title=" Administrator clicks on save event button" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="d7ce976b60d19879d318ee9bc8c516a84a0b0a9af5925cf0bef9f8edc4cd1926.png" title=" Administrator changes the capacity of the event to 1 (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="d7ce976b60d19879d318ee9bc8c516a84a0b0a9af5925cf0bef9f8edc4cd1926.png" title=" When the administrator changes the capacity of the event to 1 (completed)" width="0" />
+                </div>
+                <div class="swiper-slide">
+                    <img src="d7ce976b60d19879d318ee9bc8c516a84a0b0a9af5925cf0bef9f8edc4cd1926.png" title=" Then the error &quot;Capacity cannot be lower than the registered count (2)&quot; should be shown: &lt;span class=&#39;success-color&#39;&gt;SUCCESS&lt;/span&gt;" width="0" />
+                </div>
+        </div>
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-pagination"></div>
+    </div>
+</div>
+<div id="beforefooter"></div>
+<div id="bottomfooter">
+    <span class="version">Serenity BDD version 5.4.1</span>
+</div>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Event.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">event-platform</a> &gt; <a href="index.source.html" class="el_package">com.eventplatform.api.model</a> &gt; <span class="el_source">Event.java</span></div><h1>Event.java</h1><pre class="source lang-java linenums">package com.eventplatform.api.model;
+
+import com.eventplatform.api.model.enums.EventStatus;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = &quot;events&quot;)
+public class Event {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(length = 1000)
+    private String description;
+
+    @Column(name = &quot;start_date&quot;, nullable = false)
+    private LocalDateTime startDate;
+
+    @Column(name = &quot;end_date&quot;, nullable = false)
+    private LocalDateTime endDate;
+
+    @Column(nullable = false)
+    private Integer capacity;
+
+<span class="fc" id="L38">    @Column(name = &quot;registered_count&quot;, nullable = false)</span>
+<span class="fc" id="L39">    private Integer registeredCount = 0;</span>
+
+<span class="fc" id="L41">    @Enumerated(EnumType.STRING)</span>
+    @Column(nullable = false)
+    private EventStatus status = EventStatus.SCHEDULED;
+    // Constructor vacío requerido por JPA
+<span class="fc" id="L45">    public Event() {</span>
+<span class="fc" id="L46">    }</span>
+
+    // Constructor para crear eventos
+    public Event(
+            String name,
+            String description,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Integer capacity,
+            EventStatus status
+<span class="fc" id="L56">    ) {</span>
+<span class="fc" id="L57">        this.name = name;</span>
+<span class="fc" id="L58">        this.description = description;</span>
+<span class="fc" id="L59">        this.startDate = startDate;</span>
+<span class="fc" id="L60">        this.endDate = endDate;</span>
+<span class="fc" id="L61">        this.capacity = capacity;</span>
+<span class="fc" id="L62">        this.registeredCount = 0;</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        this.status = status != null ? status : EventStatus.SCHEDULED;</span>
+<span class="fc" id="L64">    }</span>
+    public Long getId() {
+<span class="fc" id="L66">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L70">        this.id = id;</span>
+<span class="fc" id="L71">    }</span>
+
+    public String getName() {
+<span class="fc" id="L74">        return name;</span>
+    }
+
+    public void setName(String name) {
+<span class="fc" id="L78">        this.name = name;</span>
+<span class="fc" id="L79">    }</span>
+
+    public String getDescription() {
+<span class="fc" id="L82">        return description;</span>
+    }
+
+    public void setDescription(String description) {
+<span class="fc" id="L86">        this.description = description;</span>
+<span class="fc" id="L87">    }</span>
+
+    public LocalDateTime getStartDate() {
+<span class="fc" id="L90">        return startDate;</span>
+    }
+
+    public void setStartDate(LocalDateTime startDate) {
+<span class="fc" id="L94">        this.startDate = startDate;</span>
+<span class="fc" id="L95">    }</span>
+
+    public LocalDateTime getEndDate() {
+<span class="fc" id="L98">        return endDate;</span>
+    }
+
+    public void setEndDate(LocalDateTime endDate) {
+<span class="fc" id="L102">        this.endDate = endDate;</span>
+<span class="fc" id="L103">    }</span>
+
+    public Integer getCapacity() {
+<span class="fc" id="L106">        return capacity;</span>
+    }
+
+    public void setCapacity(Integer capacity) {
+<span class="fc" id="L110">        this.capacity = capacity;</span>
+<span class="fc" id="L111">    }</span>
+
+    public Integer getRegisteredCount() {
+<span class="fc" id="L114">        return registeredCount;</span>
+    }
+
+    public void setRegisteredCount(Integer registeredCount) {
+<span class="fc" id="L118">        this.registeredCount = registeredCount;</span>
+<span class="fc" id="L119">    }</span>
+
+    public EventStatus getStatus() {
+<span class="fc" id="L122">        return status;</span>
+    }
+
+    public void setStatus(EventStatus status) {
+<span class="fc" id="L126">        this.status = status;</span>
+<span class="fc" id="L127">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

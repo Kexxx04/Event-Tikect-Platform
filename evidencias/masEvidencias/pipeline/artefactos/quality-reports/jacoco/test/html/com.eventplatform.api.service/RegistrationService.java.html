@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegistrationService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">event-platform</a> &gt; <a href="index.source.html" class="el_package">com.eventplatform.api.service</a> &gt; <span class="el_source">RegistrationService.java</span></div><h1>RegistrationService.java</h1><pre class="source lang-java linenums">package com.eventplatform.api.service;
+
+import com.eventplatform.api.dto.registration.RegistrationCancellationResponse;
+import com.eventplatform.api.dto.registration.RegistrationResponse;
+import com.eventplatform.api.dto.registration.UserEventResponse;
+import com.eventplatform.api.dto.registration.WaitlistEntryResponse;
+import com.eventplatform.api.exception.BusinessRuleViolationException;
+import com.eventplatform.api.exception.EventNotFoundException;
+import com.eventplatform.api.exception.RegistrationNotFoundException;
+import com.eventplatform.api.exception.UserNotFoundException;
+import com.eventplatform.api.model.Event;
+import com.eventplatform.api.model.Registration;
+import com.eventplatform.api.model.User;
+import com.eventplatform.api.model.enums.EventStatus;
+import com.eventplatform.api.model.enums.RegistrationStatus;
+import com.eventplatform.api.model.enums.UserStatus;
+import com.eventplatform.api.repository.EventRepository;
+import com.eventplatform.api.repository.RegistrationRepository;
+import com.eventplatform.api.repository.UserRepository;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.IntStream;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@Transactional(readOnly = true)
+public class RegistrationService {
+
+<span class="fc" id="L34">    private static final Set&lt;RegistrationStatus&gt; ACTIVE_STATUSES =</span>
+<span class="fc" id="L35">            EnumSet.of(RegistrationStatus.CONFIRMED, RegistrationStatus.WAITING_LIST);</span>
+
+<span class="fc" id="L37">    private static final Set&lt;EventStatus&gt; CLOSED_STATUSES = EnumSet.of(EventStatus.FINISHED, EventStatus.CANCELLED);</span>
+
+    private final EventRepository eventRepository;
+    private final UserRepository userRepository;
+    private final RegistrationRepository registrationRepository;
+    private final WaitlistService waitlistService;
+    private final Clock clock;
+
+    public RegistrationService(
+            EventRepository eventRepository,
+            UserRepository userRepository,
+            RegistrationRepository registrationRepository,
+            WaitlistService waitlistService,
+            Clock clock
+<span class="fc" id="L51">    ) {</span>
+<span class="fc" id="L52">        this.eventRepository = eventRepository;</span>
+<span class="fc" id="L53">        this.userRepository = userRepository;</span>
+<span class="fc" id="L54">        this.registrationRepository = registrationRepository;</span>
+<span class="fc" id="L55">        this.waitlistService = waitlistService;</span>
+<span class="fc" id="L56">        this.clock = clock;</span>
+<span class="fc" id="L57">    }</span>
+
+    /**
+     * Registers a user for an event: CONFIRMED while seats remain, WAITING_LIST once it is full.
+     * The event row stays locked until commit, so concurrent registrations never exceed capacity.
+     */
+    @Transactional
+    public RegistrationResponse register(Long eventId, Long userId) {
+<span class="fc" id="L65">        Event event = getEventForUpdate(eventId);</span>
+<span class="fc" id="L66">        User user = getUser(userId);</span>
+<span class="fc" id="L67">        LocalDateTime now = LocalDateTime.now(clock);</span>
+
+<span class="fc" id="L69">        ensureAcceptsRegistrations(event, now);</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        if (user.getStatus() == UserStatus.INACTIVE) {</span>
+<span class="fc" id="L71">            throw new BusinessRuleViolationException(&quot;Inactive users cannot register for events&quot;);</span>
+        }
+<span class="fc" id="L73">        Optional&lt;Registration&gt; existing = registrationRepository.findByEventIdAndUserId(eventId, userId);</span>
+<span class="fc bfc" id="L74" title="All 4 branches covered.">        if (existing.isPresent() &amp;&amp; ACTIVE_STATUSES.contains(existing.get().getStatus())) {</span>
+<span class="fc" id="L75">            throw new BusinessRuleViolationException(&quot;User is already registered for this event&quot;);</span>
+        }
+
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        RegistrationStatus status = event.getRegisteredCount() &lt; event.getCapacity()</span>
+<span class="fc" id="L79">                ? RegistrationStatus.CONFIRMED</span>
+<span class="fc" id="L80">                : RegistrationStatus.WAITING_LIST;</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        if (status == RegistrationStatus.CONFIRMED) {</span>
+<span class="fc" id="L82">            event.setRegisteredCount(event.getRegisteredCount() + 1);</span>
+        }
+
+        // (user_id, event_id) is unique, so a user who cancelled before reuses their registration.
+<span class="fc" id="L86">        Registration registration = existing.orElseGet(() -&gt; new Registration(user, event, now, status));</span>
+<span class="fc" id="L87">        registration.setRegistrationDate(now);</span>
+<span class="fc" id="L88">        registration.setStatus(status);</span>
+<span class="fc" id="L89">        return RegistrationResponse.from(registrationRepository.save(registration));</span>
+    }
+
+    /**
+     * Cancels the active registration of a user. A released confirmed seat goes to the oldest
+     * waitlisted registration within the same locked transaction.
+     */
+    @Transactional
+    public RegistrationCancellationResponse cancel(Long eventId, Long userId) {
+<span class="fc" id="L98">        Event event = getEventForUpdate(eventId);</span>
+<span class="fc" id="L99">        ensureUserExists(userId);</span>
+<span class="fc" id="L100">        Registration registration = getRegistration(eventId, userId);</span>
+
+<span class="fc bfc" id="L102" title="All 2 branches covered.">        if (CLOSED_STATUSES.contains(event.getStatus())) {</span>
+<span class="fc" id="L103">            throw new BusinessRuleViolationException(</span>
+<span class="fc" id="L104">                    &quot;Registrations of an event with status &quot; + event.getStatus() + &quot; cannot be cancelled&quot;);</span>
+        }
+<span class="fc bfc" id="L106" title="All 2 branches covered.">        if (registration.getStatus() == RegistrationStatus.CANCELLED) {</span>
+<span class="fc" id="L107">            throw new BusinessRuleViolationException(&quot;Registration is already cancelled&quot;);</span>
+        }
+
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        boolean releasesSeat = registration.getStatus() == RegistrationStatus.CONFIRMED;</span>
+<span class="fc" id="L111">        registration.setStatus(RegistrationStatus.CANCELLED);</span>
+<span class="fc" id="L112">        RegistrationResponse promoted = null;</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if (releasesSeat) {</span>
+<span class="fc" id="L114">            event.setRegisteredCount(event.getRegisteredCount() - 1);</span>
+<span class="fc" id="L115">            promoted = waitlistService.fillFreeSeats(event).stream()</span>
+<span class="fc" id="L116">                    .findFirst()</span>
+<span class="fc" id="L117">                    .map(RegistrationResponse::from)</span>
+<span class="fc" id="L118">                    .orElse(null);</span>
+        }
+<span class="fc" id="L120">        return new RegistrationCancellationResponse(RegistrationResponse.from(registration), promoted);</span>
+    }
+
+    public RegistrationResponse findOne(Long eventId, Long userId) {
+<span class="fc" id="L124">        ensureEventExists(eventId);</span>
+<span class="fc" id="L125">        ensureUserExists(userId);</span>
+<span class="fc" id="L126">        return RegistrationResponse.from(getRegistration(eventId, userId));</span>
+    }
+
+    public List&lt;RegistrationResponse&gt; findByEvent(Long eventId, RegistrationStatus status) {
+<span class="fc" id="L130">        ensureEventExists(eventId);</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        List&lt;Registration&gt; registrations = status == null</span>
+<span class="fc" id="L132">                ? registrationRepository.findByEventIdOrderByRegistrationDateAscIdAsc(eventId)</span>
+<span class="fc" id="L133">                : registrationRepository.findByEventIdAndStatusOrderByRegistrationDateAscIdAsc(eventId, status);</span>
+<span class="fc" id="L134">        return registrations.stream()</span>
+<span class="fc" id="L135">                .map(RegistrationResponse::from)</span>
+<span class="fc" id="L136">                .toList();</span>
+    }
+
+    public List&lt;WaitlistEntryResponse&gt; findWaitlist(Long eventId) {
+<span class="fc" id="L140">        ensureEventExists(eventId);</span>
+<span class="fc" id="L141">        List&lt;Registration&gt; waitlist = registrationRepository.findByEventIdAndStatusOrderByRegistrationDateAscIdAsc(</span>
+                eventId, RegistrationStatus.WAITING_LIST);
+<span class="fc" id="L143">        return IntStream.range(0, waitlist.size())</span>
+<span class="fc" id="L144">                .mapToObj(index -&gt; WaitlistEntryResponse.from(index + 1, waitlist.get(index)))</span>
+<span class="fc" id="L145">                .toList();</span>
+    }
+
+    public List&lt;UserEventResponse&gt; findEventsOfUser(Long userId, RegistrationStatus status) {
+<span class="fc" id="L149">        ensureUserExists(userId);</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">        List&lt;Registration&gt; registrations = status == null</span>
+<span class="fc" id="L151">                ? registrationRepository.findByUserIdOrderByEventStartDateAscIdAsc(userId)</span>
+<span class="fc" id="L152">                : registrationRepository.findByUserIdAndStatusOrderByEventStartDateAscIdAsc(userId, status);</span>
+<span class="fc" id="L153">        return registrations.stream()</span>
+<span class="fc" id="L154">                .map(UserEventResponse::from)</span>
+<span class="fc" id="L155">                .toList();</span>
+    }
+
+    private void ensureAcceptsRegistrations(Event event, LocalDateTime now) {
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        if (CLOSED_STATUSES.contains(event.getStatus())) {</span>
+<span class="fc" id="L160">            throw new BusinessRuleViolationException(</span>
+<span class="fc" id="L161">                    &quot;Event with status &quot; + event.getStatus() + &quot; does not accept registrations&quot;);</span>
+        }
+<span class="fc bfc" id="L163" title="All 2 branches covered.">        if (!now.isBefore(event.getStartDate())) {</span>
+<span class="fc" id="L164">            throw new BusinessRuleViolationException(</span>
+                    &quot;Registrations are closed because the event has already started&quot;);
+        }
+<span class="fc" id="L167">    }</span>
+
+    private Event getEventForUpdate(Long eventId) {
+<span class="fc" id="L170">        return eventRepository.findByIdForUpdate(eventId)</span>
+<span class="fc" id="L171">                .orElseThrow(() -&gt; new EventNotFoundException(eventId));</span>
+    }
+
+    private User getUser(Long userId) {
+<span class="fc" id="L175">        return userRepository.findById(userId)</span>
+<span class="fc" id="L176">                .orElseThrow(() -&gt; new UserNotFoundException(userId));</span>
+    }
+
+    private Registration getRegistration(Long eventId, Long userId) {
+<span class="fc" id="L180">        return registrationRepository.findByEventIdAndUserId(eventId, userId)</span>
+<span class="fc" id="L181">                .orElseThrow(() -&gt; new RegistrationNotFoundException(eventId, userId));</span>
+    }
+
+    private void ensureEventExists(Long eventId) {
+<span class="fc bfc" id="L185" title="All 2 branches covered.">        if (!eventRepository.existsById(eventId)) {</span>
+<span class="fc" id="L186">            throw new EventNotFoundException(eventId);</span>
+        }
+<span class="fc" id="L188">    }</span>
+
+    private void ensureUserExists(Long userId) {
+<span class="fc bfc" id="L191" title="All 2 branches covered.">        if (!userRepository.existsById(userId)) {</span>
+<span class="fc" id="L192">            throw new UserNotFoundException(userId);</span>
+        }
+<span class="fc" id="L194">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

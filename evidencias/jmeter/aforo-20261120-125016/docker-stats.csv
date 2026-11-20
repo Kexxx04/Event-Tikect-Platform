@@ -1,0 +1,10 @@
+timestamp,container,cpu_percent,mem_used_mib,mem_limit_mib,mem_percent
+2026-11-20T12:50:27,event-platform-perf-api-1,0.12,169.2,1024.0,16.53
+2026-11-20T12:50:32,event-platform-perf-jmeter-run-2238f1a0cbe3,87.56,216.7,2048.0,10.58
+2026-11-20T12:50:32,event-platform-perf-api-1,111.47,188.2,1024.0,18.38
+2026-11-20T12:50:37,event-platform-perf-jmeter-run-2238f1a0cbe3,23.02,369.2,2048.0,18.03
+2026-11-20T12:50:37,event-platform-perf-api-1,0.10,188.4,1024.0,18.39
+2026-11-20T12:50:42,event-platform-perf-jmeter-run-2238f1a0cbe3,10.66,387.8,2048.0,18.94
+2026-11-20T12:50:42,event-platform-perf-api-1,0.13,188.4,1024.0,18.39
+2026-11-20T12:50:47,event-platform-perf-jmeter-run-2238f1a0cbe3,126.13,458.5,2048.0,22.39
+2026-11-20T12:50:47,event-platform-perf-api-1,28.54,271.8,1024.0,26.54

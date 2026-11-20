@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>AuthService.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package com.eventplatform.api.service;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.eventplatform.api.config.SecurityProperties;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.eventplatform.api.dto.auth.LoginRequest;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.eventplatform.api.dto.auth.LoginResponse;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.time.Clock;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.time.Duration;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.time.Instant;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.security.authentication.AuthenticationManager;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.security.core.Authentication;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.security.oauth2.jose.jws.MacAlgorithm;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.security.oauth2.jwt.JwsHeader;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.security.oauth2.jwt.JwtClaimsSet;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.security.oauth2.jwt.JwtEncoder;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.security.oauth2.jwt.JwtEncoderParameters;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.stereotype.Service;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@Service</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_20'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>public class AuthService {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_21'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    static final String ISSUER = &#34;event-platform&#34;;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    static final String TOKEN_TYPE = &#34;Bearer&#34;;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_25'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    private final AuthenticationManager authenticationManager;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_26'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    private final JwtEncoder jwtEncoder;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_27'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    private final Clock clock;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_28'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    private final Duration tokenExpiration;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_29'/>
+29
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_29'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_30'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public AuthService(</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_31'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>            AuthenticationManager authenticationManager,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_32'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>            JwtEncoder jwtEncoder,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_33'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>            Clock clock,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_34'/>
+34
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_34'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>            SecurityProperties properties</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_35'/>
+35
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_35'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    ) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_36'/>
+36
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_36'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.authenticationManager = authenticationManager;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_37'/>
+37
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_37'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.jwtEncoder = jwtEncoder;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_38'/>
+38
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_38'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.clock = clock;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_39'/>
+39
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_39'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.tokenExpiration = properties.jwt().expiration();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_40'/>
+40
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_40'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_41'/>
+41
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_41'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_42'/>
+42
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_42'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    /** Verifies the credentials and issues a signed JWT; throws AuthenticationException when they are wrong. */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_43'/>
+43
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_43'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public LoginResponse login(LoginRequest request) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_44'/>
+44
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_44'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        Authentication authentication = authenticationManager.authenticate(</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_45'/>
+45
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_45'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                UsernamePasswordAuthenticationToken.unauthenticated(request.username(), request.password()));</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_46'/>
+46
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_46'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_47'/>
+47
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_47'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        Instant issuedAt = clock.instant();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_48'/>
+48
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_48'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        Instant expiresAt = issuedAt.plus(tokenExpiration);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_49'/>
+49
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_49'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        JwtClaimsSet claims = JwtClaimsSet.builder()</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_50'/>
+50
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_50'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .issuer(ISSUER)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_51'/>
+51
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_51'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .subject(authentication.getName())</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_52'/>
+52
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_52'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .issuedAt(issuedAt)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_53'/>
+53
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_53'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .expiresAt(expiresAt)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_54'/>
+54
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_54'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .build();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_55'/>
+55
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_55'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        String token = jwtEncoder.encode(JwtEncoderParameters.from(</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_56'/>
+56
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_56'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                JwsHeader.with(MacAlgorithm.HS256).build(), claims)).getTokenValue();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_57'/>
+57
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_57'>1</a>
+<span>
+
+1. login : replaced return value with null for com/eventplatform/api/service/AuthService::login &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return new LoginResponse(token, TOKEN_TYPE, expiresAt, authentication.getName());</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_58'/>
+58
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_58'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_59'/>
+59
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_59'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_57'>57</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@2ed3b1f5_57'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>login<br/><b>Killed by : </b>com.eventplatform.api.service.AuthServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.AuthServiceTests]/[method:issuesASignedTokenForValidCredentials()]</span></span> replaced return value with null for com/eventplatform/api/service/AuthService::login &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+
+<li class='mutator'>EMPTY_RETURNS</li>
+
+<li class='mutator'>FALSE_RETURNS</li>
+
+<li class='mutator'>INCREMENTS</li>
+
+<li class='mutator'>INVERT_NEGS</li>
+
+<li class='mutator'>MATH</li>
+
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+
+<li class='mutator'>NULL_RETURNS</li>
+
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+
+<li class='mutator'>TRUE_RETURNS</li>
+
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>com.eventplatform.api.service.AuthServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.AuthServiceTests]/[method:issuesASignedTokenForValidCredentials()] (5 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#4] (65 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#18] (66 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#14] (66 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#16] (66 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#9] (67 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#13] (67 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#1] (68 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#5] (71 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#15] (73 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#10] (74 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#12] (75 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#8] (76 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#3] (77 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#19] (78 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#11] (80 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#7] (82 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#6] (82 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#17] (82 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[test-template:describesEveryEndpointSoZapCanCallIt(java.lang.String, java.lang.String)]/[test-template-invocation:#2] (88 ms)</li><li>com.eventplatform.api.controller.AuthControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.AuthControllerIntegrationTests]/[method:logsInAndUsesTheTokenOnProtectedEndpoints()] (141 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:DefaultProfile]/[method:doesNotPublishTheDefinition()] (327 ms)</li><li>com.eventplatform.api.config.OpenApiDocsIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.config.OpenApiDocsIntegrationTests]/[nested-class:ZapProfile]/[method:usesOpenApi30BecauseZapOnlyHasInitialSupportFor31()] (619 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.19.0
+
+</body>
+</html>

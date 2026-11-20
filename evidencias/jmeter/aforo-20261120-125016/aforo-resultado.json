@@ -1,0 +1,17 @@
+{
+    "users": 1000,
+    "capacity": 100,
+    "availability": {
+        "eventId": 1,
+        "capacity": 100,
+        "registeredCount": 100,
+        "availableSeats": 0,
+        "waitlistCount": 900,
+        "status": "SCHEDULED",
+        "acceptingRegistrations": true
+    },
+    "registrationResponses": {
+        "CONFIRMED": 100,
+        "WAITING_LIST": 900
+    }
+}

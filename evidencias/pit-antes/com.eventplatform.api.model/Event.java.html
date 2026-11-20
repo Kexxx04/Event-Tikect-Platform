@@ -1,0 +1,3819 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>Event.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package com.eventplatform.api.model;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.eventplatform.api.model.enums.EventStatus;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import jakarta.persistence.Column;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import jakarta.persistence.Entity;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import jakarta.persistence.EnumType;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import jakarta.persistence.Enumerated;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import jakarta.persistence.GeneratedValue;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import jakarta.persistence.GenerationType;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import jakarta.persistence.Id;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import jakarta.persistence.Table;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.slf4j.Logger;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.slf4j.LoggerFactory;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.time.LocalDateTime;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@Entity</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@Table(name = &#34;events&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>public class Event {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_20'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_21'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @Id</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @GeneratedValue(strategy = GenerationType.IDENTITY)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    private Long id;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_25'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @Column(nullable = false)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_26'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    private String name;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_27'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_28'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @Column(length = 1000)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_29'/>
+29
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_29'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    private String description;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_30'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_31'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @Column(name = &#34;start_date&#34;, nullable = false)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_32'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    private LocalDateTime startDate;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_33'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_34'/>
+34
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_34'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @Column(name = &#34;end_date&#34;, nullable = false)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_35'/>
+35
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_35'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    private LocalDateTime endDate;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_36'/>
+36
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_36'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_37'/>
+37
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_37'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @Column(nullable = false)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_38'/>
+38
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_38'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    private Integer capacity;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_39'/>
+39
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_39'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_40'/>
+40
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_40'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    @Column(name = &#34;registered_count&#34;, nullable = false)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_41'/>
+41
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_41'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    private Integer registeredCount = 0;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_42'/>
+42
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_42'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_43'/>
+43
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_43'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    @Enumerated(EnumType.STRING)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_44'/>
+44
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_44'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @Column(nullable = false)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_45'/>
+45
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_45'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    private EventStatus status = EventStatus.SCHEDULED;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_46'/>
+46
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_46'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    private static final Logger log = LoggerFactory.getLogger(Event.class);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_47'/>
+47
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_47'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    // Constructor vac&#237;o requerido por JPA</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_48'/>
+48
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_48'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    public Event() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_49'/>
+49
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_49'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_50'/>
+50
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_50'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_51'/>
+51
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_51'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    // Constructor para crear eventos</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_52'/>
+52
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_52'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public Event(</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_53'/>
+53
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_53'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>            String name,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_54'/>
+54
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_54'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>            String description,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_55'/>
+55
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_55'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>            LocalDateTime startDate,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_56'/>
+56
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_56'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>            LocalDateTime endDate,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_57'/>
+57
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_57'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>            Integer capacity,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_58'/>
+58
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_58'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>            EventStatus status</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_59'/>
+59
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_59'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    ) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_60'/>
+60
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_60'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.name = name;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_61'/>
+61
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_61'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.description = description;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_62'/>
+62
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_62'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.startDate = startDate;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_63'/>
+63
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_63'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.endDate = endDate;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_64'/>
+64
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_64'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.capacity = capacity;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_65'/>
+65
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_65'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.registeredCount = 0;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_66'/>
+66
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_66'>1</a>
+<span>
+
+1. &#60;init&#62; : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        this.status = status != null ? status : EventStatus.SCHEDULED;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_67'/>
+67
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_67'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_68'/>
+68
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_68'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public Long getId() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_69'/>
+69
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_69'>1</a>
+<span>
+
+1. getId : replaced Long return value with 0L for com/eventplatform/api/model/Event::getId &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return id;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_70'/>
+70
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_70'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_71'/>
+71
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_71'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_72'/>
+72
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_72'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public void setId(Long id) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_73'/>
+73
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_73'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.id = id;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_74'/>
+74
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_74'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_75'/>
+75
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_75'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_76'/>
+76
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_76'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public String getName() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_77'/>
+77
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_77'>1</a>
+<span>
+
+1. getName : replaced return value with &#34;&#34; for com/eventplatform/api/model/Event::getName &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return name;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_78'/>
+78
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_78'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_79'/>
+79
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_79'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_80'/>
+80
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_80'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public void setName(String name) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_81'/>
+81
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_81'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.name = name;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_82'/>
+82
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_82'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_83'/>
+83
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_83'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_84'/>
+84
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_84'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public String getDescription() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_85'/>
+85
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_85'>1</a>
+<span>
+
+1. getDescription : replaced return value with &#34;&#34; for com/eventplatform/api/model/Event::getDescription &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return description;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_86'/>
+86
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_86'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_87'/>
+87
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_87'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_88'/>
+88
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_88'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public void setDescription(String description) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_89'/>
+89
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_89'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.description = description;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_90'/>
+90
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_90'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_91'/>
+91
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_91'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_92'/>
+92
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_92'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public LocalDateTime getStartDate() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_93'/>
+93
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_93'>1</a>
+<span>
+
+1. getStartDate : replaced return value with null for com/eventplatform/api/model/Event::getStartDate &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return startDate;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_94'/>
+94
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_94'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_95'/>
+95
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_95'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_96'/>
+96
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_96'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public void setStartDate(LocalDateTime startDate) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_97'/>
+97
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_97'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.startDate = startDate;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_98'/>
+98
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_98'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_99'/>
+99
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_99'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_100'/>
+100
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_100'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public LocalDateTime getEndDate() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_101'/>
+101
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_101'>1</a>
+<span>
+
+1. getEndDate : replaced return value with null for com/eventplatform/api/model/Event::getEndDate &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return endDate;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_102'/>
+102
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_102'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_103'/>
+103
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_103'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_104'/>
+104
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_104'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public void setEndDate(LocalDateTime endDate) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_105'/>
+105
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_105'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.endDate = endDate;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_106'/>
+106
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_106'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_107'/>
+107
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_107'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_108'/>
+108
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_108'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public Integer getCapacity() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_109'/>
+109
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_109'>1</a>
+<span>
+
+1. getCapacity : replaced Integer return value with 0 for com/eventplatform/api/model/Event::getCapacity &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return capacity;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_110'/>
+110
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_110'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_111'/>
+111
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_111'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_112'/>
+112
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_112'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public void setCapacity(Integer capacity) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_113'/>
+113
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_113'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.capacity = capacity;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_114'/>
+114
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_114'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_115'/>
+115
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_115'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_116'/>
+116
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_116'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public Integer getRegisteredCount() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_117'/>
+117
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_117'>1</a>
+<span>
+
+1. getRegisteredCount : replaced Integer return value with 0 for com/eventplatform/api/model/Event::getRegisteredCount &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return registeredCount;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_118'/>
+118
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_118'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_119'/>
+119
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_119'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_120'/>
+120
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_120'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public void setRegisteredCount(Integer registeredCount) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_121'/>
+121
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_121'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.registeredCount = registeredCount;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_122'/>
+122
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_122'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_123'/>
+123
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_123'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_124'/>
+124
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_124'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public EventStatus getStatus() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_125'/>
+125
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_125'>1</a>
+<span>
+
+1. getStatus : replaced return value with null for com/eventplatform/api/model/Event::getStatus &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return status;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_126'/>
+126
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_126'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_127'/>
+127
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_127'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_128'/>
+128
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_128'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public void setStatus(EventStatus status) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_129'/>
+129
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_129'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        this.status = status;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_130'/>
+130
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_130'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_131'/>
+131
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_131'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_132'/>
+132
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_132'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public boolean validateForPublication() throws Exception {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_133'/>
+133
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_133'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        boolean valid = true;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_134'/>
+134
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_134'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_135'/>
+135
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_135'>1</a>
+<span>
+
+1. validateForPublication : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        if (name == null) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_136'/>
+136
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_136'>1</a>
+<span>
+
+1. validateForPublication : removed call to java/io/PrintStream::println &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>            System.out.println(&#34;The event name is missing&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_137'/>
+137
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_137'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>            valid = false;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_138'/>
+138
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_138'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        } else {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_139'/>
+139
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_139'>1</a>
+<span>
+
+1. validateForPublication : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>            if (name.trim().isEmpty()) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_140'/>
+140
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_140'>1</a>
+<span>
+
+1. validateForPublication : removed call to java/io/PrintStream::println &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>                System.out.println(&#34;The event name is empty&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_141'/>
+141
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_141'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                valid = false;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_142'/>
+142
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_142'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>            } else {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_143'/>
+143
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_143'>2</a>
+<span>
+
+1. validateForPublication : changed conditional boundary &rarr; KILLED<br/>
+
+2. validateForPublication : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                if (name.length() &#60; 3) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_144'/>
+144
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_144'>1</a>
+<span>
+
+1. validateForPublication : removed call to java/io/PrintStream::println &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>                    System.out.println(&#34;The event name is too short&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_145'/>
+145
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_145'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                    valid = false;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_146'/>
+146
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_146'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>                }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_147'/>
+147
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_147'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>            }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_148'/>
+148
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_148'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_149'/>
+149
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_149'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_150'/>
+150
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_150'>1</a>
+<span>
+
+1. validateForPublication : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        if (description != null) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_151'/>
+151
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_151'>2</a>
+<span>
+
+1. validateForPublication : changed conditional boundary &rarr; KILLED<br/>
+
+2. validateForPublication : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>            if (description.length() &#62; 1000) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_152'/>
+152
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_152'>1</a>
+<span>
+
+1. validateForPublication : removed call to java/io/PrintStream::println &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>                System.out.println(&#34;The description is too long&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_153'/>
+153
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_153'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                valid = false;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_154'/>
+154
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_154'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>            }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_155'/>
+155
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_155'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_156'/>
+156
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_156'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_157'/>
+157
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_157'>1</a>
+<span>
+
+1. validateForPublication : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        if (startDate == null) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_158'/>
+158
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_158'>1</a>
+<span>
+
+1. validateForPublication : removed call to java/io/PrintStream::println &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>            System.out.println(&#34;The start date is missing&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_159'/>
+159
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_159'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>            valid = false;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_160'/>
+160
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_160'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        } else {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_161'/>
+161
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_161'>1</a>
+<span>
+
+1. validateForPublication : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>            if (startDate.isBefore(LocalDateTime.now())) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_162'/>
+162
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_162'>1</a>
+<span>
+
+1. validateForPublication : removed call to java/io/PrintStream::println &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>                System.out.println(&#34;The start date is in the past&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_163'/>
+163
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_163'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                valid = false;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_164'/>
+164
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_164'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>            }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_165'/>
+165
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_165'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_166'/>
+166
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_166'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_167'/>
+167
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_167'>1</a>
+<span>
+
+1. validateForPublication : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        if (endDate == null) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_168'/>
+168
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_168'>1</a>
+<span>
+
+1. validateForPublication : removed call to java/io/PrintStream::println &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>            System.out.println(&#34;The end date is missing&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_169'/>
+169
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_169'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>            valid = false;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_170'/>
+170
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_170'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        } else {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_171'/>
+171
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_171'>2</a>
+<span>
+
+1. validateForPublication : negated conditional &rarr; KILLED<br/>
+
+2. validateForPublication : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>            if (startDate != null &#38;&#38; !endDate.isAfter(startDate)) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_172'/>
+172
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_172'>1</a>
+<span>
+
+1. validateForPublication : removed call to java/io/PrintStream::println &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>                System.out.println(&#34;The end date must be after the start date&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_173'/>
+173
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_173'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                valid = false;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_174'/>
+174
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_174'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>            }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_175'/>
+175
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_175'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_176'/>
+176
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_176'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_177'/>
+177
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_177'>1</a>
+<span>
+
+1. validateForPublication : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        if (capacity == null) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_178'/>
+178
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_178'>1</a>
+<span>
+
+1. validateForPublication : removed call to java/io/PrintStream::println &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>            System.out.println(&#34;The capacity is missing&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_179'/>
+179
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_179'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>            valid = false;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_180'/>
+180
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_180'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        } else {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_181'/>
+181
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_181'>2</a>
+<span>
+
+1. validateForPublication : changed conditional boundary &rarr; KILLED<br/>
+
+2. validateForPublication : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>            if (capacity &#60;= 0) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_182'/>
+182
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_182'>1</a>
+<span>
+
+1. validateForPublication : removed call to java/io/PrintStream::println &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>                System.out.println(&#34;The capacity must be positive&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_183'/>
+183
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_183'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                valid = false;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_184'/>
+184
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_184'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>            }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_185'/>
+185
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_185'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_186'/>
+186
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_186'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_187'/>
+187
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_187'>3</a>
+<span>
+
+1. validateForPublication : changed conditional boundary &rarr; KILLED<br/>
+
+2. validateForPublication : negated conditional &rarr; KILLED<br/>
+
+3. validateForPublication : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        if (registeredCount == null || registeredCount &#60; 0) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_188'/>
+188
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_188'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>            log.warn(&#34;The registered count must be non-negative&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_189'/>
+189
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_189'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>            valid = false;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_190'/>
+190
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_190'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        } else {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_191'/>
+191
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_191'>3</a>
+<span>
+
+1. validateForPublication : negated conditional &rarr; KILLED<br/>
+
+2. validateForPublication : changed conditional boundary &rarr; KILLED<br/>
+
+3. validateForPublication : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>            if (capacity != null &#38;&#38; registeredCount &#62; capacity) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_192'/>
+192
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_192'>1</a>
+<span>
+
+1. validateForPublication : removed call to java/io/PrintStream::println &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>                System.out.println(&#34;The registered count exceeds capacity&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_193'/>
+193
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_193'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                valid = false;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_194'/>
+194
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_194'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>            }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_195'/>
+195
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_195'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_196'/>
+196
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_196'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_197'/>
+197
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_197'>1</a>
+<span>
+
+1. validateForPublication : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        if (status == null) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_198'/>
+198
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_198'>1</a>
+<span>
+
+1. validateForPublication : removed call to java/io/PrintStream::println &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>            System.out.println(&#34;The event status is missing&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_199'/>
+199
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_199'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>            valid = false;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_200'/>
+200
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_200'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_201'/>
+201
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_201'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_202'/>
+202
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_202'>1</a>
+<span>
+
+1. validateForPublication : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        if (!valid) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_203'/>
+203
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_203'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>            throw new Exception(&#34;The event is not valid for publication&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_204'/>
+204
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_204'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_205'/>
+205
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_205'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_206'/>
+206
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_206'>1</a>
+<span>
+
+1. validateForPublication : replaced boolean return with false for com/eventplatform/api/model/Event::validateForPublication &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return true;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_207'/>
+207
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_207'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@3ce3db41_208'/>
+208
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_208'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_66'>66</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_66'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>&#60;init&#62;<br/><b>Killed by : </b>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:rejectsInvalidStatusTransitions(com.eventplatform.api.model.enums.EventStatus, com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#7]</span></span> negated conditional &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_69'>69</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_69'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getId<br/><b>Killed by : </b>com.eventplatform.api.model.JpaConstructorTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.JpaConstructorTests]/[method:anEventStartsScheduledWithoutRegistrations()]</span></span> replaced Long return value with 0L for com/eventplatform/api/model/Event::getId &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_77'>77</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_77'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getName<br/><b>Killed by : </b>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[test-template:rejectsNullsInNotNullColumns(java.lang.String, java.util.function.Consumer)]/[test-template-invocation:#1]</span></span> replaced return value with &#34;&#34; for com/eventplatform/api/model/Event::getName &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_85'>85</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_85'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getDescription<br/><b>Killed by : </b>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:storesBlankDescriptionAsNull()]</span></span> replaced return value with &#34;&#34; for com/eventplatform/api/model/Event::getDescription &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_93'>93</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_93'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getStartDate<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#8]</span></span> replaced return value with null for com/eventplatform/api/model/Event::getStartDate &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_101'>101</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_101'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getEndDate<br/><b>Killed by : </b>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[test-template:rejectsNullsInNotNullColumns(java.lang.String, java.util.function.Consumer)]/[test-template-invocation:#4]</span></span> replaced return value with null for com/eventplatform/api/model/Event::getEndDate &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_109'>109</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_109'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getCapacity<br/><b>Killed by : </b>com.eventplatform.api.service.WaitlistServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.WaitlistServiceTests]/[method:keepsTheCountWhenNobodyIsWaiting()]</span></span> replaced Integer return value with 0 for com/eventplatform/api/model/Event::getCapacity &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_117'>117</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_117'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getRegisteredCount<br/><b>Killed by : </b>com.eventplatform.api.service.WaitlistServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.WaitlistServiceTests]/[test-template:doesNotQueryTheWaitlistOfAFullEvent(int)]/[test-template-invocation:#2]</span></span> replaced Integer return value with 0 for com/eventplatform/api/model/Event::getRegisteredCount &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_125'>125</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_125'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getStatus<br/><b>Killed by : </b>com.eventplatform.api.model.JpaConstructorTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.JpaConstructorTests]/[method:anEventStartsScheduledWithoutRegistrations()]</span></span> replaced return value with null for com/eventplatform/api/model/Event::getStatus &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_135'>135</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_135'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnOptionalDescription()]</span></span> negated conditional &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_136'>136</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_136'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>none</span></span> removed call to java/io/PrintStream::println &rarr; SURVIVED</span>
+<a title="Click to view covering tests" class="view-covered-by-tests" onClick="document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[14],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display=(document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[14],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display == 'block')?'none':'block';">Covering tests</a>
+<div class="covered-tests" id="MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[14],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]" style="display:none;">Covered by tests:
+<ul>
+<li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#1]</li> 
+</ul>
+</div></div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_139'>139</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_139'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnOptionalDescription()]</span></span> negated conditional &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_140'>140</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_140'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>none</span></span> removed call to java/io/PrintStream::println &rarr; SURVIVED</span>
+<a title="Click to view covering tests" class="view-covered-by-tests" onClick="document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[32],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display=(document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[32],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display == 'block')?'none':'block';">Covering tests</a>
+<div class="covered-tests" id="MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[32],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]" style="display:none;">Covered by tests:
+<ul>
+<li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#2]</li> 
+</ul>
+</div></div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_143'>143</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_143'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnEventAtCapacityAndMaximumDescriptionLength()]</span></span> changed conditional boundary &rarr; KILLED</span>
+</div> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnOptionalDescription()]</span></span> negated conditional &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_144'>144</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_144'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>none</span></span> removed call to java/io/PrintStream::println &rarr; SURVIVED</span>
+<a title="Click to view covering tests" class="view-covered-by-tests" onClick="document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[50],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display=(document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[50],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display == 'block')?'none':'block';">Covering tests</a>
+<div class="covered-tests" id="MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[50],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]" style="display:none;">Covered by tests:
+<ul>
+<li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#3]</li> 
+</ul>
+</div></div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_150'>150</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_150'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnOptionalDescription()]</span></span> negated conditional &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_151'>151</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_151'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnEventAtCapacityAndMaximumDescriptionLength()]</span></span> changed conditional boundary &rarr; KILLED</span>
+</div> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnEventWithNoRegistrations()]</span></span> negated conditional &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_152'>152</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_152'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>none</span></span> removed call to java/io/PrintStream::println &rarr; SURVIVED</span>
+<a title="Click to view covering tests" class="view-covered-by-tests" onClick="document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[72],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display=(document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[72],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display == 'block')?'none':'block';">Covering tests</a>
+<div class="covered-tests" id="MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[72],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]" style="display:none;">Covered by tests:
+<ul>
+<li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#4]</li> 
+</ul>
+</div></div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_157'>157</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_157'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnOptionalDescription()]</span></span> negated conditional &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_158'>158</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_158'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>none</span></span> removed call to java/io/PrintStream::println &rarr; SURVIVED</span>
+<a title="Click to view covering tests" class="view-covered-by-tests" onClick="document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[87],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display=(document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[87],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display == 'block')?'none':'block';">Covering tests</a>
+<div class="covered-tests" id="MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[87],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]" style="display:none;">Covered by tests:
+<ul>
+<li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#5]</li> 
+</ul>
+</div></div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_161'>161</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_161'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnOptionalDescription()]</span></span> negated conditional &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_162'>162</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_162'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>none</span></span> removed call to java/io/PrintStream::println &rarr; SURVIVED</span>
+<a title="Click to view covering tests" class="view-covered-by-tests" onClick="document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[105],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display=(document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[105],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display == 'block')?'none':'block';">Covering tests</a>
+<div class="covered-tests" id="MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[105],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]" style="display:none;">Covered by tests:
+<ul>
+<li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#6]</li> 
+</ul>
+</div></div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_167'>167</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_167'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnOptionalDescription()]</span></span> negated conditional &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_168'>168</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_168'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>none</span></span> removed call to java/io/PrintStream::println &rarr; SURVIVED</span>
+<a title="Click to view covering tests" class="view-covered-by-tests" onClick="document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[120],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display=(document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[120],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display == 'block')?'none':'block';">Covering tests</a>
+<div class="covered-tests" id="MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[120],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]" style="display:none;">Covered by tests:
+<ul>
+<li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#7]</li> 
+</ul>
+</div></div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_171'>171</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_171'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#8]</span></span> negated conditional &rarr; KILLED</span>
+</div> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnOptionalDescription()]</span></span> negated conditional &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_172'>172</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_172'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>none</span></span> removed call to java/io/PrintStream::println &rarr; SURVIVED</span>
+<a title="Click to view covering tests" class="view-covered-by-tests" onClick="document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[142],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display=(document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[142],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display == 'block')?'none':'block';">Covering tests</a>
+<div class="covered-tests" id="MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[142],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]" style="display:none;">Covered by tests:
+<ul>
+<li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#8]</li> <li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#9]</li> 
+</ul>
+</div></div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_177'>177</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_177'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnOptionalDescription()]</span></span> negated conditional &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_178'>178</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_178'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>none</span></span> removed call to java/io/PrintStream::println &rarr; SURVIVED</span>
+<a title="Click to view covering tests" class="view-covered-by-tests" onClick="document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[157],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display=(document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[157],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display == 'block')?'none':'block';">Covering tests</a>
+<div class="covered-tests" id="MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[157],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]" style="display:none;">Covered by tests:
+<ul>
+<li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#10]</li> 
+</ul>
+</div></div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_181'>181</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_181'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#11]</span></span> changed conditional boundary &rarr; KILLED</span>
+</div> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnOptionalDescription()]</span></span> negated conditional &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_182'>182</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_182'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>none</span></span> removed call to java/io/PrintStream::println &rarr; SURVIVED</span>
+<a title="Click to view covering tests" class="view-covered-by-tests" onClick="document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[174],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display=(document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[174],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display == 'block')?'none':'block';">Covering tests</a>
+<div class="covered-tests" id="MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[174],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]" style="display:none;">Covered by tests:
+<ul>
+<li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#12]</li> <li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#11]</li> 
+</ul>
+</div></div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_187'>187</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_187'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnOptionalDescription()]</span></span> changed conditional boundary &rarr; KILLED</span>
+</div> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnOptionalDescription()]</span></span> negated conditional &rarr; KILLED</span>
+</div> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnOptionalDescription()]</span></span> negated conditional &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_191'>191</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_191'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#15]</span></span> negated conditional &rarr; KILLED</span>
+</div> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnEventAtCapacityAndMaximumDescriptionLength()]</span></span> changed conditional boundary &rarr; KILLED</span>
+</div> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnOptionalDescription()]</span></span> negated conditional &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_192'>192</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_192'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>none</span></span> removed call to java/io/PrintStream::println &rarr; SURVIVED</span>
+<a title="Click to view covering tests" class="view-covered-by-tests" onClick="document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[217],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display=(document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[217],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display == 'block')?'none':'block';">Covering tests</a>
+<div class="covered-tests" id="MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[217],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]" style="display:none;">Covered by tests:
+<ul>
+<li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#12]</li> <li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#15]</li> 
+</ul>
+</div></div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_197'>197</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_197'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnOptionalDescription()]</span></span> negated conditional &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_198'>198</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_198'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>none</span></span> removed call to java/io/PrintStream::println &rarr; SURVIVED</span>
+<a title="Click to view covering tests" class="view-covered-by-tests" onClick="document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[232],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display=(document.getElementById('MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[232],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]').style.display == 'block')?'none':'block';">Covering tests</a>
+<div class="covered-tests" id="MutationIdentifier-[location=Location-[clazz=com.eventplatform.api.model.Event,-method=validateForPublication,-methodDesc=()Z],-indexes=[232],-mutator=org.pitest.mutationtest.engine.gregor.mutators.VoidMethodCallMutator]" style="display:none;">Covered by tests:
+<ul>
+<li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#16]</li> 
+</ul>
+</div></div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_202'>202</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_202'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#13]</span></span> negated conditional &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@3ce3db41_206'>206</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@3ce3db41_206'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateForPublication<br/><b>Killed by : </b>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnOptionalDescription()]</span></span> replaced boolean return with false for com/eventplatform/api/model/Event::validateForPublication &rarr; KILLED</span>
+</div> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+
+<li class='mutator'>EMPTY_RETURNS</li>
+
+<li class='mutator'>FALSE_RETURNS</li>
+
+<li class='mutator'>INCREMENTS</li>
+
+<li class='mutator'>INVERT_NEGS</li>
+
+<li class='mutator'>MATH</li>
+
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+
+<li class='mutator'>NULL_RETURNS</li>
+
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+
+<li class='mutator'>TRUE_RETURNS</li>
+
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#13] (0 ms)</li><li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnEventWithNoRegistrations()] (0 ms)</li><li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#10] (0 ms)</li><li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#14] (0 ms)</li><li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#12] (0 ms)</li><li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnEventAtCapacityAndMaximumDescriptionLength()] (0 ms)</li><li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#11] (0 ms)</li><li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#15] (0 ms)</li><li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#16] (0 ms)</li><li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#2] (0 ms)</li><li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#3] (0 ms)</li><li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#4] (0 ms)</li><li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#5] (0 ms)</li><li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#6] (0 ms)</li><li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#7] (0 ms)</li><li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#8] (0 ms)</li><li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#9] (0 ms)</li><li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[test-template:rejectsInvalidPublicationData(java.util.function.Consumer)]/[test-template-invocation:#1] (1 ms)</li><li>com.eventplatform.api.model.EventTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.EventTests]/[method:acceptsAnOptionalDescription()] (0 ms)</li><li>com.eventplatform.api.service.WaitlistServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.WaitlistServiceTests]/[test-template:doesNotQueryTheWaitlistOfAFullEvent(int)]/[test-template-invocation:#2] (0 ms)</li><li>com.eventplatform.api.service.WaitlistServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.WaitlistServiceTests]/[test-template:doesNotQueryTheWaitlistOfAFullEvent(int)]/[test-template-invocation:#1] (0 ms)</li><li>com.eventplatform.api.service.WaitlistServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.WaitlistServiceTests]/[method:keepsTheCountWhenNobodyIsWaiting()] (0 ms)</li><li>com.eventplatform.api.service.WaitlistServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.WaitlistServiceTests]/[method:fillsEveryFreeSeatWhenTheCapacityGrows()] (0 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:retrievesAnEventById()] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:listsEventsInIdOrder()] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:appliesValidStatusTransitions(com.eventplatform.api.model.enums.EventStatus, com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#4] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:appliesValidStatusTransitions(com.eventplatform.api.model.enums.EventStatus, com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#1] (1 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[test-template:rejectsNullsInNotNullColumns(java.lang.String, java.util.function.Consumer)]/[test-template-invocation:#4] (0 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:appliesValidStatusTransitions(com.eventplatform.api.model.enums.EventStatus, com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#2] (1 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[test-template:rejectsNullsInNotNullColumns(java.lang.String, java.util.function.Consumer)]/[test-template-invocation:#5] (0 ms)</li><li>com.eventplatform.api.service.WaitlistServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.WaitlistServiceTests]/[method:promotesTheOldestWaitlistedRegistrationIntoTheReleasedSeat()] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:appliesValidStatusTransitions(com.eventplatform.api.model.enums.EventStatus, com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#3] (1 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[test-template:rejectsNullsInNotNullColumns(java.lang.String, java.util.function.Consumer)]/[test-template-invocation:#6] (0 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:neverReportsNegativeAvailableSeats()] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:startedEventsDoNotAcceptRegistrations(long)]/[test-template-invocation:#2] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:startedEventsDoNotAcceptRegistrations(long)]/[test-template-invocation:#3] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:closedEventsDoNotAcceptRegistrations(com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#1] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:closedEventsDoNotAcceptRegistrations(com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#2] (1 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[test-template:rejectsACapacityThatIsNotPositive(int)]/[test-template-invocation:#1] (0 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:reportsAFullEventWithItsWaitlist()] (1 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[test-template:rejectsAnEndDateThatIsNotAfterTheStartDate(int)]/[test-template-invocation:#1] (0 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:startedEventsDoNotAcceptRegistrations(long)]/[test-template-invocation:#1] (2 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:reportsAvailabilityOfAnOpenEvent()] (2 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:rejectsUpdatingClosedEvents(com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#2] (1 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[test-template:rejectsACapacityThatIsNotPositive(int)]/[test-template-invocation:#2] (0 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:storesBlankDescriptionAsNull()] (1 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[test-template:rejectsAnEndDateThatIsNotAfterTheStartDate(int)]/[test-template-invocation:#2] (0 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[test-template:rejectsARegisteredCountOutsideZeroAndTheCapacity(int)]/[test-template-invocation:#2] (0 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:acceptsRegistrationsUntilTheMomentBeforeStart()] (3 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[test-template:rejectsARegisteredCountOutsideZeroAndTheCapacity(int)]/[test-template-invocation:#1] (1 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[test-template:acceptsARegisteredCountFromZeroUpToTheCapacity(int)]/[test-template-invocation:#2] (0 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:rejectsCapacityBelowRegisteredCountWithoutChangingEvent()] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:replacesDescriptionWithNullWhenOmitted()] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:createsAScheduledEventWithNormalizedData()] (2 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[test-template:acceptsARegisteredCountFromZeroUpToTheCapacity(int)]/[test-template-invocation:#1] (2 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:rejectsInvalidUpdateDataWithoutChangingEvent()] (2 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:allowsCapacityEqualToRegisteredCount()] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:rejectsUpdatingClosedEvents(com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#1] (7 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:replacesAllEditableFields(com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#1] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:replacesAllEditableFields(com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#2] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[method:acceptsRegistrationsUntilTheMomentBeforeStart()] (1 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[method:doesNotCheckReadOnlyTransactionsBecauseHibernateDoesNotFlushThem()] (1 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[method:findByIdForUpdateReturnsTheStoredEventOrEmpty()] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[test-template:waitlistsTheRegistrationWhenTheEventIsFull(int)]/[test-template-invocation:#1] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[test-template:confirmsTheRegistrationWhileSeatsRemain(com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#1] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[method:sendsAReturningUserToTheEndOfTheWaitlist()] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[test-template:waitlistsTheRegistrationWhenTheEventIsFull(int)]/[test-template-invocation:#2] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[test-template:confirmsTheRegistrationWhileSeatsRemain(com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#2] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:increasingTheCapacityFillsTheNewSeatsFromTheWaitlist()] (4 ms)</li><li>com.eventplatform.api.inmemory.InMemoryDatabaseTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryDatabaseTests]/[method:eachTableHasItsOwnSequence()] (0 ms)</li><li>com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests]/[test-template:rejectsNullsInNotNullColumns(java.lang.String, java.util.function.Consumer)]/[test-template-invocation:#2] (0 ms)</li><li>com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests]/[test-template:rejectsNullsInNotNullColumns(java.lang.String, java.util.function.Consumer)]/[test-template-invocation:#4] (0 ms)</li><li>com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests]/[test-template:rejectsNullsInNotNullColumns(java.lang.String, java.util.function.Consumer)]/[test-template-invocation:#3] (0 ms)</li><li>com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests]/[test-template:rejectsNullsInNotNullColumns(java.lang.String, java.util.function.Consumer)]/[test-template-invocation:#1] (1 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[method:checksTheConstraintsOfTheEventsThatATransactionChangedBeforeItCommits()] (2 ms)</li><li>com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests]/[method:rejectsASecondRegistrationOfTheSameUserForTheSameEvent()] (1 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[nested-class:PessimisticLock]/[method:aTransactionTakesTheLockOnceAndReleasesItWhenItCommits()] (2 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[method:refusesToDeleteAnEventWithRegistrationsLikeTheForeignKey()] (2 ms)</li><li>com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests]/[method:allowsTheSameUserInAnotherEventAndAnotherUserInTheSameEvent()] (1 ms)</li><li>com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests]/[method:listsTheRegistrationsOfAnEventByRegistrationDateThenId()] (0 ms)</li><li>com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests]/[method:countsTheRegistrationsOfAnEventWithAStatus()] (0 ms)</li><li>com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests]/[method:listsTheEventsOfAUserWithAStatusByEventStartDateThenRegistrationId()] (0 ms)</li><li>com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests]/[method:rejectsUsersAndEventsThatAreNotStoredLikeTheForeignKeys()] (1 ms)</li><li>com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests]/[method:listsTheEventsOfAUserByEventStartDateThenRegistrationId()] (0 ms)</li><li>com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests]/[method:findsTheRegistrationOfAUserForAnEvent()] (0 ms)</li><li>com.eventplatform.api.inmemory.InMemoryUserRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryUserRepositoryTests]/[method:refusesToDeleteAUserWithRegistrationsLikeTheForeignKey()] (1 ms)</li><li>com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests]/[method:listsTheRegistrationsOfAnEventWithAStatusByRegistrationDateThenId()] (0 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[nested-class:PessimisticLock]/[method:theLockIsAlsoReleasedWhenTheTransactionRollsBack()] (4 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[nested-class:PessimisticLock]/[method:differentEventsDoNotBlockEachOther()] (2 ms)</li><li>com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests]/[method:appliesTheLimitAfterOrderingTheWaitlist()] (1 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[nested-class:PessimisticLock]/[method:aTransactionInterruptedWhileWaitingFailsWithCannotAcquireLock()] (5 ms)</li><li>com.eventplatform.api.inmemory.InMemoryDatabaseTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryDatabaseTests]/[method:clearDeletesEveryRowAndRestartsEverySequence()] (3 ms)</li><li>com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryRegistrationRepositoryTests]/[method:deletesRegistrationsInBatch()] (2 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[test-template:rejectsInvalidRegistrationRequests(java.lang.String)]/[test-template-invocation:#4] (5 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[test-template:rejectsInvalidRegistrationRequests(java.lang.String)]/[test-template-invocation:#3] (5 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[test-template:rejectsInvalidRegistrationRequests(java.lang.String)]/[test-template-invocation:#2] (5 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[test-template:rejectsInvalidRegistrationRequests(java.lang.String)]/[test-template-invocation:#1] (6 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[method:createsAndRetrievesAScheduledEvent()] (8 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[test-template:rejectsInvalidStatuses(java.lang.String)]/[test-template-invocation:#3] (10 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[test-template:rejectsInvalidUpdatesWithoutChangingEvent(java.lang.String)]/[test-template-invocation:#1] (8 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[test-template:rejectsInvalidUpdatesWithoutChangingEvent(java.lang.String)]/[test-template-invocation:#3] (8 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[test-template:rejectsInvalidStatuses(java.lang.String)]/[test-template-invocation:#1] (9 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[method:startedEventDoesNotAcceptRegistrations()] (8 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[method:cancelsAScheduledEvent()] (7 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[test-template:rejectsInvalidStatuses(java.lang.String)]/[test-template-invocation:#2] (11 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[method:followsTheEventLifecycle()] (9 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[method:rejectsMalformedRequestsAndParameters()] (13 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[method:rejectsCapacityBelowRegisteredCount()] (6 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[test-template:rejectsInvalidUpdatesWithoutChangingEvent(java.lang.String)]/[test-template-invocation:#2] (7 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[method:cancelledEventDoesNotAcceptRegistrations()] (7 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[method:rejectsInvalidStatusTransitions()] (10 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[method:listsEventsInCreationOrder()] (19 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[method:reportsAvailabilityOfANewEvent()] (17 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[method:reusesTheCancelledRegistrationOfAReturningUser()] (33 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[test-template:rejectsUpdatingClosedEvents(java.lang.String)]/[test-template-invocation:#2] (15 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[method:replacesAllEditableFields()] (12 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[method:reportsAFullEventCountingOnlyItsWaitlistedRegistrations()] (13 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[method:rejectsRegistrationsAfterTheEventHasStarted()] (9 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[test-template:rejectsUpdatingClosedEvents(java.lang.String)]/[test-template-invocation:#1] (26 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[test-template:rejectsRegistrationsForClosedEvents(java.lang.String)]/[test-template-invocation:#2] (13 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[test-template:rejectsRegistrationsForClosedEvents(java.lang.String)]/[test-template-invocation:#1] (15 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[method:rejectsInactiveUsers()] (15 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[method:rejectsADuplicateRegistration()] (10 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[method:rejectsCancellingRegistrationsOfAFinishedEvent()] (12 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[method:confirmsARegistrationAndCountsTheSeat()] (12 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[method:returnsNotFoundForUnknownEventsUsersAndRegistrations()] (22 ms)</li><li>com.eventplatform.api.controller.EventControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.EventControllerIntegrationTests]/[method:increasingTheCapacityPromotesTheWaitlistInOrder()] (17 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[method:rejectsCancellingTwice()] (13 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[method:cancellingAWaitlistedRegistrationKeepsTheEventFull()] (17 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[method:aUserCanRegisterAgainAfterCancelling()] (17 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[method:cancellingWithoutWaitlistReleasesTheSeat()] (17 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[method:cancellingAConfirmedRegistrationPromotesTheFirstWaitlistedUser()] (16 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[method:listsTheRegistrationsOfAnEventByStatus()] (26 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[method:waitlistsRegistrationsOnceTheEventIsFull()] (31 ms)</li><li>com.eventplatform.api.controller.RegistrationControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.RegistrationControllerIntegrationTests]/[method:listsTheEventsOfAUserByStartDate()] (41 ms)</li><li>com.eventplatform.api.controller.AuthControllerIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.controller.AuthControllerIntegrationTests]/[method:logsInAndUsesTheTokenOnProtectedEndpoints()] (141 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[nested-class:PessimisticLock]/[method:withoutATransactionTheLockOnlyLastsForTheCallButStillWaitsForTheHolder()] (305 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[nested-class:PessimisticLock]/[method:twoTransactionsOnTheSameEventRunOneAfterTheOther()] (308 ms)</li><li>com.eventplatform.api.service.RegistrationConcurrencyIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationConcurrencyIntegrationTests]/[method:neverExceedsTheCapacityWhenUsersRegisterConcurrently()] (329 ms)</li><li>com.eventplatform.api.service.RegistrationConcurrencyIntegrationTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationConcurrencyIntegrationTests]/[method:concurrentCancellationsPromoteExactlyOneWaitlistedUserPerReleasedSeat()] (761 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[test-template:rejectsNullsInNotNullColumns(java.lang.String, java.util.function.Consumer)]/[test-template-invocation:#3] (0 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[method:listsTheEventsOfAUser()] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[method:listsTheEventsOfAUserWithARegistrationStatus()] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:rejectsInvalidStatusTransitions(com.eventplatform.api.model.enums.EventStatus, com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#7] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:rejectsInvalidStatusTransitions(com.eventplatform.api.model.enums.EventStatus, com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#3] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:rejectsInvalidStatusTransitions(com.eventplatform.api.model.enums.EventStatus, com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#11] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:rejectsInvalidStatusTransitions(com.eventplatform.api.model.enums.EventStatus, com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#8] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:rejectsInvalidStatusTransitions(com.eventplatform.api.model.enums.EventStatus, com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#4] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:rejectsInvalidStatusTransitions(com.eventplatform.api.model.enums.EventStatus, com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#9] (1 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[test-template:rejectsNullsInNotNullColumns(java.lang.String, java.util.function.Consumer)]/[test-template-invocation:#2] (0 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:rejectsInvalidStatusTransitions(com.eventplatform.api.model.enums.EventStatus, com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#10] (1 ms)</li><li>com.eventplatform.api.inmemory.InMemoryEventRepositoryTests.[engine:junit-jupiter]/[class:com.eventplatform.api.inmemory.InMemoryEventRepositoryTests]/[test-template:rejectsNullsInNotNullColumns(java.lang.String, java.util.function.Consumer)]/[test-template-invocation:#1] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:rejectsInvalidStatusTransitions(com.eventplatform.api.model.enums.EventStatus, com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#5] (2 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:rejectsInvalidStatusTransitions(com.eventplatform.api.model.enums.EventStatus, com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#6] (2 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:rejectsInvalidStatusTransitions(com.eventplatform.api.model.enums.EventStatus, com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#2] (2 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[method:rejectsCancellingForMissingEventsOrUsers()] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[method:rejectsCancellingMissingRegistrations()] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:rejectsInvalidStatusTransitions(com.eventplatform.api.model.enums.EventStatus, com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#12] (3 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[method:rejectsRegistrationsForMissingEventsOrUsers()] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[test-template:rejectsRegistrationsForClosedEvents(com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#2] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[test-template:rejectsRegistrationsForClosedEvents(com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#1] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[test-template:rejectsRegistrationsOnceTheEventHasStarted(long)]/[test-template-invocation:#2] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[method:rejectsRetrievingUnknownRegistrations()] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[test-template:rejectsRegistrationsOnceTheEventHasStarted(long)]/[test-template-invocation:#3] (2 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[test-template:rejectsRegistrationsOnceTheEventHasStarted(long)]/[test-template-invocation:#1] (2 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[method:rejectsInactiveUsers()] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[test-template:rejectsCancellingRegistrationsOfClosedEvents(com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#2] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[method:rejectsCancellingAnAlreadyCancelledRegistration()] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[test-template:rejectsCancellingRegistrationsOfClosedEvents(com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#1] (2 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[method:listsTheRegistrationsOfAnEventWithAStatus()] (2 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[method:listsAllRegistrationsOfAnEvent()] (2 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[test-template:rejectsADuplicateActiveRegistration(com.eventplatform.api.model.enums.RegistrationStatus)]/[test-template-invocation:#1] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[test-template:rejectsADuplicateActiveRegistration(com.eventplatform.api.model.enums.RegistrationStatus)]/[test-template-invocation:#2] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[method:retrievesTheRegistrationOfAUserForAnEvent()] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[method:numbersTheWaitlistInPromotionOrder()] (4 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[method:cancellingAWaitlistedRegistrationKeepsTheConfirmedSeats()] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[method:cancellingAConfirmedRegistrationWithoutWaitlistReleasesTheSeat()] (1 ms)</li><li>com.eventplatform.api.service.RegistrationServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.RegistrationServiceTests]/[method:cancellingAConfirmedRegistrationPromotesTheFirstWaitlistedUser()] (1 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[test-template:rejectsInvalidStatusTransitions(com.eventplatform.api.model.enums.EventStatus, com.eventplatform.api.model.enums.EventStatus)]/[test-template-invocation:#1] (14 ms)</li><li>com.eventplatform.api.service.EventServiceTests.[engine:junit-jupiter]/[class:com.eventplatform.api.service.EventServiceTests]/[method:doesNotTouchTheWaitlistWhenTheUpdateIsRejected()] (244 ms)</li><li>com.eventplatform.api.model.JpaConstructorTests.[engine:junit-jupiter]/[class:com.eventplatform.api.model.JpaConstructorTests]/[method:anEventStartsScheduledWithoutRegistrations()] (0 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.19.0
+
+</body>
+</html>
