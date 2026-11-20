@@ -1,0 +1,2 @@
+# One folder per run (jtl, dashboard, docker stats, resumen.md); the pipeline publishes it as an artifact.
+results/
