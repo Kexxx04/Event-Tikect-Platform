@@ -139,12 +139,13 @@ class InMemoryEventRepositoryTests {
         InMemoryRegistrationRepository registrations = new InMemoryRegistrationRepository(database);
         Event event = events.save(event(10));
         registrations.save(registration(users.save(user("ada")), event, START, RegistrationStatus.CONFIRMED));
+        Long eventId = event.getId();
 
         DataIntegrityViolationException exception =
-                assertThrows(DataIntegrityViolationException.class, () -> events.deleteById(event.getId()));
+                assertThrows(DataIntegrityViolationException.class, () -> events.deleteById(eventId));
 
         assertTrue(exception.getMessage().contains("fk_registrations_event"), exception.getMessage());
-        assertTrue(events.existsById(event.getId()));
+        assertTrue(events.existsById(eventId));
     }
 
     @Test
@@ -187,8 +188,9 @@ class InMemoryEventRepositoryTests {
             }));
         }
 
-        private Future<?> lockInANewTransaction(long eventId) {
-            return threads.submit(() -> transaction.executeWithoutResult(status -> events.findByIdForUpdate(eventId)));
+        /** On another thread, a new transaction locks the event; the future says whether it got the row. */
+        private Future<Boolean> lockInANewTransaction(long eventId) {
+            return threads.submit(() -> transaction.execute(status -> events.findByIdForUpdate(eventId).isPresent()));
         }
 
         @Test
@@ -233,8 +235,9 @@ class InMemoryEventRepositoryTests {
                 events.findByIdForUpdate(id);
             });
 
-            // A lock taken twice and released once would keep this thread waiting forever.
-            lockInANewTransaction(id).get(5, SECONDS);
+            // A lock taken twice and released once would keep the other transaction waiting until the timeout.
+            assertTrue(lockInANewTransaction(id).get(5, SECONDS),
+                    "another transaction locks the event as soon as the first one commits");
         }
 
         @Test
