@@ -34,6 +34,8 @@ import org.springframework.security.web.header.writers.CrossOriginResourcePolicy
 public class SecurityConfig {
 
     public static final String LOGIN_PATH = "/api/auth/login";
+    // Public for the Docker healthcheck; application.properties exposes no other actuator endpoint.
+    public static final String HEALTH_PATH = "/actuator/health";
 
     @Bean
     public SecurityFilterChain securityFilterChain(
@@ -51,6 +53,7 @@ public class SecurityConfig {
                         .policy(CrossOriginResourcePolicy.SAME_ORIGIN)))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, LOGIN_PATH).permitAll()
+                        .requestMatchers(HttpMethod.GET, HEALTH_PATH).permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2

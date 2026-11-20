@@ -120,7 +120,8 @@ class OpenApiDocsIntegrationTests {
                 "get,    /api/events/{eventId}/registrations",
                 "get,    /api/events/{eventId}/registrations/{userId}",
                 "delete, /api/events/{eventId}/registrations/{userId}",
-                "get,    /api/events/{eventId}/waitlist"
+                "get,    /api/events/{eventId}/waitlist",
+                "get,    /actuator/health"
         })
         void describesEveryEndpointSoZapCanCallIt(String method, String path) throws Exception {
             mockMvc.perform(get(API_DOCS_PATH)
