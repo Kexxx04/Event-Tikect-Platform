@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Limit;
+import org.springframework.transaction.support.TransactionTemplate;
 
 class InMemoryRegistrationRepositoryTests {
 
@@ -35,6 +36,7 @@ class InMemoryRegistrationRepositoryTests {
     private final InMemoryUserRepository users = new InMemoryUserRepository(database);
     private final InMemoryEventRepository events = new InMemoryEventRepository(database);
     private final InMemoryRegistrationRepository registrations = new InMemoryRegistrationRepository(database);
+    private final TransactionTemplate transaction = new TransactionTemplate(new InMemoryTransactionManager());
 
     private final Event event = events.save(event(10));
     private final Event otherEvent = events.save(event(10));
@@ -199,6 +201,30 @@ class InMemoryRegistrationRepositoryTests {
 
         assertEquals(List.of(inEvent, inLater),
                 registrations.findByUserIdAndStatusOrderByEventStartDateAscIdAsc(ana.getId(), CONFIRMED));
+    }
+
+    @Test
+    void aRegistrationChangedInATransactionMovesToItsNewEventWhenItCommits() {
+        Registration registration = register(ana, event, START, CONFIRMED);
+
+        transaction.executeWithoutResult(status ->
+                registrations.findById(registration.getId()).orElseThrow().setEvent(otherEvent));
+
+        assertEquals(List.of(registration), registrations.findByEventIdOrderByRegistrationDateAscIdAsc(otherEvent.getId()));
+        assertEquals(List.of(), registrations.findByEventIdOrderByRegistrationDateAscIdAsc(event.getId()));
+        assertEquals(1, registrations.countByEventIdAndStatus(otherEvent.getId(), CONFIRMED));
+    }
+
+    @Test
+    void theCommitRejectsMovingARegistrationOntoAUserAndEventThatAlreadyExist() {
+        register(ana, event, START, CONFIRMED);
+        Registration other = register(ana, otherEvent, START, CONFIRMED);
+
+        DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class,
+                () -> transaction.executeWithoutResult(status ->
+                        registrations.findById(other.getId()).orElseThrow().setEvent(event)));
+
+        assertTrue(exception.getMessage().contains("uk_registrations_user_event"), exception.getMessage());
     }
 
     @Test

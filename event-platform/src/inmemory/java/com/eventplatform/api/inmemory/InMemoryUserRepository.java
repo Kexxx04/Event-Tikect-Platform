@@ -11,7 +11,14 @@ import java.util.function.Predicate;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
-/** Fake of {@link UserRepository} over the users table of {@link InMemoryDatabase}. */
+/**
+ * Fake of {@link UserRepository} over the users table of {@link InMemoryDatabase}.
+ *
+ * <p>Cost with n users: the {@code existsBy...} queries and the unique checks of {@code save} scan the table,
+ * O(n). There is no index on email or document because UserService changes them in place; these queries only
+ * run when a user is created or updated, never when someone registers for an event or reads data. Deleting a
+ * user checks its registrations through an index, O(1).
+ */
 @Repository
 @Profile("inmemory")
 public class InMemoryUserRepository extends AbstractInMemoryRepository<User> implements UserRepository {
@@ -59,8 +66,7 @@ public class InMemoryUserRepository extends AbstractInMemoryRepository<User> imp
 
     @Override
     protected void checkNotReferenced(Long id) {
-        boolean registered = database.registrations().rows().values().stream()
-                .anyMatch(registration -> id.equals(registration.getUser().getId()));
+        boolean registered = !database.registrationsByUser().ids(id).isEmpty();
         notReferenced(registered, "users", "fk_registrations_user", "registrations");
     }
 
