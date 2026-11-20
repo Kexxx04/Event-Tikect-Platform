@@ -2,9 +2,11 @@ package com.eventplatform.api.config;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.eventplatform.api.exception.ApiAuthenticationEntryPoint;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -13,10 +15,13 @@ import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,10 +35,20 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
+import org.springframework.security.web.FilterChainProxy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
-/** Calls the bean factory methods directly, so each one is verified independently of the Spring context. */
+/**
+ * Calls the bean factory methods directly, so each one is verified independently of the Spring context.
+ * {@code securityFilterChain} is the exception: it needs the HttpSecurity that only Spring Security creates.
+ */
 class SecurityConfigTests {
 
     private static final String SECRET = "unit-test-secret-with-at-least-32-characters";
@@ -43,11 +58,42 @@ class SecurityConfigTests {
             new SecurityProperties.Admin("admin", "s3cret-password"),
             new SecurityProperties.Jwt(SECRET, Duration.ofHours(1)));
 
+    // A new minimal context on every run, so securityFilterChain always executes. The @SpringBootTest classes
+    // share cached contexts whose chain was built once, so they cannot detect a change in this method.
+    private final WebApplicationContextRunner securityContext = new WebApplicationContextRunner()
+            .withUserConfiguration(SpringSecurity.class, SecurityConfig.class, CorsConfig.class,
+                    ApiAuthenticationEntryPoint.class)
+            .withBean(ObjectMapper.class, () -> JsonMapper.builder().build())
+            .withPropertyValues(
+                    "app.security.admin.username=admin",
+                    "app.security.admin.password=s3cret-password",
+                    "app.security.jwt.secret=" + SECRET,
+                    "app.security.jwt.expiration=PT1H",
+                    "app.cors.allowed-origins=http://localhost:5173");
+
+    @Configuration(proxyBeanMethods = false)
+    @EnableWebSecurity
+    static class SpringSecurity {
+    }
+
     private String sign(JwtEncoder encoder) {
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder().subject("admin").issuedAt(now).expiresAt(now.plusSeconds(60)).build();
         return encoder.encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claims))
                 .getTokenValue();
+    }
+
+    @Test
+    void installsTheStatelessJwtFilterChain() {
+        securityContext.run(context -> {
+            List<SecurityFilterChain> chains = context.getBean(FilterChainProxy.class).getFilterChains();
+            assertEquals(1, chains.size());
+            List<Class<?>> filters = chains.get(0).getFilters().stream().<Class<?>>map(Object::getClass).toList();
+
+            assertTrue(filters.contains(BearerTokenAuthenticationFilter.class), "JWT bearer tokens");
+            assertTrue(filters.contains(CorsFilter.class), "CORS for the frontend");
+            assertFalse(filters.contains(CsrfFilter.class), "stateless API without CSRF");
+        });
     }
 
     @Test
